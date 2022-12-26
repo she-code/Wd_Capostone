@@ -24,10 +24,11 @@ dotenv.config({ path: "./config.env" });
 app.use(bodyParser.json());
 app.use(express.json());
 app.use(morgan("dev"));
+app.use(express.urlencoded({ extended: false }));
+
 app.use(cookieParser("process.env.SECRET_STRING"));
 
 app.use(csurf("this_should_be_32_character_long", ["POST", "PUT", "DELETE"]));
-app.use(express.urlencoded({ extended: false }));
 
 app.use(
   session({
@@ -80,17 +81,7 @@ passport.deserializeUser((id, done) => {
     })
     .catch((error) => done(error, null));
 });
-// app.post(
-//     "/register",
-//     passport.authenticate("local", { 
-//     failureRedirect: "/login" ,   
-//     failureFlash: true,
-//   }),
-//     async (request, response) => {
-//       console.log(request.user);
-//       response.redirect("/elections");
-//     }
-//   );
+
 //set default view engine
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "ejs");
@@ -115,14 +106,30 @@ app.get("/login", (request, response) => {
       csrfToken: request.csrfToken(),
     });
   })
-app.get("/elections",connectEnsureLogin.ensureLoggedIn(), (request, response) => {
+app.get("/elections",connectEnsureLogin.ensureLoggedIn(),async (request, response) => {
+  const loggedInUser = request.user.id
+  const admin = await Admin.getAdminDetails(loggedInUser)
+
     response.render("elections", {
       title: "Online Election Site",
+      admin,
       csrfToken: request.csrfToken(),
     });
   })
 //routes
-app.route('/admins',adminRoute)
+app.post(
+  "/session",
+  passport.authenticate("local", { 
+  failureRedirect: "/login" ,   
+  failureFlash: true,
+}),
+  async (request, response) => {
+    //const { email, password } = request.body;
+    //console.log(request.user.id);
+    response.redirect("/elections");
+  }
+);
+app.use('/admins',adminRoute)
 
 //export application
 module.exports = app;

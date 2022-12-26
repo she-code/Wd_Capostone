@@ -46,7 +46,7 @@ exports.signup = async (req, res) => {
 exports.signup = async (req, res) => {
     try {
       const { firstName, lastName, email, password } = req.body;
-      const salt = await bcrypt.genSalt(process.env.HASH_NUMBER);
+      const salt = await bcrypt.genSalt(10);
       const hashedPassword = await bcrypt.hash(password, salt);
       //check empty inputs
       if (
@@ -81,9 +81,32 @@ exports.signup = async (req, res) => {
         res.redirect("/elections");
       });      //jwt,cookie will be added todo
     } catch (error) {
-      return res.status().json({status:501,message:error.message});
+      console.log(error)
+      return res.status(501).json({status:501,message:error.message});
   
     }
   };
 
   //login
+  // exports.login = async(req,res)=>{
+   
+  //   passport.authenticate("local", { 
+  //   failureRedirect: "/login" ,   
+  //   failureFlash: true,
+  // }),
+  //   async (request, response) => {
+  //     console.log(request.user);
+  //     response.redirect("/elections");
+  //   }
+  
+  // }
+
+  // get admin details
+  exports.getAdminDetails = async(req,res)=>{
+    const userId = req.user.id
+    const admin = await Admin.findByPk({where:{id:userId}})
+    if(!admin){
+      res.status(404).json({status:404,message:"User not found"})
+    }
+   return admin
+  }

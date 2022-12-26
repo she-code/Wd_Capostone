@@ -10,6 +10,11 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
       // define association here
     }
+    static async getAdminDetails(id){
+    
+   return Admin.findByPk(id)
+
+    }
   }
   Admin.init(
     {
