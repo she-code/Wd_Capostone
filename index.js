@@ -1,6 +1,6 @@
-const app = require('app')
+const app = require('./app')
 //const dotenv = require('dotenv')
 
 app.listen(process.env.PORT,()=>{
-    console.log('server started')
+    console.log('server started on port',process.env.PORT)
 })
