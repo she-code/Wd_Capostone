@@ -9,7 +9,7 @@ module.exports = {
      * Example:
      * await queryInterface.createTable('users', { id: Sequelize.INTEGER });
      */
-    queryInterface.addColumn('Elections','adminId',{
+   await queryInterface.addColumn('Elections','adminId',{
       type:Sequelize.DataTypes.INTEGER
     })
     await queryInterface.addConstraint("Elections",{
@@ -20,10 +20,11 @@ module.exports = {
         field:'id'
       }
     })
+
   },
 
   async down (queryInterface, Sequelize) {
-    await queryInterface.removeConstraint("Elections",'adminId')
+    await queryInterface.removeColumn("Elections",'adminId')
     /**
      * Add reverting commands here.
      *
@@ -31,4 +32,5 @@ module.exports = {
      * await queryInterface.dropTable('users');
      */
   }
+  
 };

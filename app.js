@@ -13,10 +13,12 @@ const session = require("express-session");
 const localStrategy = require("passport-local");
 
 //import files
-const { Admin } = require("./models");
+const { Admin,Election } = require("./models");
 
 //import routes
 const adminRoute = require('./routes/adminRoute')
+const electionRoute= require('./routes/electionsRoute');
+
 // create express application
 const app = express();
 dotenv.config({ path: "./config.env" });
@@ -109,12 +111,33 @@ app.get("/login", (request, response) => {
 app.get("/elections",connectEnsureLogin.ensureLoggedIn(),async (request, response) => {
   const loggedInUser = request.user.id
   const admin = await Admin.getAdminDetails(loggedInUser)
-
+const elections = await Election.getElections(loggedInUser);
     response.render("elections", {
       title: "Online Election Site",
       admin,
+      elections,
       csrfToken: request.csrfToken(),
     });
+  })
+ app.get("/elections/new",async (request, response) => {
+
+    response.render("createElections", {
+      title: "Create Elections",
+      csrfToken: request.csrfToken(),
+    });
+  })
+  
+  app.get("/elections/:id",async (request, response) => {
+    const loggedInUser = request.user.id
+    const id = request.params.id
+    const admin = await Admin.getAdminDetails(loggedInUser)
+  const election = await Election.getElectionDetails(loggedInUser,id);
+      response.render("electionDetailsPage", {
+        title: "Election Details",
+        admin,
+        election,
+        csrfToken: request.csrfToken(),
+      });
   })
 //routes
 app.post(
@@ -130,6 +153,7 @@ app.post(
   }
 );
 app.use('/admins',adminRoute)
+app.use('/elections',electionRoute)
 
 //export application
 module.exports = app;
