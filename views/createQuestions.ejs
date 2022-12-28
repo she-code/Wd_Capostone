@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="csrf-token" content="<%= csrfToken %>" />
+    <title><%=title%></title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body>
+    <div class="grid grid-cols-6 pt-5">
+        <div class="col-start-2 col-span-2">
+
+            <h1 class="text-gray-600 text-2xl font-semibold">Create new Question</h1>
+            <form method="post" action="/questions/createQuestion">
+                <input type="hidden" name="_csrf" value="<%=csrfToken%>"/>
+                <div class="p-3">
+                    <label for="title" class="text-gray-900 text-xl py-2">What's the title of the question?</label>
+                    <input type="text" name="title" class="border border-gray-300 text-gray-900 rounded p-2 w-full"/>
+                </div>
+                <div class="p-3">
+                    <label for="description" class="text-gray-900 text-xl py-2">What's the description of the question?</label>
+                    <input type="text" name="description" class="border border-gray-300 text-gray-900 rounded p-2 w-full"/>
+                </div>
+                <div class="p-3">
+                    <button type="submit" class="text-white bg-green-600 hover:bg-green-800 font-medium rounded px-5 py-2">Submit</button>
+                </div>
+            </form>
+      </div>
+    </div>
+  </body>
+</html>

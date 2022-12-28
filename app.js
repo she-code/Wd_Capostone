@@ -13,12 +13,12 @@ const session = require("express-session");
 const localStrategy = require("passport-local");
 
 //import files
-const { Admin,Election } = require("./models");
+const { Admin,Election ,Question} = require("./models");
 
 //import routes
 const adminRoute = require('./routes/adminRoute')
 const electionRoute= require('./routes/electionsRoute');
-
+const questionsRoute= require('./routes/questionsRoute');
 // create express application
 const app = express();
 dotenv.config({ path: "./config.env" });
@@ -92,7 +92,7 @@ app.set("view engine", "ejs");
 
 app.get("/", async (req, res) => {
     res.render("index", {
-      title: "Online Election Site",
+      title: "Online Voting Platform",
       csrfToken: req.csrfToken(),
     });
   });
@@ -113,31 +113,56 @@ app.get("/elections",connectEnsureLogin.ensureLoggedIn(),async (request, respons
   const admin = await Admin.getAdminDetails(loggedInUser)
 const elections = await Election.getElections(loggedInUser);
     response.render("elections", {
-      title: "Online Election Site",
+      title: "Online Voting Platform",
       admin,
       elections,
       csrfToken: request.csrfToken(),
     });
   })
- app.get("/elections/new",async (request, response) => {
+ app.get("/elections/new",connectEnsureLogin.ensureLoggedIn(),async (request, response) => {
 
     response.render("createElections", {
       title: "Create Elections",
       csrfToken: request.csrfToken(),
     });
   })
-  
-  app.get("/elections/:id",async (request, response) => {
+
+  app.get("/elections/:id",connectEnsureLogin.ensureLoggedIn(),async (request, response) => {
     const loggedInUser = request.user.id
     const id = request.params.id
     const admin = await Admin.getAdminDetails(loggedInUser)
+    const questions = await Question.getQuestions(loggedInUser,id);
+
   const election = await Election.getElectionDetails(loggedInUser,id);
       response.render("electionDetailsPage", {
         title: "Election Details",
         admin,
         election,
+        questions,
         csrfToken: request.csrfToken(),
       });
+  })
+  app.get("/elections/:id/questions",connectEnsureLogin.ensureLoggedIn(),async (request, response) => {
+    const loggedInUser = request.user.id
+    const id = request.params.id
+    const admin = await Admin.getAdminDetails(loggedInUser)
+  const questions = await Question.getQuestions(loggedInUser,id);
+  const election = await Election.getElectionDetails(loggedInUser,id);
+
+      response.render("listQuestions", {
+        title: "Online Voting Platform",
+        admin,
+        election,
+        questions,
+        csrfToken: request.csrfToken(),
+      });
+  })
+  app.get("/elections/:id/questions/new",connectEnsureLogin.ensureLoggedIn(),async (request, response) => {
+
+    response.render("createQuestions", {
+      title: "Create Elections",
+      csrfToken: request.csrfToken(),
+    });
   })
 //routes
 app.post(
@@ -154,6 +179,7 @@ app.post(
 );
 app.use('/admins',adminRoute)
 app.use('/elections',electionRoute)
+app.use('/questions',questionsRoute)
 
 //export application
 module.exports = app;

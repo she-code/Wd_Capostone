@@ -11,22 +11,14 @@
   <body>
     <div class="grid grid-cols-6 pt-5">
         <div class="col-start-2 col-span-2">
-            <h1 class="text-2xl font-semibold text-gray-600"><%=election.title%></h1>
+            <h1 class="text-2xl font-semibold text-gray-600">Question <%=question.id%></h1>
       <div>
        <div>
-       <% if(questions.length==0){%>
-          <p>You haven't created any questions</p>
-        <%}%>
-        <p>You have created <%=questions.length%></p>
-
+        <p>You have created answers</p>
        </div>
        <div>
-        <%for(var i=0;i<questions.length;i++){%>
-          <a href="/questions/<%=questions[i].id%>" class="text-vlue-600"><%=questions[i].title%></a>
-          <%}%>
        </div>
        <a href="/elections/<%=election.id%>/questions" class="text-green-600">Manage questions</a>
-
       </div>
       </div>
     </div>
