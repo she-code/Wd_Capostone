@@ -19,6 +19,8 @@ const { Admin, Election, Question } = require("./models");
 const adminRoute = require("./routes/adminRoute");
 const electionRoute = require("./routes/electionsRoute");
 const questionsRoute = require("./routes/questionsRoute");
+const answersRoute = require("./routes/answerRoute");
+
 // create express application
 const app = express();
 dotenv.config({ path: "./config.env" });
@@ -124,6 +126,21 @@ app.get(
   }
 );
 app.get(
+  "/answers",
+  connectEnsureLogin.ensureLoggedIn(),
+  async (request, response) => {
+    const loggedInUser = request.user.id;
+    const admin = await Admin.getAdminDetails(loggedInUser);
+    const elections = await Election.getElections(loggedInUser);
+    response.render("answers", {
+      title: "Online Voting Platform",
+      admin,
+      elections,
+      csrfToken: request.csrfToken(),
+    });
+  }
+);
+app.get(
   "/elections/new",
   connectEnsureLogin.ensureLoggedIn(),
   async (request, response) => {
@@ -142,13 +159,30 @@ app.get(
     const id = request.params.id;
     const admin = await Admin.getAdminDetails(loggedInUser);
     const questions = await Question.getQuestions(loggedInUser, id);
-
     const election = await Election.getElectionDetails(loggedInUser, id);
     response.render("electionDetailsPage", {
       title: "Election Details",
       admin,
       election,
       questions,
+      csrfToken: request.csrfToken(),
+    });
+  }
+);
+app.get(
+  "/questions/:id",
+  connectEnsureLogin.ensureLoggedIn(),
+  async (request, response) => {
+    const loggedInUser = request.user.id;
+    const id = request.params.id;
+   // const admin = await Admin.getAdminDetails(loggedInUser);
+    const question = await Question.getQuestion(loggedInUser,1 ,id);
+   const election = await Election.getElectionDetails(loggedInUser, id);
+    response.render("questionDetailsPage", {
+      title: "Questions Details",
+//admin,
+    election,
+      question,
       csrfToken: request.csrfToken(),
     });
   }
@@ -176,8 +210,14 @@ app.get(
   "/elections/:id/questions/new",
   connectEnsureLogin.ensureLoggedIn(),
   async (request, response) => {
+    const loggedInUser = request.user.id;
+    const id = request.params.id;
+
+    const election = await Election.getElectionDetails(loggedInUser, id);
+
     response.render("createQuestions", {
       title: "Create Elections",
+      election,
       csrfToken: request.csrfToken(),
     });
   }
@@ -198,6 +238,7 @@ app.post(
 app.use("/admins", adminRoute);
 app.use("/elections", electionRoute);
 app.use("/questions", questionsRoute);
+app.use("/answers", answersRoute);
 
 //export application
 module.exports = app;

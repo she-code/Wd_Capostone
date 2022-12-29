@@ -12,7 +12,14 @@ module.exports = (sequelize, DataTypes) => {
       Admin.hasMany(models.Election,{
         foreignKey:'adminId'
       })
+      Admin.hasMany(models.Question,{
+        foreignKey:'adminId'
+      })
+      Admin.hasMany(models.Answer,{
+        foreignKey:'adminId'
+      })
     }
+
     static async getAdminDetails(id){
     
    return Admin.findByPk(id)

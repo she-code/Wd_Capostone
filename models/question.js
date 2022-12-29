@@ -11,6 +11,15 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
+      Question.belongsTo(models.Election, {
+        foreignKey: "electionId",
+      });
+      Question.belongsTo(models.Admin, {
+        foreignKey: "adminId",
+      });
+      Question.hasMany(models.Answer, {
+        foreignKey: "questionId",
+      });
     
     }
     static addQuestion({ title, description,adminId,electionId }) {
@@ -32,6 +41,19 @@ module.exports = (sequelize, DataTypes) => {
 
         })
     }
+
+    static getQuestion(adminId,electionId,questionId){
+      return this.findOne({
+        where:{
+          [Op.and]:[
+            {adminId},
+            {electionId},
+            {id:questionId}
+          ]
+        }
+
+      })
+  }
   }
   Question.init({
     title: DataTypes.STRING,

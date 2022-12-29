@@ -15,6 +15,7 @@
             <h1 class="text-gray-600 text-2xl font-semibold">Create new Question</h1>
             <form method="post" action="/questions/createQuestion">
                 <input type="hidden" name="_csrf" value="<%=csrfToken%>"/>
+                <input type="hidden" name="electionId" value="<%=election.id%>"/>
                 <div class="p-3">
                     <label for="title" class="text-gray-900 text-xl py-2">What's the title of the question?</label>
                     <input type="text" name="title" class="border border-gray-300 text-gray-900 rounded p-2 w-full"/>

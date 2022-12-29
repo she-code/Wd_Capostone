@@ -17,8 +17,9 @@
        <% if(questions.length==0){%>
           <p>You haven't created any questions</p>
         <%}%>
-        <p>You have created <%=questions.length%></p>
-
+        <% if(questions.length > 0){%>
+          <p>You have created <%=questions.length%> questions</p>
+          <%}%>
        </div>
        <div>
         <%for(var i=0;i<questions.length;i++){%>

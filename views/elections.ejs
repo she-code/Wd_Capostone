@@ -22,8 +22,9 @@
         </div>
         <div>
           <%for(var i=0;i<elections.length;i++){%>
-            <a href="/elections/<%=elections[i].id%>" class="text-vlue-600"><%=elections[i].title%></a>
+            <a href="/elections/<%=elections[i].id%>" class="text-vlue-600 block"><%=elections[i].title%></a>
             <%}%>
+            
         </div>
         <a href="/elections/new" class="text-green-600">Create new election</a>
       </div>
