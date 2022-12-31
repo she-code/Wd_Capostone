@@ -1,6 +1,6 @@
 const { Admin } = require("../models");
 const bcrypt = require("bcrypt");
-
+const passport = require('passport')
 //register admin
 exports.signup = async (req, res) => {
   try {
@@ -41,7 +41,6 @@ exports.signup = async (req, res) => {
   }
 };
 
-
 //register admin
 exports.signup = async (req, res) => {
     try {
@@ -79,7 +78,8 @@ exports.signup = async (req, res) => {
           console.log(err);
         }
         res.redirect("/elections");
-      });      //jwt,cookie will be added todo
+      });     
+       // todo jwt,cookie will be added 
     } catch (error) {
       console.log(error)
       return res.status(501).json({status:501,message:error.message});
@@ -87,19 +87,20 @@ exports.signup = async (req, res) => {
     }
   };
 
-  //login
-  // exports.login = async(req,res)=>{
+ // login
+  // eslint-disable-next-line no-unused-vars
+  exports.login = async(request,response)=>{
    
-  //   passport.authenticate("local", { 
-  //   failureRedirect: "/login" ,   
-  //   failureFlash: true,
-  // }),
-  //   async (request, response) => {
-  //     console.log(request.user);
-  //     response.redirect("/elections");
-  //   }
+    passport.authenticate("local", { 
+    failureRedirect: "/login" ,   
+    failureFlash: true,
+  }),
+    async (request, response) => {
+      console.log(request.user);
+      response.redirect("/elections");
+    }
   
-  // }
+  }
 
   // get admin details
   exports.getAdminDetails = async(req,res)=>{

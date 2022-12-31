@@ -12,7 +12,7 @@ module.exports = (sequelize, DataTypes) => {
       Election.belongsTo(models.Admin, {
         foreignKey: "adminId",
       });
-      Election.hasMany(models.Answer, {
+      Election.hasMany(models.Voter, {
         foreignKey: "electionId",
       });
     }

@@ -21,14 +21,6 @@ exports.createElection = async(req,res)=>{
     try {
         const {title} = req.body
         const adminId = req.user.id
-        // const election = await Election.build({
-        //     title,
-        //     status:"created",
-        //     adminId
-    
-    
-        // })
-        // await election.save();
         const election = await Election.addElection({
             title:title,
             status:"created",

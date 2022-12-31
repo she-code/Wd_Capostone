@@ -4,14 +4,14 @@
 module.exports = {
   async up (queryInterface, Sequelize) {
     
-   await queryInterface.addColumn('Answers','questionId',{
+   await queryInterface.addColumn('Voters','electionId',{
       type:Sequelize.DataTypes.INTEGER
     })
-    await queryInterface.addConstraint("Answers",{
-      fields:['questionId'],
+    await queryInterface.addConstraint("Voters",{
+      fields:['electionId'],
       type:"foreign key",
       references:{
-        table:"Admins",
+        table:"Elections",
         field:'id'
       }
     })
@@ -19,7 +19,7 @@ module.exports = {
   },
 
   async down (queryInterface, Sequelize) {
-    await queryInterface.removeColumn("Answers",'questionId') 
+    await queryInterface.removeColumn("Voters",'electionId') 
   }
   
 };

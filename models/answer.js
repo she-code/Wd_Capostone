@@ -1,5 +1,5 @@
 "use strict";
-const { Model } = require("sequelize");
+const { Model, Op } = require("sequelize");
 module.exports = (sequelize, DataTypes) => {
   class Answer extends Model {
     static associate(models) {
@@ -10,17 +10,27 @@ module.exports = (sequelize, DataTypes) => {
       Answer.belongsTo(models.Question, {
         foreignKey: "questionId",
       });
-      Answer.belongsTo(models.Election, {
-        foreignKey: "electionId",
+      // Answer.belongsTo(models.Election, {
+      //   foreignKey: "electionId",
+      // });
+    }
+    static addAnswers({adminId, content, questionId}) {
+      return this.create({
+        adminId,
+        content,
+  questionId,
       });
     }
-    static addAnswers(adminId, content,electionId, questionId) {
-      return this.create({
-        adminId:adminId,
-        content:content,
-        electionId:electionId,
-        questionId:questionId,
-      });
+    static getAnswers({adminId,questionId
+    ,electionId}){
+      return this.findAll({
+        where:{
+          [Op.and]:[
+            {questionId},
+            {adminId}
+          ]
+        }
+      })
     }
   }
   Answer.init(

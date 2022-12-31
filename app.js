@@ -13,7 +13,7 @@ const session = require("express-session");
 const localStrategy = require("passport-local");
 
 //import files
-const { Admin, Election, Question } = require("./models");
+const { Admin, Election, Question,Answer,Voter } = require("./models");
 
 //import routes
 const adminRoute = require("./routes/adminRoute");
@@ -73,9 +73,9 @@ passport.use(
   )
 );
 
-passport.serializeUser((user, done) => {
-  console.log("Seralizing user in session", user.id);
-  done(null, user.id);
+passport.serializeUser((admin, done) => {
+  console.log("Seralizing admin in session", admin.id);
+  done(null, admin.id);
 });
 
 passport.deserializeUser((id, done) => {
@@ -160,11 +160,15 @@ app.get(
     const admin = await Admin.getAdminDetails(loggedInUser);
     const questions = await Question.getQuestions(loggedInUser, id);
     const election = await Election.getElectionDetails(loggedInUser, id);
+    const voters = await Voter.getVoters({electionId:1})
+
     response.render("electionDetailsPage", {
       title: "Election Details",
       admin,
       election,
       questions,
+      voters,
+
       csrfToken: request.csrfToken(),
     });
   }
@@ -177,12 +181,14 @@ app.get(
     const id = request.params.id;
    // const admin = await Admin.getAdminDetails(loggedInUser);
     const question = await Question.getQuestion(loggedInUser,1 ,id);
-   const election = await Election.getElectionDetails(loggedInUser, id);
+   const election = 1;
+   const answers = await Answer.getAnswers({adminId:loggedInUser,questionId:question.id,electionId:election})
     response.render("questionDetailsPage", {
       title: "Questions Details",
 //admin,
     election,
       question,
+      answers,
       csrfToken: request.csrfToken(),
     });
   }
@@ -223,6 +229,53 @@ app.get(
   }
 );
 //routes
+//register user
+app.post("/users", async (request, response) => {
+  const { firstName, lastName, email, password } = request.body;
+  const hashedPwd = await bcrypt.hash(password, 10);
+  //create user
+  try {
+    const user = await Admin.create({
+      firstName: firstName,
+      lastName: lastName,
+      email: email,
+      password: hashedPwd,
+    });
+    request.logIn(user, (err) => {
+      if (err) {
+        console.log("from", err);
+      }
+      response.redirect("/todos");
+    });
+  } catch (error) {
+    if (error.name === "SequelizeUniqueConstraintError") {
+      request.flash("error", "Email already exists");
+      response.redirect("/signup");
+    }
+    if (error.name === "SequelizeValidationError") {
+      for (var key in error.errors) {
+        console.log(error.errors[key].message);
+        if (
+          error.errors[key].message === "Validation len on firstName failed"
+        ) {
+          request.flash(
+            "error",
+            "First name must have minimum of 2 characters"
+          );
+        }
+        if (
+          error.errors[key].message === "Validation isEmail on email failed"
+        ) {
+          request.flash("error", "Invalid Email");
+        }
+      }
+      //   response.redirect("/todos");
+      response.redirect("/signup");
+    }
+  }
+});
+
+//login user
 app.post(
   "/session",
   passport.authenticate("local", {

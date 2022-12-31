@@ -18,7 +18,10 @@
           <%if(elections.length == 0){%>
             <p>You haven't created any elections</p>
             <%}%>
-            <p>You have created <%=elections.length%> elections</p>
+            <%if(elections.length > 0){%>
+              <p>You have created <%=elections.length%> elections</p>
+              <%}%>
+          
         </div>
         <div>
           <%for(var i=0;i<elections.length;i++){%>
