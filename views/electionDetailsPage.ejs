@@ -23,13 +23,15 @@
               }
           }).catch((err)=>console.log(err))
       }
+      console.log(window.location.pathname)
       </script>
   </head>
   <body>
-    <div class="grid grid-cols-6 pt-5">
+    <div class="grid grid-cols-6 pt-5 mt-5">
         <div class="col-start-2 col-span-2">
             <h1 class="text-2xl font-bold text-gray-600"><%=election.title%></h1>
       <div>
+        
        <div>
         <% if(election.status=="launched"){%>
           <p>This election has launched and voters can access this URL</p>

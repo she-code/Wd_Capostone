@@ -9,11 +9,11 @@
     <script src="https://cdn.tailwindcss.com"></script>
   </head>
   <body>
-    <div class="grid pt-5">
+    <div class="grid pt-5 mt-5">
         <div class="col-start-2 col-span-2">
       <div>
-        <p><%=election.title%></p>
-       <div>
+        <h1 class="text-2xl font-bold text-gray-600"><%=election.title%></h1>
+        <div>
         <% if(voters.length > 0){%>
           <p>You have created <%=voters.length%> voters</p>
           <%}%>
@@ -39,9 +39,9 @@
             <p>List of voters you created</p>
             <%}%>
        </div>
-    <ul>
+    <ul class="list-disc">
         <%for(var i=0;i<voters.length;i++){%>
-          <li class="text-blue-600 block"><%=voters[i].voter_Id%></li>
+          <li class="text-blue-600 block ml-5"><%=voters[i].voter_Id%></li>
           <%}%>
        </ul>
       </div>

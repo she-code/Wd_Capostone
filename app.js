@@ -13,7 +13,7 @@ const session = require("express-session");
 const localStrategy = require("passport-local");
 
 //import files
-const { Admin, Election, Question,Answer,Voter } = require("./models");
+const { Admin, Election, Question, Answer, Voter } = require("./models");
 
 //import routes
 const adminRoute = require("./routes/adminRoute");
@@ -117,12 +117,18 @@ app.get(
     const loggedInUser = request.user.id;
     const admin = await Admin.getAdminDetails(loggedInUser);
     const elections = await Election.getElections(loggedInUser);
-    response.render("elections", {
-      title: "Online Voting Platform",
-      admin,
-      elections,
-      csrfToken: request.csrfToken(),
-    });
+    if (request.accepts("html")) {
+      response.render("elections", {
+        title: "Online Voting Platform",
+        admin,
+        elections,
+        csrfToken: request.csrfToken(),
+      });
+    } else {
+      response.json({
+        elections,
+      });
+    }
   }
 );
 app.get(
@@ -160,18 +166,23 @@ app.get(
     const admin = await Admin.getAdminDetails(loggedInUser);
     const questions = await Question.getQuestions(loggedInUser, id);
     const election = await Election.getElectionDetails(loggedInUser, id);
-    const electionId = election.id
-    const voters = await Voter.getVoters(electionId)
-    console.log(election)
-    response.render("electionDetailsPage", {
-      title: "Election Details",
-      admin,
-      election,
-      questions,
-      voters,
+    const electionId = election.id;
+    const voters = await Voter.getVoters(electionId);
+    if (request.accepts("html")) {
+      response.render("electionDetailsPage", {
+        title: "Election Details",
+        admin,
+        election,
+        questions,
+        voters,
 
-      csrfToken: request.csrfToken(),
-    });
+        csrfToken: request.csrfToken(),
+      });
+    } else {
+      response.json({
+        election,
+      });
+    }
   }
 );
 app.get(
@@ -180,18 +191,18 @@ app.get(
   async (request, response) => {
     const adminId = request.user.id;
     const id = request.params.id;
-   // const admin = await Admin.getAdminDetails(loggedInUser);
-    const question = await Question.getQuestion(adminId,2 ,id);
-    const questionId = id
-   const election = 1;
-   console.log({questionId})
- const answers = await Answer.getAnswers({adminId,questionId})
+    // const admin = await Admin.getAdminDetails(loggedInUser);
+    const question = await Question.getQuestion(adminId, id);
+    const questionId = id;
+    const election = 1;
+    console.log({ questionId });
+    const answers = await Answer.getAnswers({ adminId, questionId });
     response.render("questionDetailsPage", {
       title: "Questions Details",
-//admin,
-    election,
+      //admin,
+      election,
       question,
-     answers,
+      answers,
       csrfToken: request.csrfToken(),
     });
   }

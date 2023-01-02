@@ -41,3 +41,7 @@ const electionId = req.params.id
     });
   }
 }
+
+exports.vote=async(req,res)=>{
+  res.send('hi')
+}

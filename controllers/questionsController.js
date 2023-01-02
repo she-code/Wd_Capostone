@@ -1,6 +1,7 @@
 const {Question} = require('../models')
 
 
+
 //create elections
 exports.createQuestion = async(req,res)=>{
   //get adminId from req.user

@@ -10,9 +10,7 @@ module.exports = (sequelize, DataTypes) => {
       Answer.belongsTo(models.Question, {
         foreignKey: "questionId",
       });
-      // Answer.belongsTo(models.Election, {
-      //   foreignKey: "electionId",
-      // });
+      
     }
     static addAnswers({adminId, content, questionId}) {
       return this.create({

@@ -13,7 +13,7 @@
         <div class="col-start-2 col-span-2">
 
       <div>
-        <p class="py-2">Welcome <%=admin.firstName%> <%=admin.lastName%></p>
+        <p class="py-2 text-xl font-bold text-gray-500">Welcome <%=admin.firstName%> <%=admin.lastName%></p>
         <div>
           <%if(elections.length == 0){%>
             <p>You haven't created any elections</p>
@@ -23,12 +23,12 @@
               <%}%>
           
         </div>
-        <div>
+        <ul class="list-disc">
           <%for(var i=0;i<elections.length;i++){%>
-            <a href="/elections/<%=elections[i].id%>" class="text-vlue-600 block"><%=elections[i].title%></a>
+            <li class="ml-5"><a href="/elections/<%=elections[i].id%>" class="text-blue-600 block"><%=elections[i].title%></a></li>
             <%}%>
             
-        </div>
+        </ul>
         <a href="/elections/new" class="text-green-600">Create new election</a>
       </div>
       </div>

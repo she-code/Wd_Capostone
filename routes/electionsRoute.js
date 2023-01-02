@@ -8,6 +8,9 @@ router.post('/createElection',connectEnsureLogin.ensureLoggedIn(),electionContro
 router.post('/:id/voters',connectEnsureLogin.ensureLoggedIn(),voterController.addVoters)
 router.get('/:id/voters',connectEnsureLogin.ensureLoggedIn(),voterController.getVoters)
 router.put('/:id/launch',connectEnsureLogin.ensureLoggedIn(),electionController.launchElection)
+router.get('/:id/vote',connectEnsureLogin.ensureLoggedIn('/voterLogin'),voterController.vote)
+
+
 
 
 module.exports = router
