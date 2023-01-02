@@ -7,6 +7,23 @@
     <meta name="csrf-token" content="<%= csrfToken %>" />
     <title><%=title%></title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      var token = document.querySelector('meta[name="csrf-token"]').getAttribute("content")
+      function updateElection(id){
+         // let compelete = false
+          fetch(`/elections/${id}/launch`,{
+              method:'put',
+              headers:{"Content-Type":"application/json"},
+              body:JSON.stringify({
+                  _csrf:token
+              })
+          }).then((res)=>{
+              if(res.ok){
+                  window.location.reload();
+              }
+          }).catch((err)=>console.log(err))
+      }
+      </script>
   </head>
   <body>
     <div class="grid grid-cols-6 pt-5">
@@ -14,6 +31,10 @@
             <h1 class="text-2xl font-bold text-gray-600"><%=election.title%></h1>
       <div>
        <div>
+        <% if(election.status=="launched"){%>
+          <p>This election has launched and voters can access this URL</p>
+        <a href="/elections/<%=election.id%>/vote" class="text-blue-600 underline">http://localhost:5000/elections/1/vote</a>
+          <%}%>
        <% if(questions.length==0){%>
           <p>You haven't created any questions</p>
         <%}%>
@@ -21,12 +42,10 @@
           <p>Your election has <%=questions.length%> questions in the ballot</p>
           <%}%>
        </div>
-       <div>
-        <%for(var i=0;i<questions.length;i++){%>
-          <a href="/questions/<%=questions[i].id%>" class="text-blue-600 block"><%=questions[i].title%></a>
-          <%}%>
-       </div>
+      
+      <%if(election.status == "created"){%>
        <a href="/elections/<%=election.id%>/questions" class="text-green-600 block">Manage questions</a>
+      <%}%>
        <div>
         <% if(voters.length==0){%>
            <p>You haven't created any voters</p>
@@ -36,11 +55,16 @@
            <%}%>
         </div>
        <a href="/elections/<%=election.id%>/voters" class="text-green-600 block">Manage Voters</a>
-       <a href="/launch" class="text-green-600 block">Launch election</a>
+       <%if(election.status == "created"){%>
+        <a href=""onclick="updateElection('<%=election.id%>')" class="text-green-600 block">Launch election</a>
+        <%}%>
+        <%if(election.status == "launched"){%>
+          <a href="/preview" class="text-green-600 block">Preview Results</a>
+          <a href="/end" class="text-green-600 block">End election</a>
 
-      </div>
+          <%}%>
+
       </div>
     </div>
   </body>
 </html>
-

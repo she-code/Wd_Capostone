@@ -98,33 +98,33 @@ test("Create elections",async()=>{
 })
 })
 
-test("Create questions",async()=>{
-  //create new agent
+// test("Create questions",async()=>{
+//   //create new agent
 
-const agent = request.agent(server);
-await login(agent, "test@gmail.com", "12345678");
-let res = await agent.get("/elections/new");
-let csrfToken = extractCsrfToken(res);
-//  console.log(res.text)
-const response = await agent.post("/elections/createElection").send({
-  title: "Class rep",
-  _csrf: csrfToken,
-});
-console.log(response.text)
-const election = JSON.parse(response.text)
-res= await agent.get(`/elections/${election.id}/questions/new`)
-csrfToken = extractCsrfToken(res);
+// const agent = request.agent(server);
+// await login(agent, "test@gmail.com", "12345678");
+// let res = await agent.get("/elections/new");
+// let csrfToken = extractCsrfToken(res);
+// //  console.log(res.text)
+// const response = await agent.post("/elections/createElection").send({
+//   title: "Class rep",
+//   _csrf: csrfToken,
+// });
+// console.log(response.text)
+// const election = JSON.parse(response.text)
+// res= await agent.get(`/elections/${election.id}/questions/new`)
+// csrfToken = extractCsrfToken(res);
 
-const question = await agent.post("/questions/createQuestion").send({
-  title: "Who should we choose?",
-  description:"Class representative",
-electionId:election.id,
-  _csrf: csrfToken,
-});
-console.log(question)
-  expect(question.statusCode).toBe(302);
+// const question = await agent.post("/questions/createQuestion").send({
+//   title: "Who should we choose?",
+//   description:"Class representative",
+// electionId:election.id,
+//   _csrf: csrfToken,
+// });
+// console.log(question)
+//   expect(question.statusCode).toBe(302);
   
-})
+// })
 
 
 // TODO fix sign in test

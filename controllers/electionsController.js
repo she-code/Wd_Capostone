@@ -41,3 +41,22 @@ exports.createElection = async(req,res)=>{
         })
     }
 }
+
+//change the status of election to launch election
+exports.launchElection = async(req,res)=>{
+  const electionId = req.params.id
+  try {
+    const election = await Election.findByPk(electionId)
+    console.log({election})
+   const updatedElection =  await election.updateElectionStatus();
+   if(!updatedElection){console.log("error")}
+   console.log(updatedElection)
+   return res.json(updatedElection)
+  } catch (error) {
+    console.log(error.message)
+    res.status(501).json({
+      status:"fail",
+      message:error.message
+  })
+  }
+}

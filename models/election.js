@@ -33,6 +33,9 @@ module.exports = (sequelize, DataTypes) => {
         status: "created",
       });
     }
+     updateElectionStatus(){
+      return this.update({status:'launched'})
+    }
   }
   Election.init(
     {

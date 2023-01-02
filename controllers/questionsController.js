@@ -32,3 +32,8 @@ exports.createQuestion = async(req,res)=>{
         })
     }
 }
+
+//get question
+exports.getQuestionDetail=async(req,res)=>{
+    
+}

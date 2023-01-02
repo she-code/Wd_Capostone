@@ -22,7 +22,7 @@ module.exports = (sequelize, DataTypes) => {
       });
     }
     static getAnswers({adminId,questionId
-    ,electionId}){
+    }){
       return this.findAll({
         where:{
           [Op.and]:[

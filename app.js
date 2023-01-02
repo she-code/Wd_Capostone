@@ -160,8 +160,9 @@ app.get(
     const admin = await Admin.getAdminDetails(loggedInUser);
     const questions = await Question.getQuestions(loggedInUser, id);
     const election = await Election.getElectionDetails(loggedInUser, id);
-    const voters = await Voter.getVoters({electionId:1})
-
+    const electionId = election.id
+    const voters = await Voter.getVoters(electionId)
+    console.log(election)
     response.render("electionDetailsPage", {
       title: "Election Details",
       admin,
@@ -177,18 +178,20 @@ app.get(
   "/questions/:id",
   connectEnsureLogin.ensureLoggedIn(),
   async (request, response) => {
-    const loggedInUser = request.user.id;
+    const adminId = request.user.id;
     const id = request.params.id;
    // const admin = await Admin.getAdminDetails(loggedInUser);
-    const question = await Question.getQuestion(loggedInUser,1 ,id);
+    const question = await Question.getQuestion(adminId,2 ,id);
+    const questionId = id
    const election = 1;
-   const answers = await Answer.getAnswers({adminId:loggedInUser,questionId:question.id,electionId:election})
+   console.log({questionId})
+ const answers = await Answer.getAnswers({adminId,questionId})
     response.render("questionDetailsPage", {
       title: "Questions Details",
 //admin,
     election,
       question,
-      answers,
+     answers,
       csrfToken: request.csrfToken(),
     });
   }

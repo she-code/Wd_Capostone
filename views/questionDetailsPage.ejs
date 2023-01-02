@@ -13,27 +13,28 @@
         <div class="col-start-2 col-span-2">
       <div>
         <p><%=question.title%></p>
-       <div>
-        <% if(answers.length > 0){%>
-          <p>You have created <%=answers.length%> answers</p>
-          <%}%>
-       </div>
-      
+       
+        <div>
+          <% if(answers.length > 0){%>
+            <p>You have created <%=answers.length%> answers</p>
+            <%}%>
+         </div>
        <form method="post" action="/answers/createAnswers">
         <input type="hidden" name="_csrf" value="<%=csrfToken%>"/>
         <input type="hidden" name="questionId" value="<%=question.id%>"/>
 
         <div class="p-3">
-            <input type="text" name="content" class="border border-gray-300 text-gray-900 rounded p-2 w-full"/>
-            <button type="submit" class="text-white bg-green-600 hover:bg-green-800 font-medium rounded px-5 py-2 mt-5">Submit</button>
+            <input type="text" name="content" class="border border-gray-300 text-gray-900 rounded p-2 "/>
+            <button type="submit" class="text-white bg-green-600 hover:bg-green-800 font-medium rounded px-5 py-2 mt-5">Add</button>
 
         </div>
     </form>      </div>
     <div>
       <p>Answer Options</p>
-      <%for(var i=0;i<answers.length;i++){%>
-        <p class="text-vlue-600"><%=answers[i].content%></p>
-        <%}%>
+     
+ <%for(var i=0;i<answers.length;i++){%>
+  <p class="text-vlue-600"><%=answers[i].content%></p>
+  <%}%>
      </div>
       </div>
     </div>

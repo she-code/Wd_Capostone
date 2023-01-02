@@ -42,13 +42,13 @@ module.exports = (sequelize, DataTypes) => {
         })
     }
 
-    static getQuestion(adminId,electionId,questionId){
+    static getQuestion(adminId,electionId,id){
       return this.findOne({
         where:{
           [Op.and]:[
             {adminId},
             {electionId},
-            {id:questionId}
+            {id}
           ]
         }
 

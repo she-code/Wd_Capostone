@@ -7,5 +7,7 @@ const router = express.Router()
 router.post('/createElection',connectEnsureLogin.ensureLoggedIn(),electionController.createElection)
 router.post('/:id/voters',connectEnsureLogin.ensureLoggedIn(),voterController.addVoters)
 router.get('/:id/voters',connectEnsureLogin.ensureLoggedIn(),voterController.getVoters)
+router.put('/:id/launch',connectEnsureLogin.ensureLoggedIn(),electionController.launchElection)
+
 
 module.exports = router
