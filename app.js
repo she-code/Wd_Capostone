@@ -248,7 +248,7 @@ app.post("/users", async (request, response) => {
       if (err) {
         console.log("from", err);
       }
-      response.redirect("/todos");
+      response.redirect("/elections");
     });
   } catch (error) {
     if (error.name === "SequelizeUniqueConstraintError") {
