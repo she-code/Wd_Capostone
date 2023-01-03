@@ -11,7 +11,14 @@
   <body>
     <div class="grid grid-cols-6 pt-5">
         <div class="col-start-2 col-span-2">
-
+          <%
+          var data=[
+    {label:"Home",url:"/elections",current:false},
+    {label:`${election.title}`,url:`/elections/${election.id}`,current:false},
+    {label:`New Question`,url:`/elections/${election.id}/questions/new`,current:true},
+    ]
+          %>
+          <%- include('navigation.ejs',{data:data})%>
             <h1 class="text-gray-600 text-2xl font-semibold">Create new Question</h1>
             <form method="post" action="/questions/createQuestion">
                 <input type="hidden" name="_csrf" value="<%=csrfToken%>"/>

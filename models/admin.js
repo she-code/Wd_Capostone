@@ -9,21 +9,22 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
-      Admin.hasMany(models.Election,{
-        foreignKey:'adminId'
-      })
-      Admin.hasMany(models.Question,{
-        foreignKey:'adminId'
-      })
-      Admin.hasMany(models.Answer,{
-        foreignKey:'adminId'
-      })
+      Admin.hasMany(models.Election, {
+        foreignKey: "adminId",
+      });
+      Admin.hasMany(models.Question, {
+        foreignKey: "adminId",
+      });
+      Admin.hasMany(models.Answer, {
+        foreignKey: "adminId",
+      });
     }
 
-    static async getAdminDetails(id){
-    
-   return Admin.findByPk(id)
-
+    static async getAdminDetails(id) {
+      return Admin.findByPk(id);
+    }
+    static async getAllAdmins() {
+      return Admin.findAll();
     }
   }
   Admin.init(

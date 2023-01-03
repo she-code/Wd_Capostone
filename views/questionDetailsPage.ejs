@@ -11,6 +11,14 @@
   <body>
     <div class="grid grid-cols-6 pt-5 mt-5">
         <div class="col-start-2 col-span-2">
+          <%
+          var data=[
+    {label:"Home",url:"/elections",current:false},
+    {label:`${election.title}`,url:`/elections/${election.id}`,current:false},
+    {label:`Question #${question.id}`,url:`/questions/${question.id}`,current:true},
+    ]
+          %>
+          <%- include('navigation.ejs',{data:data})%>
       <div>
         <p class="text-2xl font-bold text-gray-600"><%=question.title%></p>
        

@@ -1,6 +1,8 @@
 //import packages
 const express = require("express");
 const bodyParser = require("body-parser");
+const flash = require("connect-flash");
+
 const path = require("path");
 const cookieParser = require("cookie-parser");
 const dotenv = require("dotenv");
@@ -42,6 +44,11 @@ app.use(
     },
   })
 );
+app.use(flash());
+app.use(function (request, response, next) {
+  response.locals.messages = request.flash();
+  next();
+});
 
 app.use(passport.initialize());
 app.use(passport.session());
@@ -194,11 +201,12 @@ app.get(
     // const admin = await Admin.getAdminDetails(loggedInUser);
     const question = await Question.getQuestion(adminId, id);
     const questionId = id;
-    const election = 1;
-    console.log({ questionId });
+    const electionId = question.electionId;
+    const election = await Election.getElectionDetails(adminId, electionId);
+    console.log({ election });
     const answers = await Answer.getAnswers({ adminId, questionId });
     response.render("questionDetailsPage", {
-      title: "Questions Details",
+      title: "Online Voting Platform",
       //admin,
       election,
       question,
@@ -244,7 +252,7 @@ app.get(
 );
 //routes
 //register user
-app.post("/users", async (request, response) => {
+app.post("/admins", async (request, response) => {
   const { firstName, lastName, email, password } = request.body;
   const hashedPwd = await bcrypt.hash(password, 10);
   //create user
@@ -302,6 +310,14 @@ app.post(
     response.redirect("/elections");
   }
 );
+app.get("/signout", (request, response, next) => {
+  request.logOut((err) => {
+    if (err) {
+      return next(err);
+    }
+    response.redirect("/");
+  });
+});
 app.use("/admins", adminRoute);
 app.use("/elections", electionRoute);
 app.use("/questions", questionsRoute);

@@ -10,25 +10,20 @@ module.exports = (sequelize, DataTypes) => {
       Answer.belongsTo(models.Question, {
         foreignKey: "questionId",
       });
-      
     }
-    static addAnswers({adminId, content, questionId}) {
+    static addAnswers({ adminId, content, questionId }) {
       return this.create({
         adminId,
         content,
-  questionId,
+        questionId,
       });
     }
-    static getAnswers({adminId,questionId
-    }){
+    static getAnswers({ adminId, questionId }) {
       return this.findAll({
-        where:{
-          [Op.and]:[
-            {questionId},
-            {adminId}
-          ]
-        }
-      })
+        where: {
+          [Op.and]: [{ questionId }, { adminId }],
+        },
+      });
     }
   }
   Answer.init(

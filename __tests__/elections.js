@@ -19,6 +19,7 @@ const login = async (agent, username, password) => {
     _csrf: csrfToken,
   });
 };
+// eslint-disable-next-line no-unused-vars
 const user = async (agent, username, password) => {
   let res = await agent.get("/login");
   let csrfToken = extractCsrfToken(res);
@@ -32,7 +33,7 @@ const user = async (agent, username, password) => {
 const createElection = async (agent) => {
   const res = await agent.get("/elections/new");
   const csrfToken = extractCsrfToken(res);
-  //  console.log(res.text)
+  // eslint-disable-next-line no-unused-vars
   const response = await agent.post("/elections/createElection").send({
     title: "Class rep",
     _csrf: csrfToken,
@@ -58,7 +59,7 @@ describe("Online Voting Platform", function () {
     let res = await agent.get("/signup");
     let csrfToken = extractCsrfToken(res);
 
-    res = await agent.post("/users").send({
+    res = await agent.post("/admins").send({
       firstName: "Test",
       lastName: "User",
       email: "test@gmail.com",
@@ -81,6 +82,7 @@ describe("Online Voting Platform", function () {
     });
     expect(response.statusCode).toBe(302);
   });
+
   test("Create questions", async () => {
     //create new agent
     const agent = request.agent(server);
@@ -158,7 +160,7 @@ describe("Online Voting Platform", function () {
     console.log(question.id);
     expect(question.statusCode).toBe(302);
   });
-
+  // will be updated
   test("Test to update election status to launched", async () => {
     const agent = request.agent(server);
     await login(agent, "test@gmail.com", "12345678");
@@ -171,29 +173,29 @@ describe("Online Voting Platform", function () {
     const electionsCount = parsedGroupedResponse.elections.length;
     const latestElection = parsedGroupedResponse.elections[electionsCount - 1];
 
-    let res = await agent.get(`/elections/${latestElection.id}`);
+    let res = await agent.get(`/elections`);
     let csrfToken = extractCsrfToken(res);
+    // eslint-disable-next-line no-unused-vars
     const response = await agent
       .put(`/elections/${latestElection.id}/launch`)
       .send({
         status: "launched",
         _csrf: csrfToken,
       });
-    console.log(response);
     expect(true).toBe(true);
     // const parsedUpdatedResponse = JSON.parse(response.text);
     // expect(parsedUpdatedResponse.status).toBe("launched");
   });
+
+  test("Sign out", async () => {
+    let res = await agent.get("/elections");
+    expect(res.statusCode).toBe(200);
+    res = await agent.get("/signout");
+    expect(res.statusCode).toBe(302);
+    res = await agent.get("/elections");
+    expect(res.statusCode).toBe(302);
+  });
 });
 
-//   test("Sign out", async () => {
-//     let res = await agent.get("/todos");
-//     expect(res.statusCode).toBe(200);
-//     res = await agent.get("/signout");
-//     expect(res.statusCode).toBe(302);
-//     res = await agent.get("/todos");
-//     expect(res.statusCode).toBe(302);
-//   });
-//test login
+//Todo
 // test signout
-//test admin detail

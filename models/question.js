@@ -1,7 +1,5 @@
-'use strict';
-const {
-  Model,Op
-} = require('sequelize');
+"use strict";
+const { Model, Op } = require("sequelize");
 module.exports = (sequelize, DataTypes) => {
   class Question extends Model {
     /**
@@ -9,6 +7,7 @@ module.exports = (sequelize, DataTypes) => {
      * This method is not a part of Sequelize lifecycle.
      * The `models/index` file will call this method automatically.
      */
+
     static associate(models) {
       // define association here
       Question.belongsTo(models.Election, {
@@ -20,46 +19,40 @@ module.exports = (sequelize, DataTypes) => {
       Question.hasMany(models.Answer, {
         foreignKey: "questionId",
       });
-    
     }
-    static addQuestion({ title, description,adminId,electionId }) {
+    static addQuestion({ title, description, adminId, electionId }) {
       return this.create({
         title: title,
         adminId,
         description,
-        electionId
+        electionId,
       });
     }
-    static getQuestions(adminId,electionId){
-        return this.findAll({
-          where:{
-            [Op.and]:[
-              {adminId},
-              {electionId}
-            ]
-          }
-
-        })
+    static getQuestions(adminId, electionId) {
+      return this.findAll({
+        where: {
+          [Op.and]: [{ adminId }, { electionId }],
+        },
+      });
     }
 
-    static getQuestion(adminId,id){
+    static getQuestion(adminId, id) {
       return this.findOne({
-        where:{
-          [Op.and]:[
-            {adminId},
-            {id}
-          ]
-        }
-
-      })
+        where: {
+          [Op.and]: [{ adminId }, { id }],
+        },
+      });
+    }
   }
-  }
-  Question.init({
-    title: DataTypes.STRING,
-    description: DataTypes.STRING
-  }, {
-    sequelize,
-    modelName: 'Question',
-  });
+  Question.init(
+    {
+      title: DataTypes.STRING,
+      description: DataTypes.STRING,
+    },
+    {
+      sequelize,
+      modelName: "Question",
+    }
+  );
   return Question;
 };
