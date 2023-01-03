@@ -117,6 +117,8 @@ app.get("/login", (request, response) => {
     csrfToken: request.csrfToken(),
   });
 });
+
+//display elections for loggedin user
 app.get(
   "/elections",
   connectEnsureLogin.ensureLoggedIn(),
@@ -138,21 +140,8 @@ app.get(
     }
   }
 );
-app.get(
-  "/answers",
-  connectEnsureLogin.ensureLoggedIn(),
-  async (request, response) => {
-    const loggedInUser = request.user.id;
-    const admin = await Admin.getAdminDetails(loggedInUser);
-    const elections = await Election.getElections(loggedInUser);
-    response.render("answers", {
-      title: "Online Voting Platform",
-      admin,
-      elections,
-      csrfToken: request.csrfToken(),
-    });
-  }
-);
+
+//create election page
 app.get(
   "/elections/new",
   connectEnsureLogin.ensureLoggedIn(),
@@ -164,6 +153,7 @@ app.get(
   }
 );
 
+//election details page
 app.get(
   "/elections/:id",
   connectEnsureLogin.ensureLoggedIn(),
@@ -192,6 +182,47 @@ app.get(
     }
   }
 );
+
+// manage questions page
+app.get(
+  "/elections/:id/questions",
+  connectEnsureLogin.ensureLoggedIn(),
+  async (request, response) => {
+    const loggedInUser = request.user.id;
+    const id = request.params.id;
+    const admin = await Admin.getAdminDetails(loggedInUser);
+    const questions = await Question.getQuestions(loggedInUser, id);
+    const election = await Election.getElectionDetails(loggedInUser, id);
+
+    response.render("manageQuestions", {
+      title: "Online Voting Platform",
+      admin,
+      election,
+      questions,
+      csrfToken: request.csrfToken(),
+    });
+  }
+);
+
+//create questions page
+app.get(
+  "/elections/:id/questions/new",
+  connectEnsureLogin.ensureLoggedIn(),
+  async (request, response) => {
+    const loggedInUser = request.user.id;
+    const id = request.params.id;
+
+    const election = await Election.getElectionDetails(loggedInUser, id);
+
+    response.render("createQuestions", {
+      title: "Create Elections",
+      election,
+      csrfToken: request.csrfToken(),
+    });
+  }
+);
+
+//question details page
 app.get(
   "/questions/:id",
   connectEnsureLogin.ensureLoggedIn(),
@@ -215,42 +246,24 @@ app.get(
     });
   }
 );
+
+/// answers list page
 app.get(
-  "/elections/:id/questions",
+  "/answers",
   connectEnsureLogin.ensureLoggedIn(),
   async (request, response) => {
     const loggedInUser = request.user.id;
-    const id = request.params.id;
     const admin = await Admin.getAdminDetails(loggedInUser);
-    const questions = await Question.getQuestions(loggedInUser, id);
-    const election = await Election.getElectionDetails(loggedInUser, id);
-
-    response.render("listQuestions", {
+    const elections = await Election.getElections(loggedInUser);
+    response.render("answers", {
       title: "Online Voting Platform",
       admin,
-      election,
-      questions,
+      elections,
       csrfToken: request.csrfToken(),
     });
   }
 );
-app.get(
-  "/elections/:id/questions/new",
-  connectEnsureLogin.ensureLoggedIn(),
-  async (request, response) => {
-    const loggedInUser = request.user.id;
-    const id = request.params.id;
 
-    const election = await Election.getElectionDetails(loggedInUser, id);
-
-    response.render("createQuestions", {
-      title: "Create Elections",
-      election,
-      csrfToken: request.csrfToken(),
-    });
-  }
-);
-//routes
 //register user
 app.post("/admins", async (request, response) => {
   const { firstName, lastName, email, password } = request.body;
@@ -310,6 +323,7 @@ app.post(
     response.redirect("/elections");
   }
 );
+//sign out user
 app.get("/signout", (request, response, next) => {
   request.logOut((err) => {
     if (err) {
@@ -318,6 +332,8 @@ app.get("/signout", (request, response, next) => {
     response.redirect("/");
   });
 });
+
+//routes
 app.use("/admins", adminRoute);
 app.use("/elections", electionRoute);
 app.use("/questions", questionsRoute);

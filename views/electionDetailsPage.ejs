@@ -41,7 +41,7 @@
        <div>
         <% if(election.status=="launched"){%>
           <p>This election has launched and voters can access this URL</p>
-        <a href="/elections/<%=election.id%>/vote" class="text-blue-600 underline">http://localhost:5000/elections/1/vote</a>
+        <a href="/elections/<%=election.id%>/vote" class="text-blue-600 underline">https://online-election.onrender.com/elections/1/vote</a>
           <%}%>
        <% if(questions.length==0){%>
           <p>You haven't created any questions</p>

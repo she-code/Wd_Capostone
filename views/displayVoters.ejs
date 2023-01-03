@@ -31,7 +31,7 @@
        <form method="post" action="/elections/<%=election.id%>/voters">
         <input type="hidden" name="_csrf" value="<%=csrfToken%>"/>
 
-        <div class="p-3">
+        <div class="pt-3">
             <input type="text" name="voter_Id" class="border border-gray-300 text-gray-900 rounded p-2 " placeholder="Voter Id"/>
             <input type="password" name="password" class="border border-gray-300 text-gray-900 rounded p-2 " placeholder="password"/>
             <button type="submit" class="text-white bg-green-600 hover:bg-green-800 font-medium rounded px-5 py-2 mt-5">Submit</button>
