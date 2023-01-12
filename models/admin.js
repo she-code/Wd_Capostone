@@ -34,6 +34,7 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
         validate: {
           notNull: true,
+          len: 2,
         },
       },
       lastName: {
@@ -41,6 +42,7 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
         validate: {
           notNull: true,
+          len: 2,
         },
       },
       email: {
@@ -49,9 +51,29 @@ module.exports = (sequelize, DataTypes) => {
         unique: true,
         validate: {
           notNull: true,
+          isEmail: true,
+          isUnique: (value, next) => {
+            Admin.findAll({
+              where: { email: value },
+              attributes: ["id"],
+            })
+              .then((user) => {
+                if (user.length != 0)
+                  next(new Error("Email address already in use!"));
+                next();
+              })
+              .catch((onError) => console.log(onError));
+          },
         },
       },
-      password: DataTypes.STRING,
+      password: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        validate: {
+          notNull: true,
+          notEmpty: true,
+        },
+      },
     },
     {
       sequelize,

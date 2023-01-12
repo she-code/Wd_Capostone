@@ -7,7 +7,14 @@ exports.addVoters = async (req, res) => {
   const salt = await bcrypt.genSalt(10);
   const hashedPassword = await bcrypt.hash(password, salt);
   console.log(req.params);
+
   try {
+    //check if voter already exists
+    const voterExists = await Voter.findOne({ where: { voter_Id } });
+    // if (voterExists) {
+    //   req.flash("voter already exists");
+    //   return res.redirect(`/elections/${electionId}/voters`);
+    // }
     const voter = await Voter.addVoter({
       electionId,
       voter_Id,
@@ -19,7 +26,25 @@ exports.addVoters = async (req, res) => {
     console.log(voter);
     return res.redirect(`/elections/${electionId}/voters`);
   } catch (error) {
-    res.status(501).json({ status: "fail", message: error.message });
+    console.log(error.message);
+    if (error.name === "SequelizeValidationError") {
+      for (var key in error.errors) {
+        console.log(error.errors[key].message);
+
+        if (
+          error.errors[key].message === "Validation notEmpty on voter_Id failed"
+        ) {
+          req.flash("error", "Username can't be empty");
+        }
+        if (
+          error.errors[key].message ===
+          "Validation error: Voter Id must be unique"
+        ) {
+          req.flash("error", "Description must atleaset have 5 characters");
+        }
+      }
+      res.redirect(`/elections/${electionId}/voters`);
+    }
   }
 };
 exports.getVoters = async (req, res) => {

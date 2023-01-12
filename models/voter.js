@@ -27,8 +27,34 @@ module.exports = (sequelize, DataTypes) => {
   }
   Voter.init(
     {
-      voter_Id: DataTypes.STRING,
-      password: DataTypes.STRING,
+      voter_Id: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        validate: {
+          notNull: true,
+          notEmpty: true,
+          isUnique: (value, next) => {
+            Voter.findAll({
+              where: { voter_Id: value },
+              attributes: ["id"],
+            })
+              .then((user) => {
+                if (user.length != 0)
+                  next(new Error("Voter Id must be unique"));
+                next();
+              })
+              .catch((onError) => console.log(onError));
+          },
+        },
+      },
+      password: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        validate: {
+          notNull: true,
+          notEmpty: true,
+        },
+      },
     },
     {
       sequelize,

@@ -22,10 +22,11 @@ const adminRoute = require("./routes/adminRoute");
 const electionRoute = require("./routes/electionsRoute");
 const questionsRoute = require("./routes/questionsRoute");
 const answersRoute = require("./routes/answerRoute");
+const votersRoute = require("./routes/votersRoute");
+dotenv.config({ path: "./config.env" });
 
 // create express application
 const app = express();
-dotenv.config({ path: "./config.env" });
 
 app.use(bodyParser.json());
 app.use(express.json());
@@ -263,7 +264,10 @@ app.get(
     });
   }
 );
-
+// app.get("/vote", async (req, res) => {
+//   //check if user is logged in
+//   // for this u need to have a middelware to return the userID
+// });
 //register user
 app.post("/admins", async (request, response) => {
   const { firstName, lastName, email, password } = request.body;
@@ -283,6 +287,7 @@ app.post("/admins", async (request, response) => {
       response.redirect("/elections");
     });
   } catch (error) {
+    console.log(error.message);
     if (error.name === "SequelizeUniqueConstraintError") {
       request.flash("error", "Email already exists");
       response.redirect("/signup");
@@ -298,10 +303,16 @@ app.post("/admins", async (request, response) => {
             "First name must have minimum of 2 characters"
           );
         }
+        if (error.errors[key].message === "Validation len on lastName failed") {
+          request.flash("error", "Last name must have minimum of 2 characters");
+        }
         if (
           error.errors[key].message === "Validation isEmail on email failed"
         ) {
           request.flash("error", "Invalid Email");
+        }
+        if (error.errors[key].message === "Email address already in use!") {
+          request.flash("error", "Email address already in use!");
         }
       }
       //   response.redirect("/todos");
@@ -338,6 +349,7 @@ app.use("/admins", adminRoute);
 app.use("/elections", electionRoute);
 app.use("/questions", questionsRoute);
 app.use("/answers", answersRoute);
+app.use("/voters", votersRoute);
 
 //export application
 module.exports = app;

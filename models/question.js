@@ -46,8 +46,20 @@ module.exports = (sequelize, DataTypes) => {
   }
   Question.init(
     {
-      title: DataTypes.STRING,
-      description: DataTypes.STRING,
+      title: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        validate: {
+          notNull: true,
+          // len: 2,
+          notEmpty: true,
+        },
+      },
+      description: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        validate: { notNull: true, len: 5 },
+      },
     },
     {
       sequelize,

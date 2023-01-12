@@ -33,11 +33,18 @@ exports.createElection = async (req, res) => {
     }
     return res.redirect(`/elections/${election.id}`);
   } catch (error) {
-    console.log(error.message);
-    res.status(501).json({
-      status: "fail",
-      message: error.message,
-    });
+    if (error.name === "SequelizeValidationError") {
+      for (var key in error.errors) {
+        console.log(error.errors[key].message);
+
+        if (
+          error.errors[key].message === "Validation notEmpty on title failed"
+        ) {
+          req.flash("error", "Title can't be empty");
+        }
+      }
+    }
+    res.redirect("/elections/new");
   }
 };
 
