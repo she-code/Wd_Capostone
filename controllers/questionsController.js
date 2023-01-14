@@ -1,12 +1,13 @@
-const { Question } = require("../models");
+const { Question, Election, Answer } = require("../models");
 
 //create elections
 exports.createQuestion = async (req, res) => {
   //get adminId from req.user
   //get electionId from req.params
+  const { title, description, electionId } = req.body;
+
   try {
-    const { title, description, electionId } = req.body;
-    const adminId = req.user.id;
+    const adminId = req.user;
     const question = await Question.addQuestion({
       title,
       description,
@@ -21,7 +22,6 @@ exports.createQuestion = async (req, res) => {
       });
     }
 
-    console.log(question);
     return res.redirect(`/questions/${question.id}`);
   } catch (error) {
     console.log(error.message);
@@ -41,6 +41,29 @@ exports.createQuestion = async (req, res) => {
         }
       }
     }
-    res.redirect("/elections/2/questions/new");
+    res.redirect(`/elections/${electionId}/questions/new`);
   }
+};
+
+//render questions details page
+//question details page
+exports.renderQuesDetailsPAge = async (request, response) => {
+  const adminId = request.user;
+  const id = request.params.id;
+  // const admin = await Admin.getAdminDetails(loggedInUser);
+  const question = await Question.getQuestion(adminId, id);
+  const questionId = id;
+  const electionId = question.electionId;
+
+  const election = await Election.getElectionDetails(adminId, electionId);
+  const answers = await Answer.getAnswers({ adminId, questionId });
+
+  response.render("questionDetailsPage", {
+    title: "Online Voting Platform",
+    //admin,
+    election,
+    question,
+    answers,
+    csrfToken: request.csrfToken(),
+  });
 };

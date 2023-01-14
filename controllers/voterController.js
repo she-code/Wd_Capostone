@@ -10,11 +10,13 @@ exports.addVoters = async (req, res) => {
 
   try {
     //check if voter already exists
-    const voterExists = await Voter.findOne({ where: { voter_Id } });
+    // const voterExists = await Voter.findOne({ where: { voter_Id } });
     // if (voterExists) {
+    //   console.log("voter exists");
     //   req.flash("voter already exists");
     //   return res.redirect(`/elections/${electionId}/voters`);
     // }
+
     const voter = await Voter.addVoter({
       electionId,
       voter_Id,
@@ -36,11 +38,8 @@ exports.addVoters = async (req, res) => {
         ) {
           req.flash("error", "Username can't be empty");
         }
-        if (
-          error.errors[key].message ===
-          "Validation error: Voter Id must be unique"
-        ) {
-          req.flash("error", "Description must atleaset have 5 characters");
+        if (error.errors[key].message === "Voter Id must be unique") {
+          req.flash("error", "Voter Id must be unique");
         }
       }
       res.redirect(`/elections/${electionId}/voters`);
@@ -50,7 +49,7 @@ exports.addVoters = async (req, res) => {
 exports.getVoters = async (req, res) => {
   const electionId = req.params.id;
   const voters = await Voter.getVoters(electionId);
-  const adminId = req.user.id;
+  const adminId = req.user;
   const election = await Election.getElectionDetails(adminId, electionId);
   if (req.accepts("html")) {
     res.render("displayVoters", {
@@ -66,6 +65,24 @@ exports.getVoters = async (req, res) => {
   }
 };
 
+exports.renderVotersPage = async (req, res) => {
+  const electionId = req.params.id;
+  const voters = await Voter.getVoters(electionId);
+  const adminId = req.user;
+  const election = await Election.getElectionDetails(adminId, electionId);
+  if (req.accepts("html")) {
+    res.render("displayVoters", {
+      voters,
+      election,
+      title: "Online Voting Platform",
+      csrfToken: req.csrfToken(),
+    });
+  } else {
+    res.json({
+      voters,
+    });
+  }
+};
 exports.vote = async (req, res) => {
   res.send("hi");
 };

@@ -1,8 +1,8 @@
-const { Election } = require("../models");
+const { Election, Admin, Voter, Question } = require("../models");
 
 //get elections
 exports.getElections = async (req, res) => {
-  const loggedInUser = req.user.id;
+  const loggedInUser = req.user;
   const electionss = await Election.getElections(loggedInUser);
   if (req.accepts("html")) {
     res.render("elections", {
@@ -19,7 +19,7 @@ exports.getElections = async (req, res) => {
 exports.createElection = async (req, res) => {
   try {
     const { title } = req.body;
-    const adminId = req.user.id;
+    const adminId = req.user;
     const election = await Election.addElection({
       title: title,
       status: "created",
@@ -44,7 +44,7 @@ exports.createElection = async (req, res) => {
         }
       }
     }
-    res.redirect("/elections/new");
+    res.redirect("/elections/createElections/new");
   }
 };
 
@@ -67,4 +67,138 @@ exports.launchElection = async (req, res) => {
       message: error.message,
     });
   }
+};
+//delete election
+exports.deleteElection = async (req, res) => {
+  const electionId = req.params.id;
+  const adminId = req.user;
+  console.log(adminId);
+  try {
+    await Election.deleteElection(electionId, adminId);
+    return res.json(true);
+  } catch (error) {
+    console.log(error.message);
+    req.flash("error", "Can't process you request");
+  }
+};
+
+//edit election
+exports.updateElectionTitle = async (req, res) => {
+  const { title } = req.body;
+  const id = req.params.id;
+
+  try {
+    const election = Election.findByPk(id);
+    const updatedElection = await election.updateElectionTitle(title);
+    res.json(updatedElection);
+  } catch (error) {
+    console.log(error.message);
+    req.flash("error", "Can't process you request");
+  }
+};
+
+//render elections page
+exports.renderElectionsPage = async (request, response) => {
+  const loggedInUser = request.user;
+  const admin = await Admin.getAdminDetails(loggedInUser);
+  const elections = await Election.getElections(loggedInUser);
+  if (request.accepts("html")) {
+    response.render("elections", {
+      title: "Online Voting Platform",
+      admin,
+      elections,
+      csrfToken: request.csrfToken(),
+    });
+  } else {
+    response.json({
+      elections,
+    });
+  }
+};
+
+//create election page
+exports.renderCreateElecPage = async (request, response) => {
+  const loggedInUser = request.user;
+  const admin = await Admin.getAdminDetails(loggedInUser);
+  response.render("createElections", {
+    title: "Create Elections",
+    admin,
+    csrfToken: request.csrfToken(),
+  });
+};
+
+//election details page
+exports.renderElectionDetailsPage = async (request, response) => {
+  const loggedInUser = request.user;
+  const id = request.params.id;
+  const admin = await Admin.getAdminDetails(loggedInUser);
+  const questions = await Question.getQuestions(loggedInUser, id);
+  const election = await Election.getElectionDetails(loggedInUser, id);
+  const electionId = election.id;
+  const voters = await Voter.getVoters(electionId);
+  if (request.accepts("html")) {
+    response.render("electionDetailsPage", {
+      title: "Election Details",
+      admin,
+      election,
+      questions,
+      voters,
+
+      csrfToken: request.csrfToken(),
+    });
+  } else {
+    response.json({
+      election,
+    });
+  }
+};
+
+// manage questions page
+exports.renderManageQuesPage = async (request, response) => {
+  const loggedInUser = request.user;
+  const id = request.params.id;
+  const admin = await Admin.getAdminDetails(loggedInUser);
+  const questions = await Question.getQuestions(loggedInUser, id);
+  const election = await Election.getElectionDetails(loggedInUser, id);
+
+  response.render("manageQuestions", {
+    title: "Online Voting Platform",
+    admin,
+    election,
+    questions,
+    csrfToken: request.csrfToken(),
+  });
+};
+
+//create questions page
+exports.renderCreateQuesPage = async (request, response) => {
+  const id = request.params.id;
+  const loggedInUser = request.user;
+  const admin = await Admin.getAdminDetails(loggedInUser);
+  const election = await Election.getElectionDetails(loggedInUser, id);
+  console.log({ election });
+  response.render("createQuestions", {
+    title: "Create Questions",
+    election,
+    admin,
+    csrfToken: request.csrfToken(),
+  });
+};
+//create questions page
+exports.renderVotingPage = async (request, response) => {
+  const id = request.params.id;
+  const loggedInUser = request.user;
+  const admin = await Admin.getAdminDetails(loggedInUser);
+  const election = await Election.getElectionDetails(loggedInUser, id);
+  //election
+  //question
+  //answer
+  //voterId
+  console.log({ election });
+  response.render("vote", {
+    title: "Online Voting Platform",
+    election,
+    admin,
+    csrfToken: request.csrfToken(),
+  });
 };

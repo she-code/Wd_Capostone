@@ -1,16 +1,29 @@
-const express = require('express')
+const express = require("express");
 const connectEnsureLogin = require("connect-ensure-login");
-const electionController = require('../controllers/electionsController')
-const voterController = require('../controllers/voterController')
+const electionController = require("../controllers/electionsController");
+const voterController = require("../controllers/voterController");
+const authenticateJWT = require("../middelwares/authenticateJWT");
+const router = express.Router();
 
-const router = express.Router()
-router.post('/createElection',connectEnsureLogin.ensureLoggedIn(),electionController.createElection)
-router.post('/:id/voters',connectEnsureLogin.ensureLoggedIn(),voterController.addVoters)
-router.get('/:id/voters',connectEnsureLogin.ensureLoggedIn(),voterController.getVoters)
-router.put('/:id/launch',connectEnsureLogin.ensureLoggedIn(),electionController.launchElection)
-router.get('/:id/vote',connectEnsureLogin.ensureLoggedIn('/voterLogin'),voterController.vote)
+router.get(
+  "/:id/vote",
+  connectEnsureLogin.ensureLoggedIn("/voterLogin"),
+  voterController.vote
+);
+router.use(authenticateJWT);
+router.get("/", electionController.renderElectionsPage);
+router.post(
+  "/createElection",
 
-
-
-
-module.exports = router
+  electionController.createElection
+);
+router.post("/:id/voters", voterController.addVoters);
+router.delete("/:id", electionController.deleteElection);
+router.put("/:id", electionController.updateElectionTitle);
+router.get("/:id/voters", voterController.renderVotersPage);
+router.put("/:id/launch", electionController.launchElection);
+router.get("/:id", electionController.renderElectionDetailsPage);
+router.get("/createElections/new", electionController.renderCreateElecPage);
+router.get("/:id/questions", electionController.renderManageQuesPage);
+router.get("/:id/questions/new", electionController.renderCreateQuesPage);
+module.exports = router;

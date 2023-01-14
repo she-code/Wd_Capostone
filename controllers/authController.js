@@ -1,54 +1,37 @@
+const jwt = require("jsonwebtoken");
 const { Admin } = require("../models");
-const bcrypt = require("bcrypt");
+const { generateJwtToken, generateHashedPassword } = require("../utils");
 
-const { generateJwtToken, generateHashedPassword } = require("../utils/index");
-//register admin
-exports.signup = async (req, res) => {
-  try {
-    const { firstName, lastName, email, password } = req.body;
-    const salt = await bcrypt.genSalt(process.env.HASH_NUMBER);
-    const hashedPassword = await bcrypt.hash(password, salt);
-    //check empty inputs
-    if (
-      firstName == null ||
-      lastName == null ||
-      email == null ||
-      password == null
-    ) {
-      return res
-        .status()
-        .json({ status: 401, message: "Cant have empty fields" });
-    }
-
-    //search if email exists
-    const emailExists = await Admin.findOne({ where: { email } });
-    if (emailExists) {
-      return res
-        .status()
-        .json({ status: 409, message: "Email already exist ! LOGIN instead" });
-    }
-    //create admin
-    const admin = Admin.create({
-      firstName: firstName,
-      lastName: lastName,
-      email: email,
-      password: hashedPassword,
-    });
-
-    if (!admin) {
-      return res
-        .status()
-        .json({ status: 501, message: "Unable to create account. Try later" });
-    }
-
-    //jwt,cookie will be added todo
-  } catch (error) {
-    return res.status().json({ status: 501, message: error.message });
+const protect = async (req, res, next) => {
+  let token;
+  if (
+    req.headers.authorization &&
+    req.headers.authorization.startsWith("Bearer")
+  ) {
+    token = req.headers.authorization.split(" ")[1];
+  } else if (req.cookies.jwt) {
+    token = req.cookies.jwt;
   }
+  if (!token) {
+    return next("you are not logged in");
+  }
+  jwt.verify(token, process.env.JWT_SECRET, (err, verifiedJwt) => {
+    if (err) {
+      console.log(err);
+      res.status(400).json({ error: err.message });
+    } else {
+      req.user = verifiedJwt.id;
+      req.userType = verifiedJwt.userType;
+      console.log(token);
+      console.log("user", req.user, "userType", req.userType);
+      // res.status(200).json({"token":verifiedJwt} )
+      next();
+    }
+  });
 };
 
 //register admin
-exports.register = async (request, response) => {
+const register = async (request, response) => {
   const { firstName, lastName, email, password } = request.body;
   const hashedPwd = await generateHashedPassword(password);
   //create user
@@ -59,7 +42,6 @@ exports.register = async (request, response) => {
       email: email,
       password: hashedPwd,
     });
-    // const token = generateJwtToken(user.id, "admin");
     const token = generateJwtToken(admin.id, "admin");
     const cookieOPtions = {
       expires: new Date(
@@ -113,7 +95,7 @@ exports.register = async (request, response) => {
 };
 
 // login
-exports.login = async (request, response) => {
+const login = async (request, response) => {
   const { email, password } = request.body;
   try {
     const admin = await Admin.findOne({ where: { email } });
@@ -149,7 +131,7 @@ exports.login = async (request, response) => {
   }
 };
 
-exports.logout = (req, res, next) => {
+const logout = (req, res, next) => {
   res.cookie("jwt", "loggedout", {
     expires: new Date(Date.now() + 10 * 1000),
     httpOnly: true,
@@ -162,28 +144,9 @@ exports.logout = (req, res, next) => {
     res.redirect("/");
   });
 };
-
-// get admin details
-exports.getAdminDetails = async (req, res) => {
-  const userId = req.user.id;
-  const admin = await Admin.findByPk({ where: { id: userId } });
-  if (!admin) {
-    res.status(404).json({ status: 404, message: "User not found" });
-  }
-  return admin;
-};
-//get all admins
-exports.getAllAdmins = async (req, res) => {
-  const admins = await Admin.getAllAdmins();
-  if (req.accepts("html")) {
-    res.render("displayAdminsPage", {
-      admins,
-      title: "Online Voting Platform",
-      csrfToken: req.csrfToken(),
-    });
-  } else {
-    res.json({
-      admins,
-    });
-  }
+module.exports = {
+  protect,
+  login,
+  register,
+  logout,
 };

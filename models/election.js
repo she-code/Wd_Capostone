@@ -18,7 +18,10 @@ module.exports = (sequelize, DataTypes) => {
       });
     }
     static getElections(adminId) {
-      return this.findAll({ where: { adminId } });
+      return this.findAll({
+        where: { adminId },
+        order: [["createdAt", "DESC"]],
+      });
     }
     static getElectionDetails(adminId, electionId) {
       return this.findOne({
@@ -36,6 +39,17 @@ module.exports = (sequelize, DataTypes) => {
     }
     updateElectionStatus() {
       return this.update({ status: "launched" });
+    }
+    static async deleteElection(id, adminId) {
+      return this.destroy({
+        where: {
+          id,
+          adminId,
+        },
+      });
+    }
+    updateElectionTitle(newTitle) {
+      return this.update({ title: newTitle });
     }
   }
   Election.init(

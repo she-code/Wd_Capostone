@@ -55,6 +55,11 @@ module.exports = (sequelize, DataTypes) => {
           notEmpty: true,
         },
       },
+      userType: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        defaultValue: "voter",
+      },
     },
     {
       sequelize,

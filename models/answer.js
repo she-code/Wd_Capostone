@@ -28,7 +28,15 @@ module.exports = (sequelize, DataTypes) => {
   }
   Answer.init(
     {
-      content: DataTypes.STRING,
+      content: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        validate: {
+          notNull: true,
+          notEmpty: true,
+          len: 3,
+        },
+      },
     },
     {
       sequelize,

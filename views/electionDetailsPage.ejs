@@ -27,27 +27,30 @@
       </script>
   </head>
   <body>
-    <div class="grid grid-cols-6 pt-5 mt-5">
-        <div class="col-start-2 col-span-2">
+    <main class=" h-screen" style="background-color: #6c6c7f24; ">
+      <%-include('header.ejs',{admin:admin})%>
+        <div class="  sm:container mx-auto p-10 bg-white shadow-lg rounded-md "
+          style=" margin: 30px auto; height: 75%; width: 65%;">
+          <div class="mx-auto">
           <%
           var data=[
     {label:"Home",url:"/elections",current:false},
     {label:`${election.title}`,url:`/elections/${election.id}`,current:true}
     ]%>
           <%- include('navigation.ejs',{data:data})%>
-            <h1 class="text-2xl font-bold text-gray-600"><%=election.title%></h1>
-      <div>
-        
+      <div class="p-8">
+        <h1 class="text-2xl font-bold text-gray-600"><%=election.title%></h1>
+
        <div>
         <% if(election.status=="launched"){%>
           <p>This election has launched and voters can access this URL</p>
         <a href="/elections/<%=election.id%>/vote" class="text-blue-600 underline">https://online-election.onrender.com/elections/1/vote</a>
           <%}%>
        <% if(questions.length==0){%>
-          <p>You haven't created any questions</p>
+          <p class="text-md">You haven't created any questions</p>
         <%}%>
         <% if(questions.length > 0){%>
-          <p>Your election has <%=questions.length%> questions in the ballot</p>
+          <p class="text-md">Your election has <%=questions.length%> questions in the ballot</p>
           <%}%>
        </div>
       
@@ -56,10 +59,10 @@
       <%}%>
        <div>
         <% if(voters.length==0){%>
-           <p>You haven't created any voters</p>
+           <p class="text-md">You haven't created any voters</p>
          <%}%>
          <% if(voters.length > 0){%>
-           <p>Your election has <%=voters.length%> registered voters</p>
+           <p class="text-md">Your election has <%=voters.length%> registered voters</p>
            <%}%>
         </div>
        <a href="/elections/<%=election.id%>/voters" class="text-green-600 block">Manage Voters</a>
@@ -74,5 +77,8 @@
 
       </div>
     </div>
+    </div>
+    </main>
+
   </body>
 </html>

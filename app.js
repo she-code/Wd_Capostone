@@ -10,12 +10,14 @@ const morgan = require("morgan");
 const passport = require("passport");
 const bcrypt = require("bcrypt");
 const csurf = require("tiny-csrf");
-const connectEnsureLogin = require("connect-ensure-login");
+// const connectEnsureLogin = require("connect-ensure-login");
 const session = require("express-session");
-const localStrategy = require("passport-local");
+dotenv.config({ path: "./config.env" });
 
 //import files
-const { Admin, Election, Question, Answer, Voter } = require("./models");
+const { Admin, Voter } = require("./models");
+const initiatePassport = require("./auth/passport/index");
+const authenticateJwt = require("./middelwares/authenticateJWT");
 
 //import routes
 const adminRoute = require("./routes/adminRoute");
@@ -23,7 +25,6 @@ const electionRoute = require("./routes/electionsRoute");
 const questionsRoute = require("./routes/questionsRoute");
 const answersRoute = require("./routes/answerRoute");
 const votersRoute = require("./routes/votersRoute");
-dotenv.config({ path: "./config.env" });
 
 // create express application
 const app = express();
@@ -34,14 +35,18 @@ app.use(morgan("dev"));
 app.use(express.urlencoded({ extended: false }));
 
 app.use(cookieParser("process.env.SECRET_STRING"));
-
+// eslint-disable-next-line no-unused-vars
+app.use((req, res, next) => {
+  console.log("cookie", req.cookies);
+  next();
+});
 app.use(csurf("this_should_be_32_character_long", ["POST", "PUT", "DELETE"]));
-
 app.use(
   session({
     secret: process.env.SESSION_SECRET,
     cookie: {
       maxAge: 24 * 60 * 60 * 1000,
+      secure: false,
     },
   })
 );
@@ -51,43 +56,19 @@ app.use(function (request, response, next) {
   next();
 });
 
+//intialize passport
 app.use(passport.initialize());
 app.use(passport.session());
 
-//authenticate user with passport
-passport.use(
-  new localStrategy(
-    {
-      usernameField: "email",
-      passwordField: "password",
-    },
-    (username, password, done) => [
-      Admin.findOne({ where: { email: username } })
-        .then(async (admin) => {
-          if (!admin) {
-            return done(null, false, { message: "No Admin found" });
-          }
-          const result = await bcrypt.compare(password, admin.password);
-          if (result) {
-            return done(null, admin);
-          } else {
-            return done(null, false, { message: "Invalid password" });
-          }
-        })
-        .catch((error) => {
-          return done(error);
-        }),
-    ]
-  )
-);
+initiatePassport(passport);
 
-passport.serializeUser((admin, done) => {
-  console.log("Seralizing admin in session", admin.id);
-  done(null, admin.id);
+passport.serializeUser((voter, done) => {
+  console.log("Seralizing voter in session", voter.id);
+  done(null, voter.id);
 });
 
 passport.deserializeUser((id, done) => {
-  Admin.findByPk(id)
+  Voter.findByPk(id)
     .then((user) => {
       done(null, user);
     })
@@ -119,155 +100,14 @@ app.get("/login", (request, response) => {
   });
 });
 
-//display elections for loggedin user
-app.get(
-  "/elections",
-  connectEnsureLogin.ensureLoggedIn(),
-  async (request, response) => {
-    const loggedInUser = request.user.id;
-    const admin = await Admin.getAdminDetails(loggedInUser);
-    const elections = await Election.getElections(loggedInUser);
-    if (request.accepts("html")) {
-      response.render("elections", {
-        title: "Online Voting Platform",
-        admin,
-        elections,
-        csrfToken: request.csrfToken(),
-      });
-    } else {
-      response.json({
-        elections,
-      });
-    }
-  }
-);
-
-//create election page
-app.get(
-  "/elections/new",
-  connectEnsureLogin.ensureLoggedIn(),
-  async (request, response) => {
-    response.render("createElections", {
-      title: "Create Elections",
-      csrfToken: request.csrfToken(),
-    });
-  }
-);
-
-//election details page
-app.get(
-  "/elections/:id",
-  connectEnsureLogin.ensureLoggedIn(),
-  async (request, response) => {
-    const loggedInUser = request.user.id;
-    const id = request.params.id;
-    const admin = await Admin.getAdminDetails(loggedInUser);
-    const questions = await Question.getQuestions(loggedInUser, id);
-    const election = await Election.getElectionDetails(loggedInUser, id);
-    const electionId = election.id;
-    const voters = await Voter.getVoters(electionId);
-    if (request.accepts("html")) {
-      response.render("electionDetailsPage", {
-        title: "Election Details",
-        admin,
-        election,
-        questions,
-        voters,
-
-        csrfToken: request.csrfToken(),
-      });
-    } else {
-      response.json({
-        election,
-      });
-    }
-  }
-);
-
-// manage questions page
-app.get(
-  "/elections/:id/questions",
-  connectEnsureLogin.ensureLoggedIn(),
-  async (request, response) => {
-    const loggedInUser = request.user.id;
-    const id = request.params.id;
-    const admin = await Admin.getAdminDetails(loggedInUser);
-    const questions = await Question.getQuestions(loggedInUser, id);
-    const election = await Election.getElectionDetails(loggedInUser, id);
-
-    response.render("manageQuestions", {
-      title: "Online Voting Platform",
-      admin,
-      election,
-      questions,
-      csrfToken: request.csrfToken(),
-    });
-  }
-);
-
-//create questions page
-app.get(
-  "/elections/:id/questions/new",
-  connectEnsureLogin.ensureLoggedIn(),
-  async (request, response) => {
-    const loggedInUser = request.user.id;
-    const id = request.params.id;
-
-    const election = await Election.getElectionDetails(loggedInUser, id);
-
-    response.render("createQuestions", {
-      title: "Create Elections",
-      election,
-      csrfToken: request.csrfToken(),
-    });
-  }
-);
-
-//question details page
-app.get(
-  "/questions/:id",
-  connectEnsureLogin.ensureLoggedIn(),
-  async (request, response) => {
-    const adminId = request.user.id;
-    const id = request.params.id;
-    // const admin = await Admin.getAdminDetails(loggedInUser);
-    const question = await Question.getQuestion(adminId, id);
-    const questionId = id;
-    const electionId = question.electionId;
-    const election = await Election.getElectionDetails(adminId, electionId);
-    console.log({ election });
-    const answers = await Answer.getAnswers({ adminId, questionId });
-    response.render("questionDetailsPage", {
-      title: "Online Voting Platform",
-      //admin,
-      election,
-      question,
-      answers,
-      csrfToken: request.csrfToken(),
-    });
-  }
-);
-
-/// answers list page
-app.get(
-  "/answers",
-  connectEnsureLogin.ensureLoggedIn(),
-  async (request, response) => {
-    const loggedInUser = request.user.id;
-    const admin = await Admin.getAdminDetails(loggedInUser);
-    const elections = await Election.getElections(loggedInUser);
-    response.render("answers", {
-      title: "Online Voting Platform",
-      admin,
-      elections,
-      csrfToken: request.csrfToken(),
-    });
-  }
-);
-// app.get("/vote", async (req, res) => {
-//   //check if user is logged in
-//   // for this u need to have a middelware to return the userID
-// });
+app.get("/voterLogin", async (req, res) => {
+  //check if user is logged in
+  // for this u need to have a middelware to return the userID
+  res.render("voterLogin", {
+    title: "Online Election Platform",
+    csrfToken: req.csrfToken(),
+  });
+});
 //register user
 app.post("/admins", async (request, response) => {
   const { firstName, lastName, email, password } = request.body;
@@ -325,17 +165,22 @@ app.post("/admins", async (request, response) => {
 app.post(
   "/session",
   passport.authenticate("local", {
-    failureRedirect: "/login",
+    failureRedirect: "/voterLogin",
     failureFlash: true,
   }),
   async (request, response) => {
     //const { email, password } = request.body;
     //console.log(request.user.id);
-    response.redirect("/elections");
+    response.redirect("/");
   }
 );
 //sign out user
 app.get("/signout", (request, response, next) => {
+  response.cookie("jwt", "loggedout", {
+    expires: new Date(Date.now() + 10 * 1000),
+    httpOnly: true,
+  });
+  // res.status(200).json({ status: "success" });
   request.logOut((err) => {
     if (err) {
       return next(err);
@@ -347,9 +192,9 @@ app.get("/signout", (request, response, next) => {
 //routes
 app.use("/admins", adminRoute);
 app.use("/elections", electionRoute);
-app.use("/questions", questionsRoute);
-app.use("/answers", answersRoute);
-app.use("/voters", votersRoute);
+app.use("/questions", authenticateJwt, questionsRoute);
+app.use("/answers", authenticateJwt, answersRoute);
+app.use("/voters", authenticateJwt, votersRoute);
 
 //export application
 module.exports = app;

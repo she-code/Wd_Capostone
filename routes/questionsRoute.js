@@ -1,6 +1,6 @@
-const express = require('express')
-const connectEnsureLogin = require("connect-ensure-login");
-const questionsController = require('../controllers/questionsController')
-const router = express.Router()
-router.post('/createQuestion',connectEnsureLogin.ensureLoggedIn(),questionsController.createQuestion)
-module.exports = router
+const express = require("express");
+const questionsController = require("../controllers/questionsController");
+const router = express.Router();
+router.post("/createQuestion", questionsController.createQuestion);
+router.get("/:id", questionsController.renderQuesDetailsPAge);
+module.exports = router;
