@@ -3,10 +3,13 @@ const connectEnsureLogin = require("connect-ensure-login");
 const electionController = require("../controllers/electionsController");
 const voterController = require("../controllers/voterController");
 const authenticateJWT = require("../middelwares/authenticateJWT");
+const passIdToUrl = require("../middelwares/passUrl");
+
 const router = express.Router();
 
 router.get(
   "/:id/vote",
+  passIdToUrl,
   connectEnsureLogin.ensureLoggedIn("/voterLogin"),
   voterController.vote
 );

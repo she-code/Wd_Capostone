@@ -13,12 +13,16 @@ module.exports = (sequelize, DataTypes) => {
       Voter.belongsTo(models.Election, {
         foreignKey: "electionId",
       });
+      Voter.belongsTo(models.Admin, {
+        foreignKey: "adminId",
+      });
     }
-    static addVoter({ voter_Id, password, electionId }) {
+    static addVoter({ voter_Id, password, electionId, adminId }) {
       return this.create({
         voter_Id,
         password,
         electionId,
+        adminId,
       });
     }
     static getVoters(electionId) {

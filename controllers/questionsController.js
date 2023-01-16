@@ -1,4 +1,4 @@
-const { Question, Election, Answer } = require("../models");
+const { Question, Election, Answer, Admin } = require("../models");
 
 //create elections
 exports.createQuestion = async (req, res) => {
@@ -57,13 +57,14 @@ exports.renderQuesDetailsPAge = async (request, response) => {
 
   const election = await Election.getElectionDetails(adminId, electionId);
   const answers = await Answer.getAnswers({ adminId, questionId });
-
+  const admin = await Admin.findByPk(adminId);
   response.render("questionDetailsPage", {
     title: "Online Voting Platform",
     //admin,
     election,
     question,
     answers,
+    admin,
     csrfToken: request.csrfToken(),
   });
 };

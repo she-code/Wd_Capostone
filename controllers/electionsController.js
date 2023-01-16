@@ -135,7 +135,9 @@ exports.renderElectionDetailsPage = async (request, response) => {
   const questions = await Question.getQuestions(loggedInUser, id);
   const election = await Election.getElectionDetails(loggedInUser, id);
   const electionId = election.id;
+
   const voters = await Voter.getVoters(electionId);
+  request.voterUrl = electionId;
   if (request.accepts("html")) {
     response.render("electionDetailsPage", {
       title: "Election Details",
@@ -190,11 +192,24 @@ exports.renderVotingPage = async (request, response) => {
   const loggedInUser = request.user;
   const admin = await Admin.getAdminDetails(loggedInUser);
   const election = await Election.getElectionDetails(loggedInUser, id);
+  // const ques = await Answer.findAll({
+  //   include: [
+  //     {
+  //       model: Question,
+  //       required: true,
+  //     },
+  //   ],
+  //   where: {
+  //     questionId,
+  //   },
+  // });
+  // console.log(ques)
   //election
   //question
   //answer
   //voterId
   console.log({ election });
+  request.voterUrl = id;
   response.render("vote", {
     title: "Online Voting Platform",
     election,

@@ -43,6 +43,9 @@ module.exports = (sequelize, DataTypes) => {
         },
       });
     }
+    static getQuestionsForVoting(electionId) {
+      return this.findAll({ where: { electionId } });
+    }
   }
   Question.init(
     {

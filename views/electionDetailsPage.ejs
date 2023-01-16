@@ -6,6 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="csrf-token" content="<%= csrfToken %>" />
     <title><%=title%></title>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Jost&display=swap" rel="stylesheet">
+
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
       var token = document.querySelector('meta[name="csrf-token"]').getAttribute("content")
@@ -25,6 +28,12 @@
       }
       console.log(window.location.pathname)
       </script>
+      <style>
+        body{
+  font-family: 'Jost', sans-serif;
+
+}
+      </style>
   </head>
   <body>
     <main class=" h-screen" style="background-color: #6c6c7f24; ">
@@ -39,39 +48,39 @@
     ]%>
           <%- include('navigation.ejs',{data:data})%>
       <div class="p-8">
-        <h1 class="text-2xl font-bold text-gray-600"><%=election.title%></h1>
+        <h1 class="text-3xl font-bold text-gray-600 pb-5"><%=election.title%></h1>
 
        <div>
         <% if(election.status=="launched"){%>
-          <p>This election has launched and voters can access this URL</p>
-        <a href="/elections/<%=election.id%>/vote" class="text-blue-600 underline">https://online-election.onrender.com/elections/1/vote</a>
+          <p class="text-lg text-gray-500 ">This election has launched and voters can access this URL</p>
+        <a href="/elections/<%=election.id%>/vote" class="text-blue-600 underline text-lg">https://online-election.onrender.com/elections/<%=election.id%>/vote</a>
           <%}%>
        <% if(questions.length==0){%>
-          <p class="text-md">You haven't created any questions</p>
+          <p class="text-lg text-gray-500 ">You haven't created any questions</p>
         <%}%>
         <% if(questions.length > 0){%>
-          <p class="text-md">Your election has <%=questions.length%> questions in the ballot</p>
+          <p class="text-lg text-gray-500 ">Your election has <%=questions.length%> questions in the ballot</p>
           <%}%>
        </div>
       
       <%if(election.status == "created"){%>
-       <a href="/elections/<%=election.id%>/questions" class="text-green-600 block">Manage questions</a>
+       <a href="/elections/<%=election.id%>/questions" class="text-green-500 block text-lg font-normal">Manage questions</a>
       <%}%>
        <div>
         <% if(voters.length==0){%>
-           <p class="text-md">You haven't created any voters</p>
+           <p class="text-lg text-gray-500 ">You haven't created any voters</p>
          <%}%>
          <% if(voters.length > 0){%>
-           <p class="text-md">Your election has <%=voters.length%> registered voters</p>
+           <p class="text-lg text-gray-500 ">Your election has <%=voters.length%> registered voters</p>
            <%}%>
         </div>
-       <a href="/elections/<%=election.id%>/voters" class="text-green-600 block">Manage Voters</a>
+       <a href="/elections/<%=election.id%>/voters" class="text-green-500 block text-lg font-normal">Manage Voters</a>
        <%if(election.status == "created"){%>
-        <a href=""onclick="updateElection('<%=election.id%>')" class="text-green-600 block">Launch election</a>
+        <a href=""onclick="updateElection('<%=election.id%>')" class="text-green-500 block text-lg font-normal">Launch election</a>
         <%}%>
         <%if(election.status == "launched"){%>
-          <a href="/preview" class="text-green-600 block">Preview Results</a>
-          <a href="/end" class="text-green-600 block">End election</a>
+          <a href="/preview" class="text-green-500 block text-lg font-normal">Preview Results</a>
+          <a href="/end" class="text-green-500 block text-lg font-normal">End election</a>
 
           <%}%>
 

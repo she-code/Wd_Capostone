@@ -1,6 +1,7 @@
-const { Voter, Election } = require("../models");
+const { Voter, Election, Question, Answer } = require("../models");
 const bcrypt = require("bcrypt");
-
+const _ = require("lodash");
+const fs = require("fs");
 exports.addVoters = async (req, res) => {
   const { voter_Id, password } = req.body;
   const electionId = req.params.id;
@@ -16,16 +17,17 @@ exports.addVoters = async (req, res) => {
     //   req.flash("voter already exists");
     //   return res.redirect(`/elections/${electionId}/voters`);
     // }
-
+    const adminId = req.user;
     const voter = await Voter.addVoter({
       electionId,
       voter_Id,
       password: hashedPassword,
+      adminId,
     });
     if (!voter) {
       res.status(401).json({ status: "fail", message: "Unable to add voter" });
     }
-    console.log(voter);
+    console.log({ adminId }, voter);
     return res.redirect(`/elections/${electionId}/voters`);
   } catch (error) {
     console.log(error.message);
@@ -84,5 +86,73 @@ exports.renderVotersPage = async (req, res) => {
   }
 };
 exports.vote = async (req, res) => {
-  res.send("hi");
+  const currentVoter = req.user.id;
+  const adminId = req.user.adminId;
+  const electionId = req.user.electionId;
+
+  //check if the voter is registered for the current election
+  if (req.params.id != electionId) {
+    //todo add flash
+    return res.json("go away");
+  }
+  const election = await Election.getElectionDetails(adminId, electionId);
+  const questions = await Question.getQuestions(adminId, electionId);
+  let answers = [];
+  let grouped = [];
+  // console.log(questions);
+  for (var i in questions) {
+    answers.push(
+      await Answer.findAll({
+        where: { questionId: questions[i].id },
+        include: [
+          {
+            model: Question,
+            required: true,
+          },
+        ],
+      })
+    );
+  }
+  // for (var j in answers) {
+  //   //   // console.log(Object.keys(answers[j]));
+  //   console.log(answers[j][0].Question.title);
+  //   //   // answers[j].Question.forEach((element) => {
+  //   //   //   console.log(element);
+  //   //   // });
+  //   grouped=answers[j][0].map((e)=>{
+
+  //   })
+  //   //console.log(grouped);
+  // }
+  grouped = Object.keys(answers).map((item) => {
+    return answers[item][0];
+  });
+  const redGr = grouped.reduce((accumulate, current) => {
+    const questionId = current?.Question?.id;
+    const existing = accumulate.findIndex((item) => item.id === questionId);
+    const { ["Question"]: Question, ...answer } = current; // removes the question from the obj
+    if (existing !== -1) {
+      accumulate[existing].answers.push(answer);
+    } else {
+      accumulate.push({ ...current.Question, answers: [answer] });
+    }
+
+    return accumulate;
+  }, []);
+
+  // console.log(answers);
+  if (req.accepts("html")) {
+    res.render("vote", {
+      title: "Online Voting Platform",
+      csrfToken: req.csrfToken(),
+      election,
+      currentVoter,
+      answers,
+    });
+  } else {
+    res.json({
+      // election,
+      l: "ji",
+    });
+  }
 };

@@ -15,7 +15,7 @@ const session = require("express-session");
 dotenv.config({ path: "./config.env" });
 
 //import files
-const { Admin, Voter } = require("./models");
+const { Admin, Voter, Election, Question } = require("./models");
 const initiatePassport = require("./auth/passport/index");
 const authenticateJwt = require("./middelwares/authenticateJWT");
 
@@ -108,6 +108,25 @@ app.get("/voterLogin", async (req, res) => {
     csrfToken: req.csrfToken(),
   });
 });
+
+app.get("/vote", async (req, res) => {
+  console.log("uff", req.user.id);
+
+  const currentVoter = req.user.id;
+  const adminId = req.user.adminId;
+  const electionId = req.user.electionId;
+  const election = await Election.getElectionDetails(adminId, electionId);
+  const questions = await Question.getQuestions(adminId, election.id);
+  //get id
+  console.log({ adminId }, { questions }, { election });
+  res.render("vote", {
+    title: "Online Election Platform",
+    csrfToken: req.csrfToken(),
+    election,
+    currentVoter,
+    // questions,
+  });
+});
 //register user
 app.post("/admins", async (request, response) => {
   const { firstName, lastName, email, password } = request.body;
@@ -171,7 +190,8 @@ app.post(
   async (request, response) => {
     //const { email, password } = request.body;
     //console.log(request.user.id);
-    response.redirect("/");
+
+    response.redirect(`/elections/${global.voterUrl}/vote`);
   }
 );
 //sign out user

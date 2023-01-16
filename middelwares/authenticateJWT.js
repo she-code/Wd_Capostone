@@ -1,3 +1,5 @@
+/**This middelware authenticates jwt token by fetching it from authorization headers or cookies */
+
 const jwt = require("jsonwebtoken");
 
 const authenticateJwt = (req, res, next) => {

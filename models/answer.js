@@ -25,6 +25,19 @@ module.exports = (sequelize, DataTypes) => {
         },
       });
     }
+    static getAnsWithQuestion(questionId) {
+      return this.findAll({
+        include: [
+          {
+            model: Question,
+            required: true,
+          },
+        ],
+        where: {
+          questionId,
+        },
+      });
+    }
   }
   Answer.init(
     {

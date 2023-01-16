@@ -8,8 +8,15 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="./css/styles.css" ref="stylesheet"/>
     <title><%= title %> </title>
+   
+    <style>
+        body{
+  font-family: 'Jost', sans-serif;
+
+}
+    </style>
 <body>
-    <main class="m-8 " style="background-color: #6c6c7f24; height:90vh;">
+    <main class="h-screen" style="background-color: #6c6c7f24;">
         <%- include('header.ejs',{admin:null})%>
         <div class="sm:container mx-auto p-8 bg-white shadow-lg rounded-md" style="width: 500px; margin-top: 30px; height: 70%; width: 500px;">
             <div class="mx-auto flex  flex-col	mt-5 ">
@@ -18,20 +25,20 @@
                     <input type="hidden" name="_csrf" value="<%=csrfToken%>"/>
                    
                    <div class="py-3">
-                    <label for="email">Email</label>
+                    <label for="email"class="text-lg" >Email</label>
                     <input type="email" name="email" class="border border-gray-300 text-gray-900 rounded p-2 w-full mt-2"/>
                    </div>
                    <div class="py-3"> 
-                    <label for="password">Password</label>
+                    <label for="password" class="text-lg" >Password</label>
                     <input type="password" name="password" class="border border-gray-300 text-gray-900 rounded p-2 w-full mt-2"/>
                    </div>
                    <div class="py-3"> 
-                    <button type="submit" class="text-white bg-green-600 hover:bg-green-800 font-medium rounded px-5 py-2 w-full">SIGN IN</button>
+                    <button type="submit" class="text-white bg-green-600 hover:bg-green-800 font-semibold rounded px-5 py-2 w-full">SIGN IN</button>
                    </div>
                     
                 </form>
-                <p class="py-2 ">
-                    New here? <a href="/signup" class="text-green-600 font-bold">Sign-Up</a>
+                <p class="py-2 text-lg" >
+                    New here? <a href="/signup" class="text-green-600 font-bold text-lg">Sign-Up</a>
                   </p>
                 <%-include("errorMsg.ejs")%>
             </div>

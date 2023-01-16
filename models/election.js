@@ -30,6 +30,7 @@ module.exports = (sequelize, DataTypes) => {
         },
       });
     }
+
     static addElection({ title, adminId }) {
       return this.create({
         title: title,

@@ -29,15 +29,15 @@
         <h1 class="text-2xl font-semibold text-white text-center inline-block">My Voting App</h1>          </div>
       <%if(admin !=null){%>
      <div class="inline-block">
-      <button id="dropdownDefaultButton" data-dropdown-toggle="dropdown" class="text-white bg-black-700 hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-green-300 font-medium rounded-lg text-sm px-4 py-2.5 text-center inline-flex items-center  dark:hover:bg-green-700 dark:focus:ring-green-800" type="button"><%=admin.firstName%> <%=admin.lastName%> <svg class="w-4 h-4 ml-2" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></button>
+      <button id="dropdownDefaultButton" data-dropdown-toggle="dropdown" class="text-white bg-black-700 hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-green-300 font-medium rounded-lg text-sm px-4 py-2.5 text-center inline-flex items-center  dark:hover:bg-green-700 dark:focus:ring-green-800 text-base" type="button"><%=admin.firstName%> <%=admin.lastName%> <svg class="w-4 h-4 ml-2" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></button>
       <!-- Dropdown menu -->
       <div id="dropdown" class="z-10 hidden bg-white divide-y divide-gray-100 rounded shadow w-44 dark:bg-gray-700">
           <ul class="py-1 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownDefaultButton">
             <li>
-              <a href="#" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-black">My Profile</a>
+              <a href="#" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-black text-base">My Profile</a>
             </li>
             <li>
-              <a href="/signout" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-black">Sign out</a>
+              <a href="/signout" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-black text-base">Sign out</a>
             </li>
           </ul>
       </div>

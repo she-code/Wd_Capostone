@@ -249,3 +249,10 @@
 
             onclick="deleteElection('<%=elections[i].id%>')" 
             //toggle modal data-modal-target="popup-modal" data-modal-toggle="popup-modal"
+
+
+            <!-- <%if(ques.length>0){%>
+      <ul class="list-disc">
+       <%for(var i=0;i<ques.length;i++){%>
+         <li class="text-blue-600 ml-5"><%=ques[i].Question.title%></li>
+         <%}%>     </ul><%}%> -->

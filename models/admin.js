@@ -7,6 +7,7 @@ module.exports = (sequelize, DataTypes) => {
      * This method is not a part of Sequelize lifecycle.
      * The `models/index` file will call this method automatically.
      */
+
     static associate(models) {
       // define association here
       Admin.hasMany(models.Election, {
@@ -16,6 +17,9 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: "adminId",
       });
       Admin.hasMany(models.Answer, {
+        foreignKey: "adminId",
+      });
+      Admin.hasMany(models.Voter, {
         foreignKey: "adminId",
       });
     }

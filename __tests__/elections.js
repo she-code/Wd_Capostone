@@ -205,7 +205,7 @@ describe("Online Voting Platform", function () {
     const response = await agent
       .put(`/elections/${latestElection.id}`)
       .send({ title: "Updated title", _csrf: csrfToken });
-
+    // console.log(response.text);
     expect(true).toBe(true);
   });
 
