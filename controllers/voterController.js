@@ -1,13 +1,11 @@
-const { Voter, Election, Question, Answer } = require("../models");
-const bcrypt = require("bcrypt");
-const _ = require("lodash");
-const fs = require("fs");
+const { use } = require("passport");
+const { Voter, Election, Question, Answer, Result } = require("../models");
+const { generateHashedPassword } = require("../utils/index");
+
 exports.addVoters = async (req, res) => {
   const { voter_Id, password } = req.body;
   const electionId = req.params.id;
-  const salt = await bcrypt.genSalt(10);
-  const hashedPassword = await bcrypt.hash(password, salt);
-  console.log(req.params);
+  const hashedPassword = await generateHashedPassword(password);
 
   try {
     //check if voter already exists
@@ -85,10 +83,43 @@ exports.renderVotersPage = async (req, res) => {
     });
   }
 };
+exports.saveVotes = async (req, res) => {
+  //fetch all data from req.body
+  const { ["electionId"]: electionId, ...rest } = req.body;
+  const voter_Id = req.user?.id;
+  //check if the voter has already voted
+  const userVoted = await Result.checkVoterStatus({ electionId, voter_Id });
+  if (userVoted) {
+    res.json("U have already voted");
+    //redirect to voted page
+  }
+  //create results for each submission
+  await Promise.all(
+    Object.keys(rest).map(async (key) => {
+      await Result.addVotingResult({
+        questionId: key,
+        answerId: rest[key],
+        electionId: electionId,
+        voter_Id: voter_Id,
+      });
+    })
+  );
+  const result = await Result.findAll({ raw: true });
+  console.log(result);
+  res.redirect("back");
+};
 exports.vote = async (req, res) => {
   const currentVoter = req.user.id;
   const adminId = req.user.adminId;
   const electionId = req.user.electionId;
+  let answersWithQuestion = [];
+  let filteredAnswers = [];
+  // const userVoted = await Result.checkVoterStatus({ electionId, currentVoter });
+  // console.log(userVoted);
+  // if (userVoted) {
+  //   //redirect to voted page
+  //   res.redirect(`/elections/:${global.voterUrl}/vote`);
+  // }
 
   //check if the voter is registered for the current election
   if (req.params.id != electionId) {
@@ -97,11 +128,10 @@ exports.vote = async (req, res) => {
   }
   const election = await Election.getElectionDetails(adminId, electionId);
   const questions = await Question.getQuestions(adminId, electionId);
-  let answers = [];
-  let grouped = [];
-  // console.log(questions);
+
+  //include questions table to answers (inner join)
   for (var i in questions) {
-    answers.push(
+    answersWithQuestion.push(
       await Answer.findAll({
         where: { questionId: questions[i].id },
         include: [
@@ -113,41 +143,40 @@ exports.vote = async (req, res) => {
       })
     );
   }
-  // for (var j in answers) {
-  //   //   // console.log(Object.keys(answers[j]));
-  //   console.log(answers[j][0].Question.title);
-  //   //   // answers[j].Question.forEach((element) => {
-  //   //   //   console.log(element);
-  //   //   // });
-  //   grouped=answers[j][0].map((e)=>{
 
-  //   })
-  //   //console.log(grouped);
-  // }
-  grouped = Object.keys(answers).map((item) => {
-    return answers[item][0];
-  });
-  const redGr = grouped.reduce((accumulate, current) => {
+  //extract the anwsers from the given data it's in [[{}],[{}]] format
+  for (var l = 0; l < answersWithQuestion.length; l++) {
+    for (var j = 0; j < answersWithQuestion[l].length; j++) {
+      var innerValue = answersWithQuestion[l][j];
+      filteredAnswers.push(innerValue);
+    }
+  }
+
+  //parse the data
+  let stringifiedData = JSON.stringify(filteredAnswers);
+  let parsedData = JSON.parse(stringifiedData);
+
+  //group by question id
+  const groupedByQuestion = parsedData.reduce((accumulate, current) => {
     const questionId = current?.Question?.id;
     const existing = accumulate.findIndex((item) => item.id === questionId);
+    // eslint-disable-next-line no-unused-vars
     const { ["Question"]: Question, ...answer } = current; // removes the question from the obj
     if (existing !== -1) {
       accumulate[existing].answers.push(answer);
     } else {
       accumulate.push({ ...current.Question, answers: [answer] });
     }
-
     return accumulate;
   }, []);
 
-  // console.log(answers);
   if (req.accepts("html")) {
     res.render("vote", {
       title: "Online Voting Platform",
       csrfToken: req.csrfToken(),
       election,
       currentVoter,
-      answers,
+      groupedByQuestion,
     });
   } else {
     res.json({

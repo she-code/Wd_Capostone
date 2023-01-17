@@ -40,15 +40,15 @@
       <%-include('header.ejs',{admin:admin})%>
         <div class="  sm:container mx-auto p-10 bg-white shadow-lg rounded-md "
           style=" margin: 30px auto; height: 75%; width: 65%;">
-          <div class="mx-auto">
+          <div class="mx-auto mt-5" style="width: max-content;">
           <%
           var data=[
     {label:"Home",url:"/elections",current:false},
     {label:`${election.title}`,url:`/elections/${election.id}`,current:true}
     ]%>
           <%- include('navigation.ejs',{data:data})%>
-      <div class="p-8">
-        <h1 class="text-3xl font-bold text-gray-600 pb-5"><%=election.title%></h1>
+      <div >
+        <h1 class="text-3xl font-bold text-gray-600 pb-5 text-center"><%=election.title%></h1>
 
        <div>
         <% if(election.status=="launched"){%>

@@ -10,6 +10,9 @@ module.exports = (sequelize, DataTypes) => {
       Answer.belongsTo(models.Question, {
         foreignKey: "questionId",
       });
+      Answer.hasMany(models.Result, {
+        foreignKey: "answerId",
+      });
     }
     static addAnswers({ adminId, content, questionId }) {
       return this.create({

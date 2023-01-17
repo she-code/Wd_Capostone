@@ -16,6 +16,9 @@ module.exports = (sequelize, DataTypes) => {
       Voter.belongsTo(models.Admin, {
         foreignKey: "adminId",
       });
+      Voter.hasOne(models.Result, {
+        foreignKey: "voter_Id",
+      });
     }
     static addVoter({ voter_Id, password, electionId, adminId }) {
       return this.create({

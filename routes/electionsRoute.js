@@ -13,6 +13,11 @@ router.get(
   connectEnsureLogin.ensureLoggedIn("/voterLogin"),
   voterController.vote
 );
+router.post(
+  "/:id/vote/analyze",
+
+  voterController.saveVotes
+);
 router.use(authenticateJWT);
 router.get("/", electionController.renderElectionsPage);
 router.post(
