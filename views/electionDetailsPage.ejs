@@ -10,7 +10,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
       var token = document.querySelector('meta[name="csrf-token"]').getAttribute("content")
-      function updateElection(id){
+      function launchElection(id){
          // let compelete = false
           fetch(`/elections/${id}/launch`,{
               method:'put',
@@ -24,7 +24,21 @@
               }
           }).catch((err)=>console.log(err))
       }
-      console.log(window.location.pathname)
+      function endElection(id){
+         // let compelete = false
+          fetch(`/elections/${id}/end`,{
+              method:'put',
+              headers:{"Content-Type":"application/json"},
+              body:JSON.stringify({
+                  _csrf:token
+              })
+          }).then((res)=>{
+              if(res.ok){
+                  window.location.reload();
+              }
+          }).catch((err)=>console.log(err))
+      }
+      
       </script>
      
   </head>
@@ -73,11 +87,11 @@
 
         </div>
        <%if(election.status == "created"){%>
-        <a href=""onclick="updateElection('<%=election.id%>')" class="text-green-500 block text-lg font-normal hover:text-green-700 hover:font-semibold">Launch election</a>
+        <a href=""onclick="launchElection('<%=election.id%>')" class="text-green-500 block text-lg font-normal hover:text-green-700 hover:font-semibold">Launch election</a>
         <%}%>
         <%if(election.status == "launched"){%>
-          <a href="/preview" class="text-green-500 block text-lg font-normal hover:text-green-700 hover:font-semibold">Preview Results</a>
-          <a href="/end" class="text-green-500 block text-lg font-normal hover:text-green-700 hover:font-semibold">End election</a>
+          <a href="/elections/<%=election.id%>/preview" class="text-green-500 block text-lg font-normal hover:text-green-700 hover:font-semibold">Preview Results</a>
+          <a href="" onclick="endElection('<%=election.id%>')" class="text-green-500 block text-lg font-normal hover:text-green-700 hover:font-semibold">End election</a>
 
           <%}%>
           <%-include("errorMsg.ejs")%>

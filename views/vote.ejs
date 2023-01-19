@@ -42,9 +42,8 @@
           <%if(election.status=="created" ){%>
             <p>The election is not avilable for voting</p>
           <%}%>
-          <%if(election.status=="ended" ){%>
-            <p>The election is not ended</p>
-          <%}%>
+         
+          
           <%if(election.status=="launched" ){%>
             <%if(currentVoter.voterStatus == "voted"){%>
                   <p>You have voted</p>

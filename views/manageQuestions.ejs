@@ -34,7 +34,8 @@
         method: 'delete',
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          _csrf: token
+          _csrf: token,
+          electionId:<%-JSON.stringify(election.id)%>
         })
       }).then((res) => {
         if (res.ok) {

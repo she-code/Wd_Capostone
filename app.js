@@ -99,12 +99,6 @@ app.get("/login", (request, response) => {
     csrfToken: request.csrfToken(),
   });
 });
-app.get("/previewResults", (request, response) => {
-  response.render("chart", {
-    title: "Online Voting Platform",
-    csrfToken: request.csrfToken(),
-  });
-});
 
 app.get("/voterLogin", async (req, res) => {
   //check if user is logged in
@@ -114,7 +108,22 @@ app.get("/voterLogin", async (req, res) => {
     csrfToken: req.csrfToken(),
   });
 });
-
+app.get("/forgotPassword", async (req, res) => {
+  //check if user is logged in
+  // for this u need to have a middelware to return the userID
+  res.render("forgotPassword", {
+    title: "Online Election Platform",
+    csrfToken: req.csrfToken(),
+  });
+});
+app.get("/resetPassword", async (req, res) => {
+  //check if user is logged in
+  // for this u need to have a middelware to return the userID
+  res.render("resetPassword", {
+    title: "Online Election Platform",
+    csrfToken: req.csrfToken(),
+  });
+});
 app.get("/vote", async (req, res) => {
   console.log("uff", req.user.id);
 

@@ -1,5 +1,8 @@
 const { Admin } = require("../models");
 const bcrypt = require("bcrypt");
+const crypto = require("crypto");
+const { Op } = require("sequelize");
+const Email = require("./../utils/email");
 
 const { generateJwtToken, generateHashedPassword } = require("../utils/index");
 //register admin
@@ -70,6 +73,9 @@ exports.register = async (request, response) => {
     if (process.env.NODE_ENV == "production") cookieOPtions.secure = true;
 
     response.cookie("jwt", token, cookieOPtions);
+    const url = `${request.protocol}://${request.get("host")}/me`;
+    // console.log(url);
+    await new Email(admin, url).sendWelcome();
 
     request.logIn(admin, (err) => {
       if (err) {
@@ -119,31 +125,31 @@ exports.login = async (request, response) => {
     const admin = await Admin.findOne({ where: { email } });
     if (!admin) {
       request.flash("error", "No user found");
+      response.redirect("/login");
     }
-    const passWordCorrect = await generateHashedPassword(
-      password,
-      admin.password
-    );
+    const passWordCorrect = await bcrypt.compare(password, admin.password);
     if (!passWordCorrect) {
       request.flash("error", "Incorrect password");
     }
-    const token = generateJwtToken(admin.id, "voter");
+    if (passWordCorrect) {
+      const token = generateJwtToken(admin.id, "voter");
 
-    const cookieOPtions = {
-      expires: new Date(
-        Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000
-      ),
-      httpOnly: true,
-    };
-    if (process.env.NODE_ENV == "production") cookieOPtions.secure = true;
+      const cookieOPtions = {
+        expires: new Date(
+          Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000
+        ),
+        httpOnly: true,
+      };
+      if (process.env.NODE_ENV == "production") cookieOPtions.secure = true;
 
-    response.cookie("jwt", token, cookieOPtions);
-    request.logIn(admin, (err) => {
-      if (err) {
-        console.log("from", err);
-      }
-      response.redirect("/elections");
-    });
+      response.cookie("jwt", token, cookieOPtions);
+      request.logIn(admin, (err) => {
+        if (err) {
+          console.log("from", err);
+        }
+        response.redirect("/elections");
+      });
+    }
   } catch (error) {
     console.log(error.message);
   }
@@ -186,4 +192,82 @@ exports.getAllAdmins = async (req, res) => {
       admins,
     });
   }
+};
+
+//forgot password
+exports.forgotPassword = async (req, res, next) => {
+  const { email } = req.body;
+  //get the user by email
+  const admin = await Admin.findOne({ where: { email } });
+  if (!admin) {
+    return next("no user");
+  }
+  //create hashed token
+  const resetToken = admin.createPasswordResetToken();
+  //update admin
+  await admin.save();
+
+  const resetUrl = `${req.protocol}://${req.get(
+    "host"
+  )}/admins/resetPassword/${resetToken}`;
+  await new Email(admin, resetUrl).sendPasswordReset();
+  if (!admin) {
+    req.flash("error", "No user found with this email");
+  }
+
+  req.flash(
+    "success",
+    "An email to reset your password has been sent please check your inbox"
+  );
+  res.redirect("back");
+};
+
+exports.resetPassword = async (req, res, next) => {
+  //get user based on token
+  const hashedToken = crypto
+    .createHash("sha256")
+    .update(req.params.token)
+    .digest("hex");
+
+  const admin = await Admin.findOne({
+    where: {
+      passwordResetToken: hashedToken,
+
+      PasswordResetExpires: {
+        [Op.gt]: Date.now(),
+      },
+    },
+  });
+  if (!admin) {
+    return next("no user found");
+  }
+  //update user
+  const hashedPassword = await generateHashedPassword(req.body.password);
+  admin.password = hashedPassword;
+  admin.passwordResetToken = "undefined";
+  admin.PasswordResetExpires = null;
+  await admin.save();
+  const token = generateJwtToken(admin.id, "admin");
+  const cookieOPtions = {
+    expires: new Date(
+      Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000
+    ),
+    httpOnly: true,
+  };
+  if (process.env.NODE_ENV == "production") cookieOPtions.secure = true;
+
+  res.cookie("jwt", token, cookieOPtions);
+  // const url = `${req.protocol}://${req.get("host")}/me`;
+  // // console.log(url);
+  // await new Email(admin, url).sendWelcome();
+  req.logIn(admin, (err) => {
+    if (err) {
+      console.log("from", err);
+    }
+    res.redirect("/elections");
+  });
+  //res.send(admin);
+  //check if token has expired
+  //update chagedPasswordAt
+  //log the user,send jwt
 };

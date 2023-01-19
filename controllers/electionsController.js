@@ -7,6 +7,7 @@ const {
   Result,
 } = require("../models");
 const { fn, col } = require("sequelize");
+
 //get elections
 exports.getElections = async (req, res) => {
   const loggedInUser = req.user;
@@ -57,7 +58,7 @@ exports.createElection = async (req, res) => {
 };
 
 //change the status of election to launch election
-exports.launchElection = async (req, res) => {
+exports.launchElection = async (req, res, next) => {
   const electionId = req.params.id;
   const adminId = req.user;
   let answersWithQuestion = [];
@@ -100,9 +101,10 @@ exports.launchElection = async (req, res) => {
       );
       return;
     }
-    const updatedElection = await election.updateElectionStatus();
+    const updatedElection = await election.updateElectionStatus("launched");
     if (!updatedElection) {
       console.log("error");
+      return next();
     }
     console.log(updatedElection);
     return res.json(updatedElection);
@@ -113,6 +115,21 @@ exports.launchElection = async (req, res) => {
       status: "fail",
       message: error.message,
     });
+  }
+};
+//end election
+exports.endElection = async (req, res, next) => {
+  const electionId = req.params.id;
+  const adminId = req.user;
+  try {
+    const election = await Election.getElectionDetails(adminId, electionId);
+    const updatedElection = await election.updateElectionStatus("ended");
+    if (!updatedElection) {
+      return next("Cant update");
+    }
+    return res.json(updatedElection);
+  } catch (error) {
+    console.log(error.message);
   }
 };
 //delete election
@@ -238,6 +255,8 @@ exports.renderCreateQuesPage = async (request, response) => {
 };
 
 //render result page
+
+//render result page
 exports.previewResults = async (req, res) => {
   const electionId = req.params.id;
   const result = await Result.findAll({
@@ -300,6 +319,7 @@ exports.previewResults = async (req, res) => {
   for (const key in dataPie) {
     console.log(dataPie[key]);
   }
+  console.log(parR);
   //get election
   const admin = req.user;
   const election = await Election.getElectionDetails(admin, electionId);

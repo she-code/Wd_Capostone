@@ -1,5 +1,6 @@
 "use strict";
 const { Model } = require("sequelize");
+const crypto = require("crypto");
 module.exports = (sequelize, DataTypes) => {
   class Admin extends Model {
     /**
@@ -33,6 +34,17 @@ module.exports = (sequelize, DataTypes) => {
     }
     static async getAllAdmins() {
       return Admin.findAll();
+    }
+    createPasswordResetToken() {
+      const resetToken = crypto.randomBytes(32).toString("hex");
+      this.passwordResetToken = crypto
+        .createHash("sha256")
+        .update(resetToken)
+        .digest("hex");
+      console.log({ resetToken }, this.passwordResetToken);
+
+      this.PasswordResetExpires = Date.now() + 10 * 60 * 1000;
+      return resetToken;
     }
   }
   Admin.init(
@@ -80,8 +92,12 @@ module.exports = (sequelize, DataTypes) => {
         validate: {
           notNull: true,
           notEmpty: true,
+          len: 8,
         },
       },
+      passwordChangedAt: DataTypes.DATE,
+      passwordResetToken: DataTypes.STRING,
+      PasswordResetExpires: DataTypes.DATE,
     },
     {
       sequelize,

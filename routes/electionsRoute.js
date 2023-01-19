@@ -33,6 +33,7 @@ router.delete("/:id", electionController.deleteElection);
 router.put("/:id", electionController.updateElectionTitle);
 router.get("/:id/voters", voterController.renderVotersPage);
 router.put("/:id/launch", electionController.launchElection);
+router.put("/:id/end", electionController.endElection);
 router.get("/:id/preview", electionController.previewResults);
 router.post("/:id/preview", resultController.previewResult);
 

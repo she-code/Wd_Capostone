@@ -68,18 +68,28 @@ exports.renderQuesDetailsPAge = async (request, response) => {
     csrfToken: request.csrfToken(),
   });
 };
-
 //delete question
-exports.deleteQuestion = async (req, res) => {
+exports.deleteQuestion = async (req, res, next) => {
   //get qId & adminId
+  const { electionId } = req.body;
   const questionId = req.params.id;
   const adminId = req.user;
-
+  console.log(electionId);
   try {
+    const Questions = await Question.getQuestions(adminId, electionId);
+
+    console.log(Questions.length);
+    //todo add message
+    if (Questions.length <= 1) {
+      // req.flash("error", "You cant ");
+      // res.redirect(`/elections/${electionId}`);
+      return next("You cant delete");
+    }
     await Question.deleteQuestion(questionId, adminId);
     return res.json(true);
   } catch (error) {
     console.log(error.message);
     req.flash("error", "Can't delete question ");
+    res.redirect("back");
   }
 };
