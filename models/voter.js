@@ -31,6 +31,17 @@ module.exports = (sequelize, DataTypes) => {
     static getVoters(electionId) {
       return this.findAll({ where: { electionId } });
     }
+    updateVoterStatus(status) {
+      return this.update({ voterStatus: status });
+    }
+    static async deleteVoter(id, adminId) {
+      return this.destroy({
+        where: {
+          id,
+          adminId,
+        },
+      });
+    }
   }
   Voter.init(
     {
@@ -67,7 +78,13 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
         defaultValue: "voter",
       },
+      voterStatus: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        defaultValue: "created",
+      },
     },
+
     {
       sequelize,
       modelName: "Voter",

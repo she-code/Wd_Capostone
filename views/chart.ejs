@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="csrf-token" content="<%= csrfToken %>" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+
+  <title>
+    <%=title%>
+  </title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    $(document).ready(function () {
+
+      const element = document.getElementById("select1")
+      const ck = element.options[element.selectedIndex].value
+      var x = 0;
+
+    })
+    function myFunction() {
+      x = document.getElementById("select1").value;
+      console.log(x)
+    }
+    var token = document.querySelector('meta[name="csrf-token"]').getAttribute("content")
+
+
+  // document.getElementById("demo").innerHTML = "You selected: " + x;
+
+    // element.addEventListener("change", e => {
+    //   value = e.target.value
+    //   console.log(ck)
+    //   console.log({value})
+    //   // fetch('/elections/<%=election.id%>/preview', {
+    //   //   method: 'post',
+    //   //   headers: { "Content-Type": "application/json" },
+    //   //   body: JSON.stringify({
+    //   //     questionId: value,
+    //   //     _csrf: token
+    //   //   })
+    //   // }).then((res) => {
+    //   //   if (res.ok) {
+    //   //     window.location.reload();
+    //   //   }
+    //   // }).catch((err) => console.log(err))
+
+    // })
+
+  </script>
+  <style>
+    tr:nth-child(even) {
+      background: rgb(204 204 204 / 20%);
+    }
+
+    body {
+      font-family: 'Jost', sans-serif;
+
+    }
+
+    tr:hover {
+      background: #c2c2c278;
+    }
+  </style>
+
+</head>
+
+<body>
+  <main class=" h-screen pb-5" style="background-color: #6c6c7f24; ">
+    <%-include('header.ejs',{admin:null})%>
+      <div class="  sm:container mx-auto p-10 bg-white shadow-lg rounded-md "
+        style=" margin: 30px auto; height: 75%; width: 75%;">
+        <div class="mx-auto">
+          <% var data=[ {label:"Home",url:"/elections",current:true} ] %>
+            <%- include('navigation.ejs',{data:data})%>
+              <div class="flex justify-between">
+                <p class="py-2 text-2xl font-bold text-gray-600">
+                  <%=election.title%>
+                </p>
+                <form method="get" action="/results">
+                  <input type="hidden" name="_csrf" value="<%=csrfToken%>" />
+                  <select id="select1" name="selectedQuestion" onchange="this.form.submit()">
+                    <%for(var i=0;i< questions.length;i++){%>
+                      <a href="">
+                        <option value="<%=questions[i].id%>">Question <%=i+1%>
+                        </option>
+                      </a>
+                      <%}%>
+                  </select>
+
+                </form>
+
+
+              </div>
+              <div class="shadow-lg rounded-lg overflow-hidden " style="    height: 35%;
+                width: 40%;">
+                <div class="py-3 px-5 bg-gray-50">Pie chart</div>
+                <canvas class="p-10" id="chartPie"></canvas>
+              </div>
+              <%var arr=[]; var labels=[]; var backgroundColor=[ "rgb(133, 105, 241)" , "rgb(164, 101, 241)"
+                , "rgb(101, 143, 241)" , "rgb(101, 143, 231)" , ]; 
+                %>
+                <% parR.forEach((element)=> {
+
+                  arr.push(element.votes)
+                  labels.push(element.Answer.content)
+                  %>
+                  <p>
+                    <%=element.answerId%>
+                  </p>
+                  <%}) %>
+                 
+
+<%var dataPie = {
+  labels: labels,
+  datasets: [
+    {
+      label: "My First Dataset",
+      data: arr,
+      backgroundColor: backgroundColor,
+      hoverOffset: 4,
+    },
+  ],
+};%>
+
+<% const configPie = {
+  type: "pie",
+  data: dataPie,
+  options: {},
+};%>
+                      <!-- Required chart.js -->
+
+
+        </div>
+      </div>
+  </main>
+  <!-- Chart pie -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+  var str = JSON.stringify('<%=configPie%>')
+  var co = JSON.parse(str)
+  var chartBar = new Chart(document.getElementById("chartPie"),<%-JSON.parse(configPie) %>);
+  
+</script>
+</body>
+
+</html>

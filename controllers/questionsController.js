@@ -68,3 +68,18 @@ exports.renderQuesDetailsPAge = async (request, response) => {
     csrfToken: request.csrfToken(),
   });
 };
+
+//delete question
+exports.deleteQuestion = async (req, res) => {
+  //get qId & adminId
+  const questionId = req.params.id;
+  const adminId = req.user;
+
+  try {
+    await Question.deleteQuestion(questionId, adminId);
+    return res.json(true);
+  } catch (error) {
+    console.log(error.message);
+    req.flash("error", "Can't delete question ");
+  }
+};

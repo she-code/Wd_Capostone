@@ -1,7 +1,14 @@
-const { use } = require("passport");
-const { Voter, Election, Question, Answer, Result } = require("../models");
+const {
+  Voter,
+  Election,
+  Question,
+  Answer,
+  Result,
+  Admin,
+} = require("../models");
 const { generateHashedPassword } = require("../utils/index");
 
+//registers voters
 exports.addVoters = async (req, res) => {
   const { voter_Id, password } = req.body;
   const electionId = req.params.id;
@@ -46,15 +53,21 @@ exports.addVoters = async (req, res) => {
     }
   }
 };
-exports.getVoters = async (req, res) => {
+
+//displays voters
+exports.renderVotersPage = async (req, res) => {
   const electionId = req.params.id;
   const voters = await Voter.getVoters(electionId);
   const adminId = req.user;
   const election = await Election.getElectionDetails(adminId, electionId);
+  const admin = await Admin.getAdminDetails(adminId);
+
+  //return result
   if (req.accepts("html")) {
     res.render("displayVoters", {
       voters,
       election,
+      admin,
       title: "Online Voting Platform",
       csrfToken: req.csrfToken(),
     });
@@ -65,37 +78,22 @@ exports.getVoters = async (req, res) => {
   }
 };
 
-exports.renderVotersPage = async (req, res) => {
-  const electionId = req.params.id;
-  const voters = await Voter.getVoters(electionId);
-  const adminId = req.user;
-  const election = await Election.getElectionDetails(adminId, electionId);
-  if (req.accepts("html")) {
-    res.render("displayVoters", {
-      voters,
-      election,
-      title: "Online Voting Platform",
-      csrfToken: req.csrfToken(),
-    });
-  } else {
-    res.json({
-      voters,
-    });
-  }
-};
+//saves voting results
 exports.saveVotes = async (req, res) => {
   //fetch all data from req.body
-  const { ["electionId"]: electionId, ...rest } = req.body;
+  // eslint-disable-next-line no-unused-vars
+  const { ["_csrf"]: _csrf, ["electionId"]: electionId, ...rest } = req.body;
   const voter_Id = req.user?.id;
-  //check if the voter has already voted
-  const userVoted = await Result.checkVoterStatus({ electionId, voter_Id });
-  if (userVoted) {
-    res.json("U have already voted");
-    //redirect to voted page
+  const voter = await Voter.findByPk(req.user.id);
+
+  //check of voter already voted
+  if (voter.status == "voted") {
+    return res.json("You have already voted");
   }
   //create results for each submission
   await Promise.all(
     Object.keys(rest).map(async (key) => {
+      console.log(rest[key]);
       await Result.addVotingResult({
         questionId: key,
         answerId: rest[key],
@@ -104,28 +102,22 @@ exports.saveVotes = async (req, res) => {
       });
     })
   );
-  const result = await Result.findAll({ raw: true });
-  console.log(result);
+  //update voter status
+  await voter.updateVoterStatus("voted");
+
+  // const result = await Result.findAll({ raw: true });
+  // console.log(result);
   res.redirect("back");
 };
-exports.vote = async (req, res) => {
-  const currentVoter = req.user.id;
-  const adminId = req.user.adminId;
-  const electionId = req.user.electionId;
+
+//renders voting page
+exports.renderVotingPage = async (req, res) => {
+  const currentVoter = req.user;
+  const adminId = currentVoter.adminId;
+  const electionId = currentVoter.electionId;
   let answersWithQuestion = [];
   let filteredAnswers = [];
-  // const userVoted = await Result.checkVoterStatus({ electionId, currentVoter });
-  // console.log(userVoted);
-  // if (userVoted) {
-  //   //redirect to voted page
-  //   res.redirect(`/elections/:${global.voterUrl}/vote`);
-  // }
-
-  //check if the voter is registered for the current election
-  if (req.params.id != electionId) {
-    //todo add flash
-    return res.json("go away");
-  }
+  //u might need to remove the admin id
   const election = await Election.getElectionDetails(adminId, electionId);
   const questions = await Question.getQuestions(adminId, electionId);
 
@@ -170,6 +162,7 @@ exports.vote = async (req, res) => {
     return accumulate;
   }, []);
 
+  //return the result
   if (req.accepts("html")) {
     res.render("vote", {
       title: "Online Voting Platform",
@@ -183,5 +176,22 @@ exports.vote = async (req, res) => {
       // election,
       l: "ji",
     });
+  }
+};
+
+//update voter
+
+//delete voter
+exports.deleteVoter = async (req, res) => {
+  const id = req.params.id;
+  const adminId = req.user;
+  console.log(adminId);
+  try {
+    await Voter.deleteVoter(id, adminId);
+    return res.json(true);
+  } catch (error) {
+    console.log(error.message);
+    req.flash("error", "Can't process you request");
+    res.redirect("back");
   }
 };

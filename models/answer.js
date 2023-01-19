@@ -12,6 +12,7 @@ module.exports = (sequelize, DataTypes) => {
       });
       Answer.hasMany(models.Result, {
         foreignKey: "answerId",
+        onDelete: "CASCADE",
       });
     }
     static addAnswers({ adminId, content, questionId }) {
@@ -41,6 +42,17 @@ module.exports = (sequelize, DataTypes) => {
         },
       });
     }
+    updateAnswerContent(content) {
+      return this.update(content);
+    }
+    static async deleteAnswer(id, adminId) {
+      return this.destroy({
+        where: {
+          id,
+          adminId,
+        },
+      });
+    }
   }
   Answer.init(
     {
@@ -49,8 +61,7 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
         validate: {
           notNull: true,
-          notEmpty: true,
-          len: 3,
+          len: 2,
         },
       },
     },

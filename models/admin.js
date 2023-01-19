@@ -12,15 +12,19 @@ module.exports = (sequelize, DataTypes) => {
       // define association here
       Admin.hasMany(models.Election, {
         foreignKey: "adminId",
+        onDelete: "CASCADE",
       });
       Admin.hasMany(models.Question, {
         foreignKey: "adminId",
+        onDelete: "CASCADE",
       });
       Admin.hasMany(models.Answer, {
         foreignKey: "adminId",
+        onDelete: "CASCADE",
       });
       Admin.hasMany(models.Voter, {
         foreignKey: "adminId",
+        onDelete: "CASCADE",
       });
     }
 

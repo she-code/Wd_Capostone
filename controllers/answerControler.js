@@ -4,8 +4,9 @@ const { Answer, Admin, Election } = require("../models");
 exports.createAnswer = async (req, res) => {
   //get adminId from req.user
   //get electionId from req.body
+  const { content, questionId } = req.body;
+
   try {
-    const { content, questionId } = req.body;
     const adminId = req.user;
     console.log(req.body, adminId);
     const answer = await Answer.addAnswers({
@@ -24,11 +25,21 @@ exports.createAnswer = async (req, res) => {
     console.log(answer);
     return res.redirect(`/questions/${questionId}`);
   } catch (error) {
-    console.log(error);
-    res.status(501).json({
-      status: "fail",
-      message: error.message,
-    });
+    console.log(error.message);
+
+    if (error.name === "SequelizeValidationError") {
+      for (var key in error.errors) {
+        console.log(error.errors[key].message);
+
+        if (error.errors[key].message === "Validation len on content failed") {
+          req.flash(
+            "error",
+            "Option's content must contain atleast 3 characters"
+          );
+        }
+      }
+    }
+    res.redirect(`/questions/${questionId}`);
   }
 };
 
@@ -59,4 +70,21 @@ exports.renderAnswersPage = async (request, response) => {
     elections,
     csrfToken: request.csrfToken(),
   });
+};
+
+//update answer
+
+//delete answer
+exports.deleteAnswer = async (req, res) => {
+  const id = req.params.id;
+  const adminId = req.user;
+  console.log(adminId);
+  try {
+    await Answer.deleteAnswer(id, adminId);
+    return res.json(true);
+  } catch (error) {
+    console.log(error.message);
+    req.flash("error", "Can't process you request");
+    res.redirect("back");
+  }
 };

@@ -1,5 +1,12 @@
-const { Election, Admin, Voter, Question } = require("../models");
-
+const {
+  Election,
+  Admin,
+  Voter,
+  Question,
+  Answer,
+  Result,
+} = require("../models");
+const { fn, col } = require("sequelize");
 //get elections
 exports.getElections = async (req, res) => {
   const loggedInUser = req.user;
@@ -15,7 +22,8 @@ exports.getElections = async (req, res) => {
     });
   }
 };
-//create elections
+
+//creates elections
 exports.createElection = async (req, res) => {
   try {
     const { title } = req.body;
@@ -51,15 +59,54 @@ exports.createElection = async (req, res) => {
 //change the status of election to launch election
 exports.launchElection = async (req, res) => {
   const electionId = req.params.id;
+  const adminId = req.user;
+  let answersWithQuestion = [];
+  let error = false;
+
   try {
-    const election = await Election.findByPk(electionId);
-    console.log({ election });
+    const election = await Election.getElectionDetails(adminId, electionId);
+    //console.log({ election });
+    //check if every question contains atleast two answers
+    const questions = await Question.getQuestions(adminId, electionId);
+    for (var i in questions) {
+      answersWithQuestion.push(
+        await Answer.findAll({
+          where: { questionId: questions[i].id },
+          include: [
+            {
+              model: Question,
+              required: true,
+            },
+          ],
+        })
+      );
+    }
+    //extract the anwsers from the given data it's in [[{}],[{}]] format
+    for (var l = 0; l < answersWithQuestion.length; l++) {
+      console.log(answersWithQuestion[l].length);
+      if (answersWithQuestion[l].length < 2) {
+        error = true;
+      }
+    }
+    //todo add flash message
+    if (error) {
+      // req.flash(
+      //   "error",
+      //   "Every question in an election must have atleast two answers"
+      // );
+      // res.redirect("back");
+      console.log(
+        "Every question in an election must have atleast two answers"
+      );
+      return;
+    }
     const updatedElection = await election.updateElectionStatus();
     if (!updatedElection) {
       console.log("error");
     }
     console.log(updatedElection);
     return res.json(updatedElection);
+    // res.send("hi");
   } catch (error) {
     console.log(error.message);
     res.status(501).json({
@@ -86,10 +133,13 @@ exports.deleteElection = async (req, res) => {
 exports.updateElectionTitle = async (req, res) => {
   const { title } = req.body;
   const id = req.params.id;
-
+  console.log(id);
   try {
-    const election = Election.findByPk(id);
+    const election = await Election.findByPk(id);
     const updatedElection = await election.updateElectionTitle(title);
+    console.log(title, election);
+
+    // res.json(updatedElection);
     res.json(updatedElection);
   } catch (error) {
     console.log(error.message);
@@ -186,34 +236,84 @@ exports.renderCreateQuesPage = async (request, response) => {
     csrfToken: request.csrfToken(),
   });
 };
-//create questions page
-exports.renderVotingPage = async (request, response) => {
-  const id = request.params.id;
-  const loggedInUser = request.user;
-  const admin = await Admin.getAdminDetails(loggedInUser);
-  const election = await Election.getElectionDetails(loggedInUser, id);
-  // const ques = await Answer.findAll({
-  //   include: [
-  //     {
-  //       model: Question,
-  //       required: true,
-  //     },
-  //   ],
-  //   where: {
-  //     questionId,
-  //   },
-  // });
-  // console.log(ques)
-  //election
-  //question
-  //answer
-  //voterId
-  console.log({ election });
-  request.voterUrl = id;
-  response.render("vote", {
-    title: "Online Voting Platform",
-    election,
-    admin,
-    csrfToken: request.csrfToken(),
+
+//render result page
+exports.previewResults = async (req, res) => {
+  const electionId = req.params.id;
+  const result = await Result.findAll({
+    // where: { [Op.and]: [{ electionId }, { questionId }] },
+    where: { electionId },
+    include: [
+      {
+        model: Answer,
+        required: true,
+        attributes: ["content", "id"],
+      },
+      {
+        model: Question,
+        required: true,
+        attributes: ["title", "description", "id", "electionId"],
+      },
+    ],
+    attributes: [
+      "answerId",
+      "Result.questionId",
+      "Result.electionId",
+      "Answer.id",
+      "Question.id",
+      [fn("COUNT", col("voter_Id")), "votes"],
+    ],
+    group: [
+      "answerId",
+      "Result.questionId",
+      "Result.electionId",
+      "Question.id",
+      "Answer.id",
+    ],
   });
+  const labels = [];
+  const votes = [];
+  const backgroundColor = [
+    "rgb(133, 105, 241)",
+    "rgb(164, 101, 241)",
+    "rgb(101, 143, 241)",
+    "rgb(101, 143, 231)",
+  ];
+  const strR = JSON.stringify(result);
+  const parR = JSON.parse(strR);
+  parR.forEach((element) => {
+    labels.push(element.Answer.content);
+    votes.push(element.votes);
+  });
+  var dataPie = {
+    labels: labels,
+    datasets: [
+      {
+        label: "My First Dataset",
+        data: votes,
+        backgroundColor: backgroundColor,
+        hoverOffset: 4,
+      },
+    ],
+  };
+  console.log(dataPie);
+  for (const key in dataPie) {
+    console.log(dataPie[key]);
+  }
+  //get election
+  const admin = req.user;
+  const election = await Election.getElectionDetails(admin, electionId);
+  const questions = await Question.getQuestions(admin, electionId);
+
+  if (req.accepts("html")) {
+    res.render("previewResult", {
+      election,
+      questions,
+      parR,
+      title: "Online Voting Platform",
+      csrfToken: req.csrfToken(),
+    });
+  } else {
+    res.send("electionss");
+  }
 };

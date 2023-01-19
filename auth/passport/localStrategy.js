@@ -11,10 +11,19 @@ const strategy = new localStrategy(
     Voter.findOne({ where: { voter_Id: voter_Id } })
       .then(async (voter) => {
         if (!voter) {
-          return done(null, false, { message: "No Voter found" });
+          return done(null, false, {
+            message: "No Voter found with this voter Id",
+          });
+        }
+        //check if the voter is registered for this election
+        if (voter.electionId != global.voterUrl) {
+          return done(null, false, {
+            message: "You are not registered for this election",
+          });
         }
         const result = await bcrypt.compare(password, voter.password);
         if (result) {
+          console.log(voter);
           return done(null, voter);
         } else {
           return done(null, false, { message: "Invalid password" });

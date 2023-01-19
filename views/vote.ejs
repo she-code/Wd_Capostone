@@ -39,36 +39,47 @@
           <h1 class="text-3xl font-semibold text-gray-600">
             <%=election.title%>
           </h1>
-          <% if(groupedByQuestion.length>0){%>
-            <form action="/elections/<%=election.id%>/vote/analyze" method="post">
-              <input type="hidden" name="_csrf" value="<%=csrfToken%>" />
-              <input type="hidden" name="electionId" value="<%=election.id%>" />
+          <%if(election.status=="created" ){%>
+            <p>The election is not avilable for voting</p>
+          <%}%>
+          <%if(election.status=="ended" ){%>
+            <p>The election is not ended</p>
+          <%}%>
+          <%if(election.status=="launched" ){%>
+            <%if(currentVoter.voterStatus == "voted"){%>
+                  <p>You have voted</p>
+            <%}%>
+            
+            <%if(currentVoter.voterStatus == "created"){%>
+                <% if(groupedByQuestion.length>0){%>
+                    <form action="/elections/<%=election.id%>/vote/analyze" method="post">
+                      <input type="hidden" name="_csrf" value="<%=csrfToken%>" />
+                      <input type="hidden" name="electionId" value="<%=election.id%>" />
 
-              <%for(var i=0; i<groupedByQuestion.length;i++){%>
-                <div>
-                  <p><span>
-                      <%=i+1 %>
-                    </span>
-                    <%=groupedByQuestion[i].title%>
-                  </p>
-                </div>
-                <div>
-                  <%for(var l=0; l< groupedByQuestion[i].answers.length;l++) {%>
-                    <input type="radio" name='<%=groupedByQuestion[i].id%>'
-                      value='<%=groupedByQuestion[i].answers[l]["id"]%>'>
-                    <label for='<%=groupedByQuestion[i].id%>'>
-                      <%=groupedByQuestion[i].answers[l]["content"]%>
-                    </label>
-                    <% }%>
-                      <%}%>
-                </div>
+                      <%for(var i=0; i<groupedByQuestion.length;i++){%>
+                        <div>
+                          <p><span>
+                              <%=i+1 %>
+                            </span>
+                            <%=groupedByQuestion[i].title%>
+                          </p>
+                        </div>
+                        <div>
+                          <%for(var l=0; l< groupedByQuestion[i].answers.length;l++) {%>
+                            <input type="radio" name='<%=groupedByQuestion[i].id%>'
+                              value='<%=groupedByQuestion[i].answers[l]["id"]%>'>
+                            <label for='<%=groupedByQuestion[i].id%>'>
+                              <%=groupedByQuestion[i].answers[l]["content"]%>
+                            </label>
+                            <% }%>
+                              <%}%>
+                        </div>
 
-                <button type="submit" class="bg-green-600 py-2 px-3 text-white">Vote</button>
-            </form>
-            <% }%>
-              <%if(groupedByQuestion.length ==0){%>
-                <p>You have voted</p>
-                <%}%>
+                        <button type="submit" class="bg-green-600 py-2 px-3 text-white">Vote</button>
+                    </form>
+                  <% }%>
+             <%}%>  
+           <%}%>
         </div>
       </div>
       </div>

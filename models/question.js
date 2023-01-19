@@ -18,9 +18,11 @@ module.exports = (sequelize, DataTypes) => {
       });
       Question.hasMany(models.Answer, {
         foreignKey: "questionId",
+        onDelete: "CASCADE",
       });
       Question.hasMany(models.Result, {
         foreignKey: "questionId",
+        onDelete: "CASCADE",
       });
     }
     static addQuestion({ title, description, adminId, electionId }) {
@@ -48,6 +50,14 @@ module.exports = (sequelize, DataTypes) => {
     }
     static getQuestionsForVoting(electionId) {
       return this.findAll({ where: { electionId } });
+    }
+    static deleteQuestion(id, adminId) {
+      return this.destroy({
+        where: {
+          id,
+          adminId,
+        },
+      });
     }
   }
   Question.init(

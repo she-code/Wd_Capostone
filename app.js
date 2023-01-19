@@ -25,7 +25,7 @@ const electionRoute = require("./routes/electionsRoute");
 const questionsRoute = require("./routes/questionsRoute");
 const answersRoute = require("./routes/answerRoute");
 const votersRoute = require("./routes/votersRoute");
-
+const resultsRoute = require("./routes/resultsRoute");
 // create express application
 const app = express();
 
@@ -96,6 +96,12 @@ app.get("/signup", (request, response) => {
 app.get("/login", (request, response) => {
   response.render("login", {
     title: "Login",
+    csrfToken: request.csrfToken(),
+  });
+});
+app.get("/previewResults", (request, response) => {
+  response.render("chart", {
+    title: "Online Voting Platform",
     csrfToken: request.csrfToken(),
   });
 });
@@ -214,7 +220,8 @@ app.use("/admins", adminRoute);
 app.use("/elections", electionRoute);
 app.use("/questions", authenticateJwt, questionsRoute);
 app.use("/answers", authenticateJwt, answersRoute);
-app.use("/voters", authenticateJwt, votersRoute);
+app.use("/voters", votersRoute);
+app.use("/results", resultsRoute);
 
 //export application
 module.exports = app;

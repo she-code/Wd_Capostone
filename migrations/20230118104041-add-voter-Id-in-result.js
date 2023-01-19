@@ -3,20 +3,21 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.addColumn("Voters", "adminId", {
+    await queryInterface.addColumn("Results", "voter_Id", {
       type: Sequelize.DataTypes.INTEGER,
     });
-    await queryInterface.addConstraint("Voters", {
-      fields: ["adminId"],
+    await queryInterface.addConstraint("Results", {
+      fields: ["voter_Id"],
       type: "foreign key",
+      onDelete: "CASCADE",
       references: {
-        table: "Admins",
+        table: "Voters",
         field: "id",
       },
     });
   },
 
   async down(queryInterface, Sequelize) {
-    await queryInterface.removeColumn("Voters", "adminId");
+    await queryInterface.removeColumn("Results", "voter_Id");
   },
 };

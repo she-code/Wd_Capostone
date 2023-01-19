@@ -13,12 +13,12 @@ const authenticateJwt = (req, res, next) => {
     token = req.cookies.jwt;
   }
   if (!token) {
-    return next("you are not logged in");
+    return res.redirect("/");
   }
   jwt.verify(token, process.env.JWT_SECRET, (err, verifiedJwt) => {
     if (err) {
       console.log(err);
-      res.status(400).json({ error: err.message });
+      res.redirect("/");
     } else {
       req.user = verifiedJwt.id;
       req.userType = verifiedJwt.userType;
