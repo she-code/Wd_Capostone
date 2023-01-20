@@ -54,7 +54,9 @@
       <div class="  sm:container mx-auto p-10 bg-white shadow-lg rounded-md "
         style=" margin: 30px auto; height: 75%; width: 75%;">
         <div class="mx-auto">
-          <% var data=[ {label:"Home",url:"/elections",current:true} ] %>
+          <% var data=[ {label:"Home",url:"/elections",current:false},
+          {label:`${election.title}`,url:`/elections/${election.id}`,current:false},
+          {label:`Preview Results`,url:`/elections/${election.id}/preview`,current:true} ] %>
             <%- include('navigation.ejs',{data:data})%>
               <div class="flex justify-between">
                 <p class="py-2 text-2xl font-bold text-gray-600">

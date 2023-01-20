@@ -39,10 +39,17 @@ module.exports = (sequelize, DataTypes) => {
         },
       });
     }
-
-    static addElection({ title, adminId }) {
+    static getElectionByCustStr(customString) {
+      return this.findOne({
+        where: {
+          url: customString,
+        },
+      });
+    }
+    static addElection({ title, url, adminId }) {
       return this.create({
         title: title,
+        url: url,
         adminId,
         status: "created",
       });
@@ -70,6 +77,7 @@ module.exports = (sequelize, DataTypes) => {
         validate: {
           notNull: true,
           notEmpty: true,
+          len: 2,
         },
       },
       status: {
@@ -81,6 +89,23 @@ module.exports = (sequelize, DataTypes) => {
       },
       url: {
         type: DataTypes.STRING,
+        allowNull: false,
+        validate: {
+          notNull: true,
+          notEmpty: true,
+          isUnique: (value, next) => {
+            Election.findAll({
+              where: { url: value },
+              attributes: ["id"],
+            })
+              .then((election) => {
+                if (election.length != 0)
+                  next(new Error("Elections's custom string must be unique"));
+                next();
+              })
+              .catch((onError) => console.log(onError));
+          },
+        },
       },
     },
     {

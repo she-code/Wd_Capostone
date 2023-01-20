@@ -206,7 +206,7 @@ app.post(
     //const { email, password } = request.body;
     //console.log(request.user.id);
 
-    response.redirect(`/elections/${global.voterUrl}/vote`);
+    response.redirect(`/elections/e/${global.elecIdUrl}/vote`);
   }
 );
 //sign out user

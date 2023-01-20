@@ -61,8 +61,12 @@
        <div class="mb-2">
         <% if(election.status=="launched"){%>
           <p class="text-xl text-gray-500 ">This election has launched and voters can access this URL</p>
-        <a href="/elections/<%=election.id%>/vote" class="text-blue-600 underline text-lg">https://online-election.onrender.com/elections/<%=election.id%>/vote</a>
+        <a href="/elections/e/<%=election.url%>/vote" class="text-blue-600 underline text-lg">https://online-election.onrender.com/elections/e/<%=election.url%>/vote</a>
           <%}%>
+        <% if(election.status=="ended"){%>
+          <p class="text-xl text-gray-500 ">This election has ended</p>
+          <a href="/elections/e/<%=election.url%>/vote" class="text-blue-600 underline text-lg">https://online-election.onrender.com/elections/e/<%=election.url%>/vote</a>
+        <%}%>
         </div>
        <% if(questions.length==0){%>
           <p class="text-xl text-gray-500 ">You haven't created any questions</p>
@@ -83,14 +87,21 @@
          <% if(voters.length > 0){%>
            <p class="text-xl text-gray-500 ">Your election has <span class="text-gray-900 font-semibold"><%=voters.length%></span> registered voters</p>
            <%}%>
+           <%if(election.status == "launched" || election.status == "created"){%>
+
            <a href="/elections/<%=election.id%>/voters" class="text-green-500 block text-lg font-normal hover:text-green-700 hover:font-semibold">Manage voters</a>
+           <%}%>
 
         </div>
        <%if(election.status == "created"){%>
         <a href=""onclick="launchElection('<%=election.id%>')" class="text-green-500 block text-lg font-normal hover:text-green-700 hover:font-semibold">Launch election</a>
         <%}%>
-        <%if(election.status == "launched"){%>
+        <%if(election.status == "launched" || election.status == "ended"){%>
           <a href="/elections/<%=election.id%>/preview" class="text-green-500 block text-lg font-normal hover:text-green-700 hover:font-semibold">Preview Results</a>
+
+          <%}%>
+
+        <%if(election.status == "launched"){%>
           <a href="" onclick="endElection('<%=election.id%>')" class="text-green-500 block text-lg font-normal hover:text-green-700 hover:font-semibold">End election</a>
 
           <%}%>

@@ -1,18 +1,21 @@
+/**This routes handles any requests starting with /elections */
 const express = require("express");
-const connectEnsureLogin = require("connect-ensure-login");
 const electionController = require("../controllers/electionsController");
 const voterController = require("../controllers/voterController");
 const resultController = require("../controllers/resultController");
 
 const authenticateJWT = require("../middelwares/authenticateJWT");
 const passIdToUrl = require("../middelwares/passUrl");
+const checkElectionStatus = require("../middelwares/checkElectionStatus");
 const router = express.Router();
 
 router.get(
-  "/:id/vote",
+  "/e/:customString/vote",
+  checkElectionStatus,
   passIdToUrl,
-  connectEnsureLogin.ensureLoggedIn("/voterLogin"),
-  voterController.renderVotingPage
+  //connectEnsureLogin.ensureLoggedIn("/voterLogin"),
+  electionController.renderVotingPage
+  // voterController.renderVotingPage
 );
 router.post(
   "/:id/vote/analyze",

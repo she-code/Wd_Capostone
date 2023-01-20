@@ -36,7 +36,11 @@
                     <input type="text" name="title" class="border border-gray-300 text-gray-900 rounded p-2 w-full mt-2"/>
                 </div>
                 <div class="p-3">
-                    <button type="submit" class="text-white bg-green-600 hover:bg-green-800 font-medium rounded px-5 py-2 w-full">Submit</button>
+                  <label for="customString" class="text-gray-900 text-lg py-2">What's the custom string for the election?</label>
+                  <input type="text" name="customString" class="border border-gray-300 text-gray-900 rounded p-2 w-full mt-2"/>
+              </div>
+                <div class="p-3">
+                    <button type="submit" class="text-white bg-green-600 hover:bg-green-800 font-medium rounded px-5 py-2 w-full">SUBMIT</button>
                 </div>
             </form>
             <%-include("errorMsg.ejs")%>

@@ -28,10 +28,11 @@ exports.getElections = async (req, res) => {
 //creates elections
 exports.createElection = async (req, res) => {
   try {
-    const { title } = req.body;
+    const { title, customString } = req.body;
     const adminId = req.user;
     const election = await Election.addElection({
       title: title,
+      url: customString,
       status: "created",
       adminId,
     });
@@ -43,6 +44,7 @@ exports.createElection = async (req, res) => {
     }
     return res.redirect(`/elections/${election.id}`);
   } catch (error) {
+    console.log(error.message);
     if (error.name === "SequelizeValidationError") {
       for (var key in error.errors) {
         console.log(error.errors[key].message);
@@ -51,6 +53,15 @@ exports.createElection = async (req, res) => {
           error.errors[key].message === "Validation notEmpty on title failed"
         ) {
           req.flash("error", "Title can't be empty");
+        }
+        if (error.errors[key].message === "Validation notEmpty on url failed") {
+          req.flash("error", "Custom string can't be empty");
+        }
+        if (
+          error.errors[key].message ===
+          "Elections's custom string must be unique"
+        ) {
+          req.flash("error", "Elections's custom string must be unique");
         }
       }
     }
@@ -70,6 +81,9 @@ exports.launchElection = async (req, res, next) => {
     //console.log({ election });
     //check if every question contains atleast two answers
     const questions = await Question.getQuestions(adminId, electionId);
+    if (questions.length < 1) {
+      return next("Yo cant launch with one election");
+    }
     for (var i in questions) {
       answersWithQuestion.push(
         await Answer.findAll({
@@ -255,8 +269,77 @@ exports.renderCreateQuesPage = async (request, response) => {
   });
 };
 
-//render result page
+//render vote page
+exports.renderVotingPage = async (req, res) => {
+  //req.user might be empty
+  const currentVoter = req.user;
 
+  let answersWithQuestion = [];
+  let filteredAnswers = [];
+  // //u might need to remove the admin id
+  const election = await Election.getElectionByCustStr(global.elecIdUrl);
+  const questions = await Question.findAll({
+    where: { electionId: election.id },
+  });
+  //console.log(election, questions);
+
+  // include questions table to answers (inner join)
+  for (var i in questions) {
+    answersWithQuestion.push(
+      await Answer.findAll({
+        where: { questionId: questions[i].id },
+        include: [
+          {
+            model: Question,
+            required: true,
+          },
+        ],
+      })
+    );
+  }
+
+  //extract the anwsers from the given data it's in [[{}],[{}]] format
+  for (var l = 0; l < answersWithQuestion.length; l++) {
+    for (var j = 0; j < answersWithQuestion[l].length; j++) {
+      var innerValue = answersWithQuestion[l][j];
+      filteredAnswers.push(innerValue);
+    }
+  }
+
+  // //parse the data
+  let stringifiedData = JSON.stringify(filteredAnswers);
+  let parsedData = JSON.parse(stringifiedData);
+
+  //group by question id
+  const groupedByQuestion = parsedData.reduce((accumulate, current) => {
+    const questionId = current?.Question?.id;
+    const existing = accumulate.findIndex((item) => item.id === questionId);
+    // eslint-disable-next-line no-unused-vars
+    const { ["Question"]: Question, ...answer } = current; // removes the question from the obj
+    if (existing !== -1) {
+      accumulate[existing].answers.push(answer);
+    } else {
+      accumulate.push({ ...current.Question, answers: [answer] });
+    }
+    return accumulate;
+  }, []);
+
+  // //return the result
+  if (req.accepts("html")) {
+    res.render("vote", {
+      title: "Online Voting Platform",
+      csrfToken: req.csrfToken(),
+      election,
+      currentVoter,
+      groupedByQuestion,
+    });
+  } else {
+    res.json({
+      // election,
+      l: "ji",
+    });
+  }
+};
 //render result page
 exports.previewResults = async (req, res) => {
   const electionId = req.params.id;

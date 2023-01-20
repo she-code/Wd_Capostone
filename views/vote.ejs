@@ -43,13 +43,16 @@
             <p>The election is not avilable for voting</p>
           <%}%>
          
-          
+          <%if(election.status=="ended" ){%>
+            <p>The election has ended</p>
+          <%}%>
           <%if(election.status=="launched" ){%>
+            <%if(currentVoter != null){%>
             <%if(currentVoter.voterStatus == "voted"){%>
                   <p>You have voted</p>
-            <%}%>
+            <%}}%>
             
-            <%if(currentVoter.voterStatus == "created"){%>
+            <%if(currentVoter != null && currentVoter.voterStatus == "created"){%>
                 <% if(groupedByQuestion.length>0){%>
                     <form action="/elections/<%=election.id%>/vote/analyze" method="post">
                       <input type="hidden" name="_csrf" value="<%=csrfToken%>" />

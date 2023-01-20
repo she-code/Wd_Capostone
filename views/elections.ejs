@@ -97,6 +97,7 @@ body{
                     <tr class="flex w-full mb-4">
                       <th class='px-4 py-2 w-1/4 text text-lg'>No.</th>
                       <th class='px-4 py-2 w-1/3 text-lg'>Election Name</th>
+                      <th class='px-4 py-2 w-1/3 text-lg'>Custom String</th>
                       <th class='px-4 py-2 w-1/4 text-lg'>Actions</th>
                     </tr>
                   </thead>
@@ -114,6 +115,9 @@ body{
                             <%=elections[i].title%>
                           </a>
                         </td>
+                          <td class="p-4 w-1/4 text-lg">
+                            <%=elections[i].url%>
+                          </td>
                         <td class="p-4 w-1/4">
                           <div class="flex justify-between">
                             <button data-modal-target="authentication-modal-<%=elections[i].id%>" data-modal-toggle="authentication-modal">
