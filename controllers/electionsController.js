@@ -162,20 +162,28 @@ exports.deleteElection = async (req, res) => {
 };
 
 //edit election
-exports.updateElectionTitle = async (req, res) => {
-  const { title } = req.body;
+exports.updateElection = async (req, res, next) => {
+  const { title, url } = req.body;
   const id = req.params.id;
-  console.log(id);
+  console.log(req.body);
   try {
+    if (!election) {
+      return next("no election found");
+    }
     const election = await Election.findByPk(id);
-    const updatedElection = await election.updateElectionTitle(title);
-    console.log(title, election);
+    const updatedElection = await election.update({
+      title: title,
+      url: url,
+    });
+    // const updatedElection = await election.updateElection({title:title,url:customString});
+    console.log(updatedElection);
 
     // res.json(updatedElection);
     res.json(updatedElection);
   } catch (error) {
     console.log(error.message);
-    req.flash("error", "Can't process you request");
+    req.flash("error", "Can't process your request");
+    res.redirect("back");
   }
 };
 
@@ -263,6 +271,20 @@ exports.renderCreateQuesPage = async (request, response) => {
   console.log({ election });
   response.render("createQuestions", {
     title: "Create Questions",
+    election,
+    admin,
+    csrfToken: request.csrfToken(),
+  });
+};
+//edit election page
+exports.renderUpdateElecPage = async (request, response) => {
+  const id = request.params.id;
+  const loggedInUser = request.user;
+  const admin = await Admin.getAdminDetails(loggedInUser);
+  const election = await Election.getElectionDetails(loggedInUser, id);
+  console.log({ election });
+  response.render("editElectionPage", {
+    title: "Update Election",
     election,
     admin,
     csrfToken: request.csrfToken(),
@@ -400,4 +422,34 @@ exports.previewResults = async (req, res) => {
   } else {
     res.send("electionss");
   }
+};
+exports.saveVotes = async (req, res) => {
+  //fetch all data from req.body
+  // eslint-disable-next-line no-unused-vars
+  const { ["_csrf"]: _csrf, ["electionId"]: electionId, ...rest } = req.body;
+  const voter_Id = req.user?.id;
+  const voter = await Voter.findByPk(req.user.id);
+
+  //check of voter already voted
+  if (voter.status == "voted") {
+    return res.json("You have already voted");
+  }
+  //create results for each submission
+  await Promise.all(
+    Object.keys(rest).map(async (key) => {
+      console.log(rest[key]);
+      await Result.addVotingResult({
+        questionId: key,
+        answerId: rest[key],
+        electionId: electionId,
+        voter_Id: voter_Id,
+      });
+    })
+  );
+  //update voter status
+  await voter.updateVoterStatus("voted");
+
+  // const result = await Result.findAll({ raw: true });
+  // console.log(result);
+  res.redirect("back");
 };

@@ -30,12 +30,13 @@ const user = async (agent, username, password) => {
   });
   return response;
 };
-const createElection = async (agent) => {
+const createElection = async (agent, title, url) => {
   const res = await agent.get("/elections/createElections/new");
   const csrfToken = extractCsrfToken(res);
   // eslint-disable-next-line no-unused-vars
   const response = await agent.post("/elections/createElection").send({
-    title: "Class rep",
+    title: title,
+    url: url,
     _csrf: csrfToken,
   });
   // console.log(response)
@@ -78,6 +79,7 @@ describe("Online Voting Platform", function () {
     //  console.log(res.text)
     const response = await agent.post("/elections/createElection").send({
       title: "Class rep",
+      url: "class202",
       _csrf: csrfToken,
     });
     expect(response.statusCode).toBe(302);
@@ -87,7 +89,14 @@ describe("Online Voting Platform", function () {
     //create new agent
     const agent = request.agent(server);
     await login(agent, "test@gmail.com", "12345678");
-    await createElection(agent);
+    // await createElection(agent);
+    let res = await agent.get("/elections/createElections/new");
+    let csrfToken = extractCsrfToken(res);
+    await agent.post("/elections/createElection").send({
+      title: "Class rep",
+      url: "class22",
+      _csrf: csrfToken,
+    });
     const groupedTodosResponse = await agent
       .get("/elections")
       .set("Accept", "application/json");
@@ -96,8 +105,8 @@ describe("Online Voting Platform", function () {
     const electionsCount = parsedGroupedResponse.elections.length;
     const latestElection = parsedGroupedResponse.elections[electionsCount - 1];
 
-    let res = await agent.get(`/elections/${latestElection.id}/questions/new`);
-    let csrfToken = extractCsrfToken(res);
+    res = await agent.get(`/elections/${latestElection.id}/questions/new`);
+    csrfToken = extractCsrfToken(res);
 
     const question = await agent.post("/questions/createQuestion").send({
       title: "Who should we choose?",
@@ -112,7 +121,7 @@ describe("Online Voting Platform", function () {
     //create new agent
     const agent = request.agent(server);
     await login(agent, "test@gmail.com", "12345678");
-    await createElection(agent);
+    await createElection(agent, "class 301", "301");
     const groupedTodosResponse = await agent
       .get("/elections")
       .set("Accept", "application/json");
@@ -139,7 +148,7 @@ describe("Online Voting Platform", function () {
     //create new agent
     const agent = request.agent(server);
     await login(agent, "test@gmail.com", "12345678");
-    await createElection(agent);
+    await createElection(agent, "class 303", "303");
     const groupedTodosResponse = await agent
       .get("/elections")
       .set("Accept", "application/json");
@@ -191,7 +200,7 @@ describe("Online Voting Platform", function () {
   test("Update an election based on given Id", async () => {
     const agent = request.agent(server);
     await login(agent, "test@gmail.com", "12345678");
-    await createElection(agent);
+    await createElection(agent, "class 304", "304");
     const groupedTodosResponse = await agent
       .get("/elections")
       .set("Accept", "application/json");
@@ -213,7 +222,7 @@ describe("Online Voting Platform", function () {
   test("Delete an election of a given Id", async () => {
     const agent = request.agent(server);
     await login(agent, "test@gmail.com", "12345678");
-    await createElection(agent);
+    await createElection(agent, "class 305", "305");
     const groupedTodosResponse = await agent
       .get("/elections")
       .set("Accept", "application/json");
@@ -246,5 +255,6 @@ describe("Online Voting Platform", function () {
 });
 
 //Todo
+
 // test signout
 //

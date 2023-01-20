@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="csrf-token" content="<%= csrfToken %>" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+
+    <title>
+        <%=title%>
+    </title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+
+    </style>
+</head>
+
+<body>
+    <main class=" h-screen pb-5" style="background-color: #6c6c7f24; ">
+        <%-include('header.ejs',{admin:null})%>
+            <div class="  sm:container mx-auto  bg-white shadow-lg rounded-md  p-10 flex flex-col justify-center" id="content" 
+                style=" margin: 30px auto; height: 75%; width: 75%;">
+               
+                    <div class="container flex flex-col justify-center mx-auto " style="width: max-content;">
+                        <h1 class="text-4xl font-bold text-red-900 align-center">404</h1>
+                      <p class="text-3xl align-center">The page you are looking for is not found</p>
+                    </div>
+
+            </div>
+    </main>
+</body>
+
+</html>

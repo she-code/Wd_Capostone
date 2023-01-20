@@ -232,5 +232,13 @@ app.use("/answers", authenticateJwt, answersRoute);
 app.use("/voters", votersRoute);
 app.use("/results", resultsRoute);
 
+//handles non existing paths
+app.all("*", (req, res, next) => {
+  // console.log(req.originalUrl);
+  res.render("pageNotFound", {
+    title: "Online Voting Platform",
+    csrfToken: req.csrfToken(),
+  });
+});
 //export application
 module.exports = app;

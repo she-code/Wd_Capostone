@@ -20,7 +20,7 @@ router.get(
 router.post(
   "/:id/vote/analyze",
 
-  voterController.saveVotes
+  electionController.saveVotes
 );
 
 router.use(authenticateJWT);
@@ -32,7 +32,7 @@ router.post(
 );
 router.post("/:id/voters", voterController.addVoters);
 router.delete("/:id", electionController.deleteElection);
-router.put("/:id", electionController.updateElectionTitle);
+router.put("/:id", electionController.updateElection);
 router.get("/:id/voters", voterController.renderVotersPage);
 router.put("/:id/launch", electionController.launchElection);
 router.put("/:id/end", electionController.endElection);
@@ -40,6 +40,8 @@ router.get("/:id/preview", electionController.previewResults);
 router.post("/:id/preview", resultController.previewResult);
 
 router.get("/:id", electionController.renderElectionDetailsPage);
+router.get("/:id/edit", electionController.renderUpdateElecPage);
+
 router.get("/createElections/new", electionController.renderCreateElecPage);
 router.get("/:id/questions", electionController.renderManageQuesPage);
 router.get("/:id/questions/new", electionController.renderCreateQuesPage);

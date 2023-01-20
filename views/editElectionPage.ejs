@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="csrf-token" content="<%= csrfToken %>" />
+    <title>
+        <%=title%>
+    </title>
+    <script src="https://cdn.tailwindcss.com"></script>
+   <script>        var token = document.querySelector('meta[name="csrf-token"]').getAttribute("content")
+</script>
+</head>
+
+<body>
+    <main class=" h-screen" style="background-color: #6c6c7f24; ">
+        <%-include('header.ejs',{admin:admin})%>
+            <div class="  sm:container mx-auto p-10 bg-white shadow-lg rounded-md "
+                style=" margin: 30px auto; height: 75%; width: 65%;">
+                <div class="mx-auto">
+                    <% var data=[ {label:"Home",url:"/elections",current:false},
+                        {label:`${election.title}`,url:`/elections/${election.id}`,current:false}, {label:`New
+                        Question`,url:`/elections/${election.id}/edit`,current:true}, ] %>
+                        <%- include('navigation.ejs',{data:data})%>
+                            <div class="p-8 mx-auto flex flex-col align-center justify-center" style="width: 500px;">
+
+                                <h1 class="text-gray-600 text-2xl font-semibold text-center">Edit Election</h1>
+                                <form id="update_user">
+                                    <input type="hidden" name="_csrf" value="<%=csrfToken%>" id="csrf"/>
+                                    <input type="hidden" name="electionId" value="<%=election.id%>" id="electionId"/>
+                                    <div class="p-3">
+                                        <label for="title" class="text-gray-600 text-lg py-2">Title</label>
+                                        <input type="text" name="title" id="title"
+                                            class="border border-gray-300 text-gray-900 rounded p-2 w-full mt-2"
+                                            value="<%=election.title%>" />
+                                    </div>
+                                    <div class="p-3">
+                                        <label for="customString" class="text-gray-600 text-lg py-2">Custom
+                                            String</label>
+                                        <input type="text" name="customString" value="<%=election.url%>"
+                                            id="customString"
+                                            class="border border-gray-300 text-gray-900 rounded p-2 w-full mt-2" />
+                                    </div>
+                                    <div class="p-3">
+                                        <button type="submit" id="submitBtn"
+                                            class="text-white bg-green-600 hover:bg-green-800 font-medium rounded px-5 py-2 w-full">SUBMIT</button>
+                                    </div>
+                                </form>
+                                <%-include("errorMsg.ejs")%>
+
+                            </div>
+                </div>
+            </div>
+    </main>
+    <script>
+        let title, customString, form, submitBtn,id,csrf,electionId;
+
+             title = document.getElementById('title').value
+            submitBtn = document.getElementById('submitBtn')
+            customString = document.getElementById('customString').value
+            form = document.getElementById('update_user')
+            csrf = document.getElementById('csrf').value
+            electionId=document.getElementById('electionId').value
+        // form.addEventListener('submit', (e) => {
+        //         e.preventDefault()
+        //     })
+      
+        submitBtn.addEventListener('click', (e) => {
+            e.preventDefault()
+            console.log({title},{customString},{csrf},{electionId})
+            fetch(`/elections/${electionId}`, {
+                method: 'put',
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    title:title,
+                    url:customString,
+                    _csrf: csrf
+                })
+            }).then((res) => {
+                if (res.ok) {
+                    window.location.reload();
+                }
+            }).catch((err) => console.log(err))
+        })
+
+       
+        
+    </script>
+</body>
+
+</html>

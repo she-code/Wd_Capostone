@@ -10,11 +10,6 @@ router.post(
   voterController.addVoters
 );
 
-router.get(
-  "/:id/vote",
-  connectEnsureLogin.ensureLoggedIn("/voterLogin"),
-  voterController.renderVotingPage
-);
 router.get("/", async (req, res) => {
   const voter = await Voter.findAll({ raw: true });
   res.send(voter);
