@@ -7,6 +7,7 @@ const {
   Result,
 } = require("../models");
 const { fn, col } = require("sequelize");
+const { encode } = require("../utils");
 
 //get elections
 exports.getElections = async (req, res) => {
@@ -202,7 +203,7 @@ exports.renderElectionDetailsPage = async (request, response) => {
   const questions = await Question.getQuestions(loggedInUser, id);
   const election = await Election.getElectionDetails(loggedInUser, id);
   const electionId = election.id;
-
+  const urlId = encode(electionId);
   const voters = await Voter.getVoters(electionId);
   request.voterUrl = electionId;
   if (request.accepts("html")) {
@@ -212,7 +213,7 @@ exports.renderElectionDetailsPage = async (request, response) => {
       election,
       questions,
       voters,
-
+      urlId,
       csrfToken: request.csrfToken(),
     });
   } else {
@@ -292,34 +293,14 @@ exports.previewResults = async (req, res) => {
   });
   const labels = [];
   const votes = [];
-  const backgroundColor = [
-    "rgb(133, 105, 241)",
-    "rgb(164, 101, 241)",
-    "rgb(101, 143, 241)",
-    "rgb(101, 143, 231)",
-  ];
+
   const strR = JSON.stringify(result);
   const parR = JSON.parse(strR);
   parR.forEach((element) => {
     labels.push(element.Answer.content);
     votes.push(element.votes);
   });
-  var dataPie = {
-    labels: labels,
-    datasets: [
-      {
-        label: "My First Dataset",
-        data: votes,
-        backgroundColor: backgroundColor,
-        hoverOffset: 4,
-      },
-    ],
-  };
-  console.log(dataPie);
-  for (const key in dataPie) {
-    console.log(dataPie[key]);
-  }
-  console.log(parR);
+
   //get election
   const admin = req.user;
   const election = await Election.getElectionDetails(admin, electionId);

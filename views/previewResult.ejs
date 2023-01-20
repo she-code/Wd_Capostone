@@ -26,7 +26,6 @@
     function myFunction() {
       x = document.getElementById("select1").value;
       console.log(x)
-      console.log(toArr)
     }
     var token = document.querySelector('meta[name="csrf-token"]').getAttribute("content")
 
@@ -110,10 +109,10 @@ var chart = anychart.pie();
 
 // set the chart title
 chart.title("<%=election.title%>");
-var f=<%-JSON.stringify(arr)%>
-console.log(f)
+var chartData=<%-JSON.stringify(arr)%>
+console.log(chartData)
 // add the data
-chart.data(f);
+chart.data(chartData);
 
 // display the chart in the container
 chart.container('container');

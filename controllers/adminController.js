@@ -58,16 +58,16 @@ exports.register = async (request, response) => {
   try {
     const admin = await Admin.create({
       firstName: firstName,
+
       lastName: lastName,
       email: email,
       password: hashedPwd,
     });
     // const token = generateJwtToken(user.id, "admin");
     const token = generateJwtToken(admin.id, "admin");
+    //  const JWT_COOKIE_EXPIRES_IN = 90d;
     const cookieOPtions = {
-      expires: new Date(
-        Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000
-      ),
+      expiresIn: "60d",
       httpOnly: true,
     };
     if (process.env.NODE_ENV == "production") cookieOPtions.secure = true;
@@ -75,7 +75,7 @@ exports.register = async (request, response) => {
     response.cookie("jwt", token, cookieOPtions);
     const url = `${request.protocol}://${request.get("host")}/me`;
     // console.log(url);
-    await new Email(admin, url).sendWelcome();
+    // await new Email(admin, url).sendWelcome();
 
     request.logIn(admin, (err) => {
       if (err) {

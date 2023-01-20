@@ -116,7 +116,7 @@ body{
                         </td>
                         <td class="p-4 w-1/4">
                           <div class="flex justify-between">
-                            <button data-modal-target="authentication-modal" data-modal-toggle="authentication-modal">
+                            <button data-modal-target="authentication-modal-<%=elections[i].id%>" data-modal-toggle="authentication-modal">
                               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                                 stroke="currentColor" class="w-5 h-6 stroke-green-600">
                                 <path stroke-linecap="round" stroke-linejoin="round"
@@ -143,7 +143,7 @@ body{
 
                   <!-- Main modal -->
                   <%for(var i=0;i<elections.length;i++){%>
-                  <div id="authentication-modal" tabindex="-1" aria-hidden="true"
+                  <div id="authentication-modal-<%=elections[i].id%>" tabindex="-1" aria-hidden="true"
                     class="fixed top-0 left-0 right-0 z-50 hidden w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-modal md:h-full">
                     <div class="relative w-full h-full max-w-md md:h-auto">
                       <!-- Modal content -->

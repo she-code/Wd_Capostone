@@ -6,7 +6,6 @@ const resultController = require("../controllers/resultController");
 
 const authenticateJWT = require("../middelwares/authenticateJWT");
 const passIdToUrl = require("../middelwares/passUrl");
-const { Question } = require("../models");
 const router = express.Router();
 
 router.get(
