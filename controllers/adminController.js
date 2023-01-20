@@ -135,9 +135,8 @@ exports.login = async (request, response) => {
       const token = generateJwtToken(admin.id, "voter");
 
       const cookieOPtions = {
-        expires: new Date(
-          Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000
-        ),
+        expiresIn: "60d",
+
         httpOnly: true,
       };
       if (process.env.NODE_ENV == "production") cookieOPtions.secure = true;
@@ -249,9 +248,8 @@ exports.resetPassword = async (req, res, next) => {
   await admin.save();
   const token = generateJwtToken(admin.id, "admin");
   const cookieOPtions = {
-    expires: new Date(
-      Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000
-    ),
+    expiresIn: "60d",
+
     httpOnly: true,
   };
   if (process.env.NODE_ENV == "production") cookieOPtions.secure = true;
