@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="csrf-token" content="<%= csrfToken %>" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+
+    <title>
+        <%=title%>
+    </title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        tr:nth-child(even) {
+            background: rgb(204 204 204 / 20%);
+        }
+
+        body {
+            font-family: 'Jost', sans-serif;
+
+        }
+
+        tr:hover {
+            background: #c2c2c278;
+        }
+    </style>
+    <script>
+        var token = document.querySelector('meta[name="csrf-token"]').getAttribute("content")
+
+    </script>
+</head>
+
+<body>
+    <main class=" h-screen pb-5" style="background-color: #6c6c7f24; ">
+        <%-include('header.ejs',{admin:admin})%>
+            <div class="  sm:container mx-auto p-10 bg-white shadow-lg rounded-md "
+                style=" margin: 30px auto; height: 75%; width: 75%;">
+                <div class="mx-auto">
+
+                    <p class="text-gray-400 text-2xl fone-semibold mt-10 pl-5">Welcome, <%=admin.firstName%> You have created</p>
+                    <div class="grid grid-rows-4 grid-flow-row gap-4 pl-3">
+                    
+                        <div class="row-start-2 row-span-2 flex jusitfy-center flex-col  items-center rounded-lg shadow-lg px-5 py-8 text-white bg-green-600">
+                            <%if(elections.length>0){%>
+                            <p><span class="font-bold text-2xl "><%=elections.length%></span></p>
+                            <p>Elections</p>
+                            <%}%>
+                        </div>
+                        <div class="row-start-2 row-span-2  flex jusitfy-center flex-col items-center rounded-lg shadow-lg px-5 py-8 bg-gradient-to-r from-cyan-500 to-blue-500 text-white">
+                            <%if(questions.length>0){%>
+                                <p><span class="font-bold text-2xl "><%=questions.length%></span></p>
+                                <p>Questions</p>
+                                <%}%>
+                        </div>
+                       
+                        <div class="row-start-2 row-span-2  flex jusitfy-center flex-col items-center rounded-lg shadow-lg px-5 py-8 text-white bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 ">
+                            <%if(voters.length>0){%>
+                                <p><span class="font-bold text-2xl "><%=voters.length%></span></p>
+                                <p>Voters</p>
+                                <%}%>
+                        </div>
+                       
+                        <div class="row-start-2 row-span-2  flex jusitfy-center flex-col items-center rounded-lg shadow-lg px-5 py-8 text-white bg-green-500">
+                            <%if(answers.length>0){%>
+                                <p><span class="font-bold text-2xl "><%=answers.length%></span></p>
+                                <p>Answers</p>
+                                <%}%>
+                        </div>
+                    </div>
+                    <div class="mx-auto border-solid border-2 border-sky-500  p-8" style="width: max-content;" >
+                        <p class="text-center text-gray-600 font-semibold text-lg">Personal Information</p>
+                        <div class="grid grid-rows-2 grid-flow-row gap-6">
+                            <p class="inline-block text-gray-400 row-start-2 row-span-2">Full Name:</p>
+                            <p class="inline-block row-start-2 row-span-2"><%=admin.firstName%> <%=admin.lastName%></p>
+                        </div>
+                        <div class="grid grid-rows-2 grid-flow-row gap-6">
+                            <p class="inline-block text-gray-400 mr-5 row-start-2 row-span-2">Email:</p>
+
+                            <p class="inline-block row-start-2 row-span-2"><%=admin.email%></p>
+                        </div>
+                       
+                    </div>
+                </div>
+            </div>
+    </main>
+</body>
+
+</html>

@@ -1,8 +1,11 @@
 const express = require("express");
 const route = express.Router();
 const adminController = require("../controllers/adminController");
+const authenticateJWT = require("../middelwares/authenticateJWT");
 // route.post("/signup", adminController.signup);
 route.get("/list", adminController.getAllAdmins);
+route.get("/myProfile", authenticateJWT, adminController.getAdminDetails);
+
 route.post("/register", adminController.register);
 route.post("/login", adminController.login);
 route.post("/logout", adminController.logout);

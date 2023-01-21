@@ -2,9 +2,9 @@ const bcrypt = require("bcrypt");
 const crypto = require("crypto");
 const { Op } = require("sequelize");
 
-const { Admin } = require("../models");
+const { Admin, Election, Question, Voter, Answer } = require("../models");
 const Email = require("./../utils/email");
-
+const AppError = require("../utils/AppError");
 const { generateJwtToken, generateHashedPassword } = require("../utils/index");
 
 //creates token and saves it in cookies
@@ -106,13 +106,34 @@ exports.logout = (req, res) => {
 };
 
 // get admin details
-exports.getAdminDetails = async (req, res) => {
-  const userId = req.user.id;
-  const admin = await Admin.findByPk({ where: { id: userId } });
+exports.getAdminDetails = async (req, res, next) => {
+  const userId = req.user;
+  const admin = await Admin.findByPk(userId);
   if (!admin) {
-    res.status(404).json({ status: 404, message: "User not found" });
+    //req.flash("error", "No User found");
+    return next(new AppError("No admin found", 404));
   }
-  return admin;
+  console.log(admin);
+  const elections = await Election.getElections(admin.id);
+  const questions = await Question.findAll({ where: { adminId: admin.id } });
+  const answers = await Answer.findAll({ where: { adminId: admin.id } });
+  const voters = await Voter.findAll({ where: { adminId: admin.id } });
+
+  if (req.accepts("html")) {
+    res.render("profilePage", {
+      admin,
+      elections,
+      voters,
+      questions,
+      answers,
+      title: "My Profile",
+      csrfToken: req.csrfToken(),
+    });
+  } else {
+    res.json({
+      admin,
+    });
+  }
 };
 //get all admins
 exports.getAllAdmins = async (req, res) => {
