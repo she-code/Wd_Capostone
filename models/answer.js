@@ -22,6 +22,13 @@ module.exports = (sequelize, DataTypes) => {
         questionId,
       });
     }
+    static getAnswer({ adminId, id }) {
+      return this.findOne({
+        where: {
+          [Op.and]: [{ adminId: adminId }, { id: id }],
+        },
+      });
+    }
     static getAnswers({ adminId, questionId }) {
       return this.findAll({
         where: {

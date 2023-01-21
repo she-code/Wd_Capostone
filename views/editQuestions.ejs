@@ -22,22 +22,30 @@
                 style=" margin: 30px auto; height: 75%; width: 65%;">
                 <div class="mx-auto">
                     <% var data=[ {label:"Home",url:"/elections",current:false},
+                    {label:`${election.title}`,url:`/elections/${election.id}/questions`,current:false},
                          {label:`Edit
-                        Election`,url:`/elections/${election.id}/edit`,current:true}, ] %>
+                        Question`,url:`/questions/${question.id}/edit`,current:true}, ] %>
                         <%- include('navigation.ejs',{data:data})%>
                             <div class="p-8 mx-auto flex flex-col align-center justify-center" style="width: 500px;">
 
-                                <h1 class="text-gray-600 text-2xl font-semibold text-center">Edit Election</h1>
+                                <h1 class="text-gray-600 text-2xl font-semibold text-center">Edit Question</h1>
                                 <form id="update_user" class="form">
                                     <input type="hidden" name="_csrf" value="<%=csrfToken%>" id="_csrf" />
+                                    <input type="hidden" name="questionId" value="<%=question.id%>" id="questionId" />
                                     <input type="hidden" name="electionId" value="<%=election.id%>" id="electionId" />
+
                                     <div class="p-3">
                                         <label for="title" class="text-gray-600 text-lg py-2">Title</label>
                                         <input type="text" name="title" id="title" required minlength="2"
                                             class="border border-gray-300 text-gray-900 rounded p-2 w-full mt-2"
-                                            value="<%=election.title%>" />
+                                            value="<%=question.title%>" />
                                     </div>
-
+                                    <div class="p-3">
+                                        <label for="description" class="text-gray-600 text-lg py-2">description</label>
+                                        <input type="text" name="description" id="description" required minlength="5"
+                                            class="border border-gray-300 text-gray-900 rounded p-2 w-full mt-2"
+                                            value="<%=question.description%>" />
+                                    </div>
                                     <div class="p-3">
                                         <button type="submit" id="submitBtn"
                                             class="text-white bg-green-600 hover:bg-green-800 font-medium rounded px-5 py-2 w-full">SUBMIT</button>
@@ -54,21 +62,25 @@
         document.querySelector('.form').addEventListener('submit', e => {
             e.preventDefault()
             const title = document.getElementById('title').value
+            const description = document.getElementById('description').value
             const cs = document.getElementById('_csrf').value
-            const id = document.getElementById('electionId').value
+            const id = document.getElementById('questionId').value
+            const electionId = document.getElementById('electionId').value
+
             console.log(title, cs, id)
-            fetch(`/elections/${id}`, {
+            fetch(`/questions/${id}`, {
                 method: 'put',
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     title: title,
+                    description:description,
                     _csrf: cs
                 })
             }).then((res) => {
                 if (res.ok) {
-                    window.location.replace('/elections');
+                    window.location.replace(`/elections/${electionId}/questions`);
                 }
-            }).catch((err) => alert(err.message))
+            }).catch((err) => window.alert(err.message))
         })
 
     </script>

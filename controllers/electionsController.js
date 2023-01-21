@@ -8,11 +8,15 @@ const {
 } = require("../models");
 const { fn, col } = require("sequelize");
 const { encode } = require("../utils");
+const AppError = require("../utils/AppError");
 
 //get elections
-exports.getElections = async (req, res) => {
+exports.getElections = async (req, res, next) => {
   const loggedInUser = req.user;
   const electionss = await Election.getElections(loggedInUser);
+  if (!electionss) {
+    return next(new AppError("No elections found for this user", 404));
+  }
   if (req.accepts("html")) {
     res.render("elections", {
       electionss,
@@ -26,7 +30,7 @@ exports.getElections = async (req, res) => {
 };
 
 //creates elections
-exports.createElection = async (req, res) => {
+exports.createElection = async (req, res, next) => {
   try {
     const { title, customString } = req.body;
     const adminId = req.user;
@@ -37,10 +41,7 @@ exports.createElection = async (req, res) => {
       adminId,
     });
     if (!election) {
-      res.status(401).json({
-        status: "fail",
-        message: "Unable to create election",
-      });
+      return next(new AppError("Unable to create election", 404));
     }
     return res.redirect(`/elections/${election.id}`);
   } catch (error) {
@@ -78,11 +79,22 @@ exports.launchElection = async (req, res, next) => {
 
   try {
     const election = await Election.getElectionDetails(adminId, electionId);
-    //console.log({ election });
+    if (!election) {
+      return next(new AppError("No election found with that id", 404));
+    }
+
     //check if every question contains atleast two answers
     const questions = await Question.getQuestions(adminId, electionId);
+    // if (!questions) {
+    //   return next(new AppError("No questions found", 404));
+    // }
     if (questions.length < 1) {
-      return next("Yo cant launch with one election");
+      return next(
+        new AppError(
+          "An election must have atleast 1 question to be launched",
+          403
+        )
+      );
     }
     for (var i in questions) {
       answersWithQuestion.push(
@@ -106,20 +118,25 @@ exports.launchElection = async (req, res, next) => {
     }
     //todo add flash message
     if (error) {
-      // req.flash(
-      //   "error",
-      //   "Every question in an election must have atleast two answers"
-      // );
-      // res.redirect("back");
       console.log(
         "Every question in an election must have atleast two answers"
       );
-      return;
+      return next(
+        new AppError(
+          "Every question in an election must have atleast two answers",
+          403
+        )
+      );
     }
     const updatedElection = await election.updateElectionStatus("launched");
     if (!updatedElection) {
       console.log("error");
-      return next();
+      return next(
+        new AppError(
+          "Every question in an election must have atleast two answers",
+          403
+        )
+      );
     }
     console.log(updatedElection);
     return res.json(updatedElection);
@@ -138,10 +155,11 @@ exports.endElection = async (req, res, next) => {
   const adminId = req.user;
   try {
     const election = await Election.getElectionDetails(adminId, electionId);
-    const updatedElection = await election.updateElectionStatus("ended");
-    if (!updatedElection) {
-      return next("Cant update");
+    if (!election) {
+      return next(new AppError("No election found with that id", 404));
     }
+    const updatedElection = await election.updateElectionStatus("ended");
+
     return res.json(updatedElection);
   } catch (error) {
     console.log(error.message);
@@ -163,35 +181,34 @@ exports.deleteElection = async (req, res) => {
 
 //edit election
 exports.updateElection = async (req, res, next) => {
-  const { title, url } = req.body;
+  const { title } = req.body;
   const id = req.params.id;
   console.log(req.body);
   try {
-    if (!election) {
-      return next("no election found");
-    }
     const election = await Election.findByPk(id);
+    if (!election) {
+      return next(new AppError("No election found with that id", 404));
+    }
     const updatedElection = await election.update({
       title: title,
-      url: url,
     });
     // const updatedElection = await election.updateElection({title:title,url:customString});
     console.log(updatedElection);
 
     // res.json(updatedElection);
     res.json(updatedElection);
+    // res.redirect(`/elections`);
   } catch (error) {
     console.log(error.message);
-    req.flash("error", "Can't process your request");
-    res.redirect("back");
+    res.json(error.message);
   }
 };
-
 //render elections page
 exports.renderElectionsPage = async (request, response) => {
   const loggedInUser = request.user;
   const admin = await Admin.getAdminDetails(loggedInUser);
   const elections = await Election.getElections(loggedInUser);
+
   if (request.accepts("html")) {
     response.render("elections", {
       title: "Online Voting Platform",
@@ -218,12 +235,15 @@ exports.renderCreateElecPage = async (request, response) => {
 };
 
 //election details page
-exports.renderElectionDetailsPage = async (request, response) => {
+exports.renderElectionDetailsPage = async (request, response, next) => {
   const loggedInUser = request.user;
   const id = request.params.id;
   const admin = await Admin.getAdminDetails(loggedInUser);
   const questions = await Question.getQuestions(loggedInUser, id);
   const election = await Election.getElectionDetails(loggedInUser, id);
+  if (!election) {
+    return next(new AppError("No election found with that id", 404));
+  }
   const electionId = election.id;
   const urlId = encode(electionId);
   const voters = await Voter.getVoters(electionId);
@@ -277,12 +297,16 @@ exports.renderCreateQuesPage = async (request, response) => {
   });
 };
 //edit election page
-exports.renderUpdateElecPage = async (request, response) => {
+exports.renderUpdateElecPage = async (request, response, next) => {
   const id = request.params.id;
   const loggedInUser = request.user;
   const admin = await Admin.getAdminDetails(loggedInUser);
   const election = await Election.getElectionDetails(loggedInUser, id);
+  if (!election) {
+    return next(new AppError("No election found with that id", 404));
+  }
   console.log({ election });
+
   response.render("editElectionPage", {
     title: "Update Election",
     election,

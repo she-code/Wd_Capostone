@@ -18,6 +18,7 @@ dotenv.config({ path: "./config.env" });
 const { Admin, Voter, Election, Question } = require("./models");
 const initiatePassport = require("./auth/passport/index");
 const authenticateJwt = require("./middelwares/authenticateJWT");
+const globalErrorHandler = require("./controllers/errorController");
 
 //import routes
 const adminRoute = require("./routes/adminRoute");
@@ -38,6 +39,7 @@ app.use(cookieParser("process.env.SECRET_STRING"));
 // eslint-disable-next-line no-unused-vars
 app.use((req, res, next) => {
   console.log("cookie", req.cookies);
+  console.log(process.env.NODE_ENV);
   next();
 });
 app.use(csurf("this_should_be_32_character_long", ["POST", "PUT", "DELETE"]));
@@ -233,12 +235,13 @@ app.use("/voters", votersRoute);
 app.use("/results", resultsRoute);
 
 //handles non existing paths
-app.all("*", (req, res, next) => {
-  // console.log(req.originalUrl);
-  res.render("pageNotFound", {
-    title: "Online Voting Platform",
-    csrfToken: req.csrfToken(),
-  });
-});
+// app.all("*", (req, res, next) => {
+//   // console.log(req.originalUrl);
+//   res.render("pageNotFound", {
+//     title: "Online Voting Platform",
+//     csrfToken: req.csrfToken(),
+//   });
+// });
+app.use(globalErrorHandler);
 //export application
 module.exports = app;

@@ -1,5 +1,5 @@
 const { Question, Election, Answer, Admin } = require("../models");
-
+const AppError = require("../utils/AppError");
 //create elections
 exports.createQuestion = async (req, res) => {
   //get adminId from req.user
@@ -57,6 +57,7 @@ exports.renderQuesDetailsPAge = async (request, response) => {
 
   const election = await Election.getElectionDetails(adminId, electionId);
   const answers = await Answer.getAnswers({ adminId, questionId });
+  console.log(answers);
   const admin = await Admin.findByPk(adminId);
   response.render("questionDetailsPage", {
     title: "Online Voting Platform",
@@ -92,4 +93,54 @@ exports.deleteQuestion = async (req, res, next) => {
     req.flash("error", "Can't delete question ");
     res.redirect("back");
   }
+};
+//edit question
+exports.updateQuestion = async (req, res, next) => {
+  const { title, description } = req.body;
+  const id = req.params.id;
+  console.log(req.body);
+  try {
+    const question = await Question.findByPk(id);
+    if (!question) {
+      return next(new AppError("No Question found with that id", 404));
+    }
+    const updatedQuestion = await question.update({
+      title: title,
+      description: description,
+    });
+    // const updatedQuestion = await Question.updateQuestion({title:title,url:customString});
+    console.log(updatedQuestion);
+
+    // res.json(updatedQuestion);
+    res.json(updatedQuestion);
+    // res.redirect(`/elections`);
+  } catch (error) {
+    console.log(error.message);
+    res.json(error.message);
+  }
+};
+
+//edit question page
+exports.renderUpdateQuesPage = async (request, response, next) => {
+  const id = request.params.id;
+  const loggedInUser = request.user;
+  const admin = await Admin.getAdminDetails(loggedInUser);
+  const question = await Question.getQuestion(loggedInUser, id);
+  if (!question) {
+    return next(new AppError("No question found with that id", 404));
+  }
+  const election = await Election.getElectionDetails(
+    loggedInUser,
+    question.electionId
+  );
+
+  console.log({ question });
+
+  response.render("editQuestions", {
+    title: "Update question",
+    question,
+    admin,
+    election,
+    csrfToken: request.csrfToken(),
+  });
 };

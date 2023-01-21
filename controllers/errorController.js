@@ -4,7 +4,8 @@ const handleJWTError = () =>
 
 const handleJWTExpiredError = () =>
   new AppError("Your token has expired! Please log in again.", 401);
-
+const handleLauncElectionError = () =>
+  new AppError("An election must have atleast 1 question to be launched", 403);
 const sendErrorDev = (err, req, res) => {
   //add api
   // A) API
@@ -17,7 +18,7 @@ const sendErrorDev = (err, req, res) => {
     });
   }
   // B) RENDERED WEBSITE
-  console.error("ERROR 💥", err);
+  console.error("ERROR ", err);
   return res.status(err.statusCode).render("errorPage", {
     title: "Something went wrong!",
     msg: err.message,
@@ -35,7 +36,7 @@ const sendErrorProd = (err, req, res) => {
     }
     // B) Programming or other unknown error: don't leak error details
     // 1) Log error
-    console.error("ERROR 💥", err);
+    console.error("ERROR ", err);
     // 2) Send generic message
     return res.status(500).json({
       status: "error",
@@ -53,7 +54,7 @@ const sendErrorProd = (err, req, res) => {
   }
   // B) Programming or other unknown error: don't leak error details
   // 1) Log error
-  console.error("ERROR 💥", err);
+  console.error("ERROR ", err);
   // 2) Send generic message
   return res.status(err.statusCode).render("errorPage", {
     title: "Something went wrong!",

@@ -1,5 +1,5 @@
-const { Answer, Admin, Election } = require("../models");
-
+const { Answer, Admin, Election, Question } = require("../models");
+const AppError = require("../utils/AppError");
 //create elections
 exports.createAnswer = async (req, res) => {
   //get adminId from req.user
@@ -87,4 +87,30 @@ exports.deleteAnswer = async (req, res) => {
     req.flash("error", "Can't process you request");
     res.redirect("back");
   }
+};
+
+//edit answer page
+exports.renderUpdateAnsPage = async (request, response, next) => {
+  const id = request.params.id;
+  const loggedInUser = request.user;
+  console.log(request.user);
+  const admin = await Admin.getAdminDetails(loggedInUser);
+  const answer = await Answer.getAnswer(loggedInUser, id);
+  if (!answer) {
+    return next(new AppError("No answer found with that id", 404));
+  }
+  const question = await Question.getQuestionDetails(
+    loggedInUser,
+    answer.questionId
+  );
+
+  console.log({ answer });
+
+  response.render("editAnswers", {
+    title: "Update answer",
+    answer,
+    admin,
+    question,
+    csrfToken: request.csrfToken(),
+  });
 };
