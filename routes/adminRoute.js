@@ -1,8 +1,9 @@
+/* The bellow code is a route file for the admin. */
 const express = require("express");
 const route = express.Router();
 const adminController = require("../controllers/adminController");
 const authenticateJWT = require("../middelwares/authenticateJWT");
-// route.post("/signup", adminController.signup);
+
 route.get("/list", adminController.getAllAdmins);
 route.get("/myProfile", authenticateJWT, adminController.getAdminDetails);
 

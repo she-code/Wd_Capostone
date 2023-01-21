@@ -27,7 +27,6 @@ router.get("/:id/voters", authenticateJWT, voterController.renderVotersPage);
 router.put("/:id/launch", authenticateJWT, electionController.launchElection);
 router.put("/:id/end", authenticateJWT, electionController.endElection);
 router.get("/:id/preview", authenticateJWT, electionController.previewResults);
-router.post("/:id/preview", authenticateJWT, resultController.previewResult);
 
 router.get(
   "/:id",
@@ -66,15 +65,14 @@ router.get(
   "/e/:customString/vote",
   checkElectionStatus,
   passIdToUrl,
-  //connectEnsureLogin.ensureLoggedIn("/voterLogin"),
   electionController.renderVotingPage
-  // voterController.renderVotingPage
 );
 router.post(
   "/:id/vote/analyze",
 
   electionController.saveVotes
 );
+
 //intialize passport
 router.use(passport.initialize());
 router.use(passport.session());
@@ -85,9 +83,7 @@ router.get(
   "/e/:customString/vote",
   checkElectionStatus,
   passIdToUrl,
-  //connectEnsureLogin.ensureLoggedIn("/voterLogin"),
   electionController.renderVotingPage
-  // voterController.renderVotingPage
 );
 router.post(
   "/:id/vote/analyze",
@@ -102,9 +98,6 @@ router.post(
     failureFlash: true,
   }),
   async (request, response) => {
-    //const { email, password } = request.body;
-    //console.log(request.user.id);
-
     response.redirect(`/elections/e/${global.elecIdUrl}/vote`);
   }
 );

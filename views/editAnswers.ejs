@@ -21,8 +21,7 @@
             <div class="  sm:container mx-auto p-10 bg-white shadow-lg rounded-md "
                 style=" margin: 30px auto; height: 75%; width: 65%;">
                 <div class="mx-auto">
-                    <% var data=[ {label:"Home",url:"/elections",current:false},
-                         {label:`Edit
+                    <% var data=[ {label:"Home",url:"/elections",current:false}, {label:`Edit
                         Question`,url:`/questions/${question.id}/edit`,current:true}, ] %>
                         <%- include('navigation.ejs',{data:data})%>
                             <div class="p-8 mx-auto flex flex-col align-center justify-center" style="width: 500px;">

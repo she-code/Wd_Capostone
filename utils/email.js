@@ -10,14 +10,6 @@ module.exports = class Email {
 
   newTransport() {
     if (process.env.NODE_ENV === "production") {
-      // Sendgrid
-      // return nodemailer.createTransport({
-      //   service: "SendGrid",
-      //   auth: {
-      //     user: process.env.SENDGRID_USERNAME,
-      //     pass: process.env.SENDGRID_PASSWORD,
-      //   },
-      // });
       return nodemailer.createTransport({
         service: "gmail",
         auth: {
@@ -41,20 +33,11 @@ module.exports = class Email {
 
   // Send the actual email
   async send(subject) {
-    // // 1) Render HTML based on a ejs template
-    // const html = ejs.renderFile(`${__dirname}/../views/${template}.ejs`, {
-    //   firstName: this.firstName,
-    //   url: this.url,
-    //   subject,
-    // });
-
     // 2) Define email options
     const mailOptions = {
       from: this.from,
       to: this.to,
       subject,
-      // html,
-      // html,
       text: this.url,
     };
 

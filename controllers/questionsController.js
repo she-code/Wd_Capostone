@@ -1,5 +1,6 @@
 const { Question, Election, Answer, Admin } = require("../models");
 const AppError = require("../utils/AppError");
+
 //create elections
 exports.createQuestion = async (req, res) => {
   //get adminId from req.user
@@ -46,22 +47,23 @@ exports.createQuestion = async (req, res) => {
 };
 
 //render questions details page
-//question details page
-exports.renderQuesDetailsPAge = async (request, response) => {
+exports.renderQuesDetailsPAge = async (request, response, next) => {
   const adminId = request.user;
   const id = request.params.id;
   // const admin = await Admin.getAdminDetails(loggedInUser);
   const question = await Question.getQuestion(adminId, id);
+  if (!question) {
+    return next(new AppError("No question found with that id", 404));
+  }
   const questionId = id;
   const electionId = question.electionId;
 
   const election = await Election.getElectionDetails(adminId, electionId);
   const answers = await Answer.getAnswers({ adminId, questionId });
-  console.log(answers);
   const admin = await Admin.findByPk(adminId);
+
   response.render("questionDetailsPage", {
     title: "Online Voting Platform",
-    //admin,
     election,
     question,
     answers,
@@ -69,22 +71,20 @@ exports.renderQuesDetailsPAge = async (request, response) => {
     csrfToken: request.csrfToken(),
   });
 };
+
 //delete question
 exports.deleteQuestion = async (req, res, next) => {
   //get qId & adminId
   const { electionId } = req.body;
   const questionId = req.params.id;
   const adminId = req.user;
-  console.log(electionId);
+
   try {
     const Questions = await Question.getQuestions(adminId, electionId);
 
-    console.log(Questions.length);
     //todo add message
     if (Questions.length <= 1) {
-      // req.flash("error", "You cant ");
-      // res.redirect(`/elections/${electionId}`);
-      return next("You cant delete");
+      return next(new AppError("You cant delete", 403));
     }
     await Question.deleteQuestion(questionId, adminId);
     return res.json(true);
@@ -98,7 +98,7 @@ exports.deleteQuestion = async (req, res, next) => {
 exports.updateQuestion = async (req, res, next) => {
   const { title, description } = req.body;
   const id = req.params.id;
-  console.log(req.body);
+
   try {
     const question = await Question.findByPk(id);
     if (!question) {
@@ -108,12 +108,8 @@ exports.updateQuestion = async (req, res, next) => {
       title: title,
       description: description,
     });
-    // const updatedQuestion = await Question.updateQuestion({title:title,url:customString});
-    console.log(updatedQuestion);
 
-    // res.json(updatedQuestion);
     res.json(updatedQuestion);
-    // res.redirect(`/elections`);
   } catch (error) {
     console.log(error.message);
     res.json(error.message);
@@ -122,25 +118,27 @@ exports.updateQuestion = async (req, res, next) => {
 
 //edit question page
 exports.renderUpdateQuesPage = async (request, response, next) => {
-  const id = request.params.id;
-  const loggedInUser = request.user;
-  const admin = await Admin.getAdminDetails(loggedInUser);
-  const question = await Question.getQuestion(loggedInUser, id);
-  if (!question) {
-    return next(new AppError("No question found with that id", 404));
+  try {
+    const id = request.params.id;
+    const loggedInUser = request.user;
+    const admin = await Admin.getAdminDetails(loggedInUser);
+    const question = await Question.getQuestion(loggedInUser, id);
+    if (!question) {
+      return next(new AppError("No question found with that id", 404));
+    }
+    const election = await Election.getElectionDetails(
+      loggedInUser,
+      question.electionId
+    );
+
+    response.render("editQuestions", {
+      title: "Update question",
+      question,
+      admin,
+      election,
+      csrfToken: request.csrfToken(),
+    });
+  } catch (error) {
+    console.log(error.message);
   }
-  const election = await Election.getElectionDetails(
-    loggedInUser,
-    question.electionId
-  );
-
-  console.log({ question });
-
-  response.render("editQuestions", {
-    title: "Update question",
-    question,
-    admin,
-    election,
-    csrfToken: request.csrfToken(),
-  });
 };

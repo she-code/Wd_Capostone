@@ -1,13 +1,45 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><%=title%></title>
-</head>
-<body>
-    <p><%=msg%></p>
 
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+
+    <title>
+        <%=title%>
+    </title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        tr:nth-child(even) {
+            background: rgb(204 204 204 / 20%);
+        }
+
+        body {
+            font-family: 'Jost', sans-serif;
+
+        }
+
+        tr:hover {
+            background: #c2c2c278;
+        }
+    </style>
+   
+</head>
+
+<body>
+    <main class=" h-screen pb-5" style="background-color: #6c6c7f24; ">
+        <%-include('header.ejs',{admin:null})%>
+            <div class="  sm:container mx-auto p-10 bg-white shadow-lg rounded-md "
+                style=" margin: 30px auto; height: 75%; width: 75%;">
+                <div class="mx-auto pt-8" style="width: max-content;">
+                    <h1 class="text-3xl text-center text-red-600 font-bold mt-6">
+                        <%=msg%>
+                    </h1>
+                </div>
+            </div>
+    </main>
 </body>
+
 </html>

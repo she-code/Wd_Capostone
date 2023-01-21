@@ -9,12 +9,6 @@ exports.addVoters = async (req, res) => {
 
   try {
     //check if voter already exists
-    // const voterExists = await Voter.findOne({ where: { voter_Id } });
-    // if (voterExists) {
-    //   console.log("voter exists");
-    //   req.flash("voter already exists");
-    //   return res.redirect(`/elections/${electionId}/voters`);
-    // }
     const adminId = req.user;
     const voter = await Voter.addVoter({
       electionId,
@@ -25,7 +19,6 @@ exports.addVoters = async (req, res) => {
     if (!voter) {
       res.status(401).json({ status: "fail", message: "Unable to add voter" });
     }
-    console.log({ adminId }, voter);
     return res.redirect(`/elections/${electionId}/voters`);
   } catch (error) {
     console.log(error.message);
@@ -71,13 +64,10 @@ exports.renderVotersPage = async (req, res) => {
   }
 };
 
-//update voter
-
 //delete voter
 exports.deleteVoter = async (req, res) => {
   const id = req.params.id;
   const adminId = req.user;
-  console.log(adminId);
   try {
     await Voter.deleteVoter(id, adminId);
     return res.json(true);

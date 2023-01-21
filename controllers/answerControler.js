@@ -1,5 +1,6 @@
 const { Answer, Admin, Election, Question } = require("../models");
 const AppError = require("../utils/AppError");
+
 //create answer
 exports.createAnswer = async (req, res) => {
   //get adminId from req.user
@@ -8,13 +9,11 @@ exports.createAnswer = async (req, res) => {
 
   try {
     const adminId = req.user;
-    console.log(req.body, adminId);
     const answer = await Answer.addAnswers({
       adminId,
       content,
       questionId,
     });
-    console.log(answer);
     if (!answer) {
       res.status(401).json({
         status: "fail",
@@ -22,7 +21,6 @@ exports.createAnswer = async (req, res) => {
       });
     }
 
-    console.log(answer);
     return res.redirect(`/questions/${questionId}`);
   } catch (error) {
     console.log(error.message);
@@ -44,13 +42,13 @@ exports.createAnswer = async (req, res) => {
 };
 
 //get all answers for a question
-exports.getAllAnswers = async (req, res) => {
+exports.getAllAnswers = async (req, res, next) => {
   const { questionId } = req.body;
   const adminId = req.user.id;
   try {
     const answers = await Answer.getAnswers({ adminId, questionId });
     if (!answers) {
-      res.status(404).json({ status: "fail", message: "No answers found" });
+      return next(new AppError("No answers found", 404));
     }
     return answers;
   } catch (error) {
@@ -72,13 +70,10 @@ exports.renderAnswersPage = async (request, response) => {
   });
 };
 
-//update answer
-
 //delete answer
 exports.deleteAnswer = async (req, res) => {
   const id = req.params.id;
   const adminId = req.user;
-  console.log(adminId);
   try {
     await Answer.deleteAnswer(id, adminId);
     return res.json(true);
@@ -88,11 +83,10 @@ exports.deleteAnswer = async (req, res) => {
     res.redirect("back");
   }
 };
-//edit question
+//edit answer
 exports.updateAnswer = async (req, res, next) => {
   const { content } = req.body;
   const id = req.params.id;
-  console.log(req.body);
   try {
     const answer = await Answer.findByPk(id);
     if (!answer) {
@@ -101,12 +95,7 @@ exports.updateAnswer = async (req, res, next) => {
     const updatedAnswer = await answer.update({
       content,
     });
-    // const updatedanswer = await answer.updateanswer({title:title,url:customString});
-    console.log(updatedAnswer);
-
-    // res.json(updatedanswer);
     res.json(updatedAnswer);
-    // res.redirect(`/elections`);
   } catch (error) {
     console.log(error.message);
     res.json(error.message);
@@ -116,15 +105,12 @@ exports.updateAnswer = async (req, res, next) => {
 exports.renderUpdateAnsPage = async (request, response, next) => {
   const id = request.params.id;
   const loggedInUser = request.user;
-  console.log(request.user);
   const admin = await Admin.getAdminDetails(loggedInUser);
   const answer = await Answer.findByPk(id);
   if (!answer) {
     return next(new AppError("No answer found with that id", 404));
   }
   const question = await Question.getQuestion(loggedInUser, answer.questionId);
-
-  console.log({ answer });
 
   response.render("editAnswers", {
     title: "Update answer",

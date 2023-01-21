@@ -6,7 +6,6 @@ const {
   Answer,
   Result,
 } = require("../models");
-const { fn, col } = require("sequelize");
 const { encode, votingResult } = require("../utils");
 const AppError = require("../utils/AppError");
 
@@ -48,8 +47,6 @@ exports.createElection = async (req, res, next) => {
     console.log(error.message);
     if (error.name === "SequelizeValidationError") {
       for (var key in error.errors) {
-        console.log(error.errors[key].message);
-
         if (
           error.errors[key].message === "Validation notEmpty on title failed"
         ) {
@@ -70,7 +67,7 @@ exports.createElection = async (req, res, next) => {
   }
 };
 
-//change the status of election to launch election
+/* The bellow code is a controller function that is used to launch an election. */
 exports.launchElection = async (req, res, next) => {
   const electionId = req.params.id;
   const adminId = req.user;
@@ -83,11 +80,8 @@ exports.launchElection = async (req, res, next) => {
       return next(new AppError("No election found with that id", 404));
     }
 
-    //check if every question contains atleast two answers
+    /* Checking if the election has atleast one question. */
     const questions = await Question.getQuestions(adminId, electionId);
-    // if (!questions) {
-    //   return next(new AppError("No questions found", 404));
-    // }
     if (questions.length < 1) {
       return next(
         new AppError(
@@ -96,6 +90,7 @@ exports.launchElection = async (req, res, next) => {
         )
       );
     }
+    /* Finding all the answers for each question. */
     for (var i in questions) {
       answersWithQuestion.push(
         await Answer.findAll({
@@ -111,7 +106,6 @@ exports.launchElection = async (req, res, next) => {
     }
     //extract the anwsers from the given data it's in [[{}],[{}]] format
     for (var l = 0; l < answersWithQuestion.length; l++) {
-      console.log(answersWithQuestion[l].length);
       if (answersWithQuestion[l].length < 2) {
         error = true;
       }
@@ -138,18 +132,14 @@ exports.launchElection = async (req, res, next) => {
         )
       );
     }
-    console.log(updatedElection);
     return res.json(updatedElection);
     // res.send("hi");
   } catch (error) {
     console.log(error.message);
-    res.status(501).json({
-      status: "fail",
-      message: error.message,
-    });
+    throw error;
   }
 };
-//end election
+/* Updating the election status to ended. */
 exports.endElection = async (req, res, next) => {
   const electionId = req.params.id;
   const adminId = req.user;
@@ -165,11 +155,11 @@ exports.endElection = async (req, res, next) => {
     console.log(error.message);
   }
 };
-//delete election
+
+/* Deleting an election. */
 exports.deleteElection = async (req, res) => {
   const electionId = req.params.id;
   const adminId = req.user;
-  console.log(adminId);
   try {
     await Election.deleteElection(electionId, adminId);
     return res.json(true);
@@ -179,11 +169,10 @@ exports.deleteElection = async (req, res) => {
   }
 };
 
-//edit election
+/* Updating the election title. */
 exports.updateElection = async (req, res, next) => {
   const { title } = req.body;
   const id = req.params.id;
-  console.log(req.body);
   try {
     const election = await Election.findByPk(id);
     if (!election) {
@@ -192,18 +181,15 @@ exports.updateElection = async (req, res, next) => {
     const updatedElection = await election.update({
       title: title,
     });
-    // const updatedElection = await election.updateElection({title:title,url:customString});
-    console.log(updatedElection);
 
-    // res.json(updatedElection);
     res.json(updatedElection);
-    // res.redirect(`/elections`);
   } catch (error) {
     console.log(error.message);
     res.json(error.message);
   }
 };
-//render elections page
+
+/* The bellow code is rendering the elections page. */
 exports.renderElectionsPage = async (request, response) => {
   const loggedInUser = request.user;
   const admin = await Admin.getAdminDetails(loggedInUser);
@@ -288,7 +274,6 @@ exports.renderCreateQuesPage = async (request, response) => {
   const loggedInUser = request.user;
   const admin = await Admin.getAdminDetails(loggedInUser);
   const election = await Election.getElectionDetails(loggedInUser, id);
-  console.log({ election });
   response.render("createQuestions", {
     title: "Create Questions",
     election,
@@ -305,7 +290,6 @@ exports.renderUpdateElecPage = async (request, response, next) => {
   if (!election) {
     return next(new AppError("No election found with that id", 404));
   }
-  console.log({ election });
 
   response.render("editElectionPage", {
     title: "Update Election",
@@ -317,7 +301,6 @@ exports.renderUpdateElecPage = async (request, response, next) => {
 
 //render vote page
 exports.renderVotingPage = async (req, res) => {
-  //req.user might be empty
   const currentVoter = req.user;
 
   let answersWithQuestion = [];
@@ -327,7 +310,6 @@ exports.renderVotingPage = async (req, res) => {
   const questions = await Question.findAll({
     where: { electionId: election.id },
   });
-  //console.log(election, questions);
 
   // include questions table to answers (inner join)
   for (var i in questions) {
@@ -426,7 +408,6 @@ exports.saveVotes = async (req, res) => {
   //create results for each submission
   await Promise.all(
     Object.keys(rest).map(async (key) => {
-      console.log(rest[key]);
       await Result.addVotingResult({
         questionId: key,
         answerId: rest[key],
@@ -438,7 +419,5 @@ exports.saveVotes = async (req, res) => {
   //update voter status
   await voter.updateVoterStatus("voted");
 
-  // const result = await Result.findAll({ raw: true });
-  // console.log(result);
   res.redirect("back");
 };

@@ -1,25 +1,28 @@
-<% if(messages && messages.success && messages.success.length > 0)  { %>
-    <% for(var i=0; i<messages.success.length; i++) { %>
-        
-        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative " role="alert" id="success">
-            <strong class="font-bold"><%= messages.success[i] %></strong>
-           
-          </div>
-          <script> var alert = document.getElementById('success'); 
-          var close = document.getElementById('close')
-          
-           setTimeout(() => {
-          
-            success.style.visibility = 'hidden';
-          }, 3000);
-//todo close the pop up on click
-          function closeClicked(){
-            console.log("hi")
-            success.style.visibility = 'hidden';
-          }
-        </script>
+<% if(messages && messages.success && messages.success.length> 0) { %>
+  <% for(var i=0; i<messages.success.length; i++) { %>
 
-         
-          
+    <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative " role="alert"
+      id="success">
+      <strong class="font-bold">
+        <%= messages.success[i] %>
+      </strong>
+
+    </div>
+    <script> var alert = document.getElementById('success');
+      var close = document.getElementById('close')
+
+      setTimeout(() => {
+
+        success.style.visibility = 'hidden';
+      }, 3000);
+      //todo close the pop up on click
+      function closeClicked() {
+        console.log("hi")
+        success.style.visibility = 'hidden';
+      }
+    </script>
+
+
+
     <% } %>
-  <% } %>
+      <% } %>

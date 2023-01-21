@@ -1,18 +1,24 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="csrf-token" content="<%= csrfToken %>" />
-    <title><%=title%></title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">  </head>
-  <body>
-    <main class="h-screen" style="background-color: #6c6c7f24; ">
-     <%-include('header.ejs',{admin:null})%>
-    
-      <div class="sm:container mx-auto p-8 bg-white shadow-lg rounded-md " style="margin-top: 5rem; height: 60%; width: 45%;">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="csrf-token" content="<%= csrfToken %>" />
+  <title>
+    <%=title%>
+  </title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+</head>
+
+<body>
+  <main class="h-screen" style="background-color: #6c6c7f24; ">
+    <%-include('header.ejs',{admin:null})%>
+
+      <div class="sm:container mx-auto p-8 bg-white shadow-lg rounded-md "
+        style="margin-top: 5rem; height: 60%; width: 45%;">
         <div class="mx-auto flex items-center flex-col	mt-5 justify-center">
           <p class="py-2 text-2xl font-bold">Welcome to the Voting Manager</p>
           <p class="py-2 text-xl">
@@ -23,10 +29,10 @@
             <a href="/login" class="text-green-600 font-bold">Sign-In</a>
           </p>
         </div>
-       
-    </div>
-    </main>
-   
-  </body>
-</html>
 
+      </div>
+  </main>
+
+</body>
+
+</html>

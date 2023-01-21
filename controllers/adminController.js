@@ -113,7 +113,6 @@ exports.getAdminDetails = async (req, res, next) => {
     //req.flash("error", "No User found");
     return next(new AppError("No admin found", 404));
   }
-  console.log(admin);
   const elections = await Election.getElections(admin.id);
   const questions = await Question.findAll({ where: { adminId: admin.id } });
   const answers = await Answer.findAll({ where: { adminId: admin.id } });

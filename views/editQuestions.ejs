@@ -22,9 +22,8 @@
                 style=" margin: 30px auto; height: 75%; width: 65%;">
                 <div class="mx-auto">
                     <% var data=[ {label:"Home",url:"/elections",current:false},
-                    {label:`${election.title}`,url:`/elections/${election.id}/questions`,current:false},
-                         {label:`Edit
-                        Question`,url:`/questions/${question.id}/edit`,current:true}, ] %>
+                        {label:`${election.title}`,url:`/elections/${election.id}/questions`,current:false},
+                        {label:`Edit Question`,url:`/questions/${question.id}/edit`,current:true}, ] %>
                         <%- include('navigation.ejs',{data:data})%>
                             <div class="p-8 mx-auto flex flex-col align-center justify-center" style="width: 500px;">
 
@@ -73,7 +72,7 @@
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     title: title,
-                    description:description,
+                    description: description,
                     _csrf: cs
                 })
             }).then((res) => {

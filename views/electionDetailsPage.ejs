@@ -1,119 +1,141 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="csrf-token" content="<%= csrfToken %>" />
-    <title><%=title%></title>
-   
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-      var token = document.querySelector('meta[name="csrf-token"]').getAttribute("content")
-      function launchElection(id){
-         // let compelete = false
-          fetch(`/elections/${id}/launch`,{
-              method:'put',
-              headers:{"Content-Type":"application/json"},
-              body:JSON.stringify({
-                  _csrf:token
-              })
-          }).then((res)=>{
-              if(res.ok){
-                  window.location.reload();
-              }
-          }).catch((err)=>{
-          window.alert(err.message)
-          console.log({err})
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="csrf-token" content="<%= csrfToken %>" />
+  <title>
+    <%=title%>
+  </title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    var token = document.querySelector('meta[name="csrf-token"]').getAttribute("content")
+    function launchElection(id) {
+      // let compelete = false
+      fetch(`/elections/${id}/launch`, {
+        method: 'put',
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          _csrf: token
         })
-      }
-      function endElection(id){
-         // let compelete = false
-          fetch(`/elections/${id}/end`,{
-              method:'put',
-              headers:{"Content-Type":"application/json"},
-              body:JSON.stringify({
-                  _csrf:token
-              })
-          }).then((res)=>{
-              if(res.ok){
-                  window.location.reload();
-              }
-          }).catch((err)=>console.log(err))
-      }
-      
-      </script>
-     
-  </head>
-  <body>
-    <main class=" h-screen" style="background-color: #6c6c7f24; ">
-      <%-include('header.ejs',{admin:admin})%>
-        <div class="  sm:container mx-auto p-10 bg-white shadow-lg rounded-md "
-          style=" margin: 30px auto; height: 75%; width: 65%;">
-          <div class="mx-auto " >
-          <%
-          var data=[
-    {label:"Home",url:"/elections",current:false},
-    {label:`${election.title}`,url:`/elections/${election.id}`,current:true}
-    ]%>
-          <%- include('navigation.ejs',{data:data})%>
-      <div class="mx-auto mt-5" style="width: max-content;">
-        <h1 class="text-3xl font-bold text-gray-600 pb-5 text-center"><%=election.title%></h1>
+      }).then((res) => {
+        if (res.ok) {
+          window.location.reload();
+        }
+      }).catch((err) => {
+        window.alert(err.message)
+        console.log({ err })
+      })
+    }
+    function endElection(id) {
+      // let compelete = false
+      fetch(`/elections/${id}/end`, {
+        method: 'put',
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          _csrf: token
+        })
+      }).then((res) => {
+        if (res.ok) {
+          window.location.reload();
+        }
+      }).catch((err) => console.log(err))
+    }
 
-       <div class="mb-2" >
-       <div class="mb-2">
-        <% if(election.status=="launched"){%>
-          <p class="text-xl text-gray-500 ">This election has launched and voters can access this URL</p>
-        <a href="/elections/e/<%=election.url%>/vote" class="text-blue-600 underline text-lg">https://online-election.onrender.com/elections/e/<%=election.url%>/vote</a>
-          <%}%>
-        <% if(election.status=="ended"){%>
-          <p class="text-xl text-gray-500 ">This election has ended</p>
-          <a href="/elections/e/<%=election.url%>/vote" class="text-blue-600 underline text-lg">https://online-election.onrender.com/elections/e/<%=election.url%>/vote</a>
-        <%}%>
+  </script>
+
+</head>
+
+<body>
+  <main class=" h-screen" style="background-color: #6c6c7f24; ">
+    <%-include('header.ejs',{admin:admin})%>
+      <div class="  sm:container mx-auto p-10 bg-white shadow-lg rounded-md "
+        style=" margin: 30px auto; height: 75%; width: 65%;">
+        <div class="mx-auto ">
+          <% var data=[ {label:"Home",url:"/elections",current:false},
+            {label:`${election.title}`,url:`/elections/${election.id}`,current:true} ]%>
+            <%- include('navigation.ejs',{data:data})%>
+              <div class="mx-auto mt-5" style="width: max-content;">
+                <h1 class="text-3xl font-bold text-gray-600 pb-5 text-center">
+                  <%=election.title%>
+                </h1>
+
+                <div class="mb-2">
+                  <div class="mb-2">
+                    <% if(election.status=="launched" ){%>
+                      <p class="text-xl text-gray-500 ">This election has launched and voters can access this URL</p>
+                      <a href="/elections/e/<%=election.url%>/vote"
+                        class="text-blue-600 underline text-lg">https://online-election.onrender.com/elections/e/
+                        <%=election.url%>/vote</a>
+                      <%}%>
+                        <% if(election.status=="ended" ){%>
+                          <p class="text-xl text-gray-500 ">This election has ended</p>
+                          <a href="/elections/e/<%=election.url%>/vote"
+                            class="text-blue-600 underline text-lg">https://online-election.onrender.com/elections/e/
+                            <%=election.url%>/vote</a>
+                          <%}%>
+                  </div>
+                  <% if(questions.length==0){%>
+                    <p class="text-xl text-gray-500 ">You haven't created any questions</p>
+                    <%}%>
+                      <% if(questions.length> 0){%>
+                        <p class="text-xl text-gray-500 ">Your election has <span class="text-gray-900 font-semibold">
+                            <%=questions.length%>
+                          </span> questions in the ballot</p>
+                        <%}%>
+                          <%if(election.status=="created" ){%>
+                            <a href="/elections/<%=election.id%>/questions"
+                              class="text-green-500 block text-lg font-normal hover:text-green-700 hover:font-semibold">Manage
+                              questions</a>
+                            <%}%>
+                </div>
+
+
+                <div class="mb-2">
+                  <% if(voters.length==0){%>
+                    <p class="text-xl text-gray-500 ">You haven't created any voters</p>
+                    <%}%>
+                      <% if(voters.length> 0){%>
+                        <p class="text-xl text-gray-500 ">Your election has <span class="text-gray-900 font-semibold">
+                            <%=voters.length%>
+                          </span> registered voters</p>
+                        <%}%>
+                          <%if(election.status=="launched" || election.status=="created" ){%>
+
+                            <a href="/elections/<%=election.id%>/voters"
+                              class="text-green-500 block text-lg font-normal hover:text-green-700 hover:font-semibold">Manage
+                              voters</a>
+                            <%}%>
+
+                </div>
+                <%if(election.status=="created" ){%>
+                  <a href="" onclick="launchElection('<%=election.id%>')"
+                    class="text-green-500 block text-lg font-normal hover:text-green-700 hover:font-semibold">Launch
+                    election</a>
+                  <%}%>
+                    <%if(election.status=="launched" || election.status=="ended" ){%>
+                      <a href="/elections/<%=election.id%>/preview"
+                        class="text-green-500 block text-lg font-normal hover:text-green-700 hover:font-semibold">Preview
+                        Results</a>
+
+                      <%}%>
+
+                        <%if(election.status=="launched" ){%>
+                          <a href="" onclick="endElection('<%=election.id%>')"
+                            class="text-green-500 block text-lg font-normal hover:text-green-700 hover:font-semibold">End
+                            election</a>
+
+                          <%}%>
+                            <%-include("errorMsg.ejs")%>
+
+              </div>
         </div>
-       <% if(questions.length==0){%>
-          <p class="text-xl text-gray-500 ">You haven't created any questions</p>
-        <%}%>
-        <% if(questions.length > 0){%>
-          <p class="text-xl text-gray-500 ">Your election has <span class="text-gray-900 font-semibold"><%=questions.length%></span> questions in the ballot</p>
-          <%}%>
-          <%if(election.status == "created"){%>
-            <a href="/elections/<%=election.id%>/questions" class="text-green-500 block text-lg font-normal hover:text-green-700 hover:font-semibold">Manage questions</a>
-           <%}%>
-       </div>
-      
-    
-       <div class="mb-2">
-        <% if(voters.length==0){%>
-           <p class="text-xl text-gray-500 ">You haven't created any voters</p>
-         <%}%>
-         <% if(voters.length > 0){%>
-           <p class="text-xl text-gray-500 ">Your election has <span class="text-gray-900 font-semibold"><%=voters.length%></span> registered voters</p>
-           <%}%>
-           <%if(election.status == "launched" || election.status == "created"){%>
-
-           <a href="/elections/<%=election.id%>/voters" class="text-green-500 block text-lg font-normal hover:text-green-700 hover:font-semibold">Manage voters</a>
-           <%}%>
-
-        </div>
-       <%if(election.status == "created"){%>
-        <a href=""onclick="launchElection('<%=election.id%>')" class="text-green-500 block text-lg font-normal hover:text-green-700 hover:font-semibold">Launch election</a>
-        <%}%>
-        <%if(election.status == "launched" || election.status == "ended"){%>
-          <a href="/elections/<%=election.id%>/preview" class="text-green-500 block text-lg font-normal hover:text-green-700 hover:font-semibold">Preview Results</a>
-
-          <%}%>
-
-        <%if(election.status == "launched"){%>
-          <a href="" onclick="endElection('<%=election.id%>')" class="text-green-500 block text-lg font-normal hover:text-green-700 hover:font-semibold">End election</a>
-
-          <%}%>
-          <%-include("errorMsg.ejs")%>
-
       </div>
-    </div>
-    </div>
-    </main>
+  </main>
 
-  </body>
+</body>
+
 </html>
