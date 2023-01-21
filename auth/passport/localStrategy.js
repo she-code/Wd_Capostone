@@ -28,7 +28,7 @@ const strategy = new localStrategy(
           // console.log(voter);
           return done(null, voter);
         } else {
-          return done(null, false, { message: "Invalid password" });
+          return done(null, false, { message: "Invalid password or username" });
         }
       })
       .catch((error) => {

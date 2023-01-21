@@ -25,6 +25,11 @@
 
     function myFunction() {
       x = document.getElementById("select1").value;
+      // var data = 
+      // var filtered=parR.filter(function (el)
+      //         {
+      //           return el.Question.id == 29
+      //         })
       console.log(x)
     }
     var token = document.querySelector('meta[name="csrf-token"]').getAttribute("content")
@@ -58,12 +63,13 @@
           {label:`${election.title}`,url:`/elections/${election.id}`,current:false},
           {label:`Preview Results`,url:`/elections/${election.id}/preview`,current:true} ] %>
             <%- include('navigation.ejs',{data:data})%>
+            <p class="py-2 text-2xl font-bold text-gray-600">
+              <%=election.title%>
+            </p>
               <div class="flex justify-between">
-                <p class="py-2 text-2xl font-bold text-gray-600">
-                  <%=election.title%>
-                </p>
-              
-                  <select id="select1" name="selectedQuestion" onchange="myFunction()">
+                
+                <p class="text-gray-600 font-light">Select the dropdown to view the voting result for each question</p>
+                  <select id="select1" name="selectedQuestion" onchange="displayChart()">
                     <%for(var i=0;i< questions.length;i++){%>
                       <a href="">
                         <option value="<%=questions[i].id%>">Question <%=i+1%>
@@ -72,56 +78,61 @@
                       <%}%>
                   </select>
               </div>
-              <div class="shadow-lg rounded-lg overflow-hidden " style="    height: 35%;
-                width: 40%;">
-                
-              <%var arr=[]; var ele={x:'',value:0}; var filtered=parR.filter(function (el)
-              {
-                return el.Question.id == 29
-              })
-                %>
-                <% parR.forEach((element)=> {
-
-                  arr.push({x:element.Answer.content,value:element.votes})
-                  %>
-                 
-                  <%}) %>
-                  <% filtered.forEach((element)=> {
-
-                    %>
-                    <p>
-                      <%=element.answerId%>
-                    </p>
-                    <%}) %>
-               <!-- Required chart.js -->
-               
-
-
-        </div>
+              
         <div id="container" style="height: 400px;"></div>
       </div>
   </main>
 
       <script>
-        anychart.onDocumentReady(function() {
+        //declare variables
+         let selectedQuestion=0 ;
+         let parsedData = <%-JSON.stringify(parR)%>
+         let newData =[]
+         let filtered=[]
+        var queTitle ;
+        function displayChart(){
+          newData=[]
+          //if the chart container has child remove all
+              const container = document.getElementById("container");
+              if (container.childNodes.length > 0) { 
+                while (container.firstChild) {
+                    container.removeChild(container.firstChild);
+                        }
+                    }
+                    //filter the data
+              selectedQuestion = document.getElementById("select1").value;
+              filtered=parsedData.filter(function (el)
+                  {
+                    return el.Question.id == selectedQuestion
+                  })
+             //create chart data
+              filtered.forEach((element)=> {
+                queTitle = element.Question.title
+                newData.push({x:element.Answer.content,value:element.votes})
+                })
 
+                //generate the chart
+                anychart.onDocumentReady(function() {
 
-// create the chart
-var chart = anychart.pie();
+                // create the chart
+                var chart = anychart.pie();
 
-// set the chart title
-chart.title("<%=election.title%>");
-var chartData=<%-JSON.stringify(arr)%>
-console.log(chartData)
-// add the data
-chart.data(chartData);
+                // set the chart title
+                chart.title(queTitle);
+                //console.log(chartData)
+                // add the data
+                chart.data(newData);
 
-// display the chart in the container
-chart.container('container');
-chart.draw();
+                // display the chart in the container
+                chart.container('container');
+                chart.draw();
 
-});
-      </script>
+                });
+              // newData
+        }
+       
+      
+              </script>
 
 </body>
 
