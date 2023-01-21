@@ -199,7 +199,7 @@ exports.forgotPassword = async (req, res, next) => {
   //get the user by email
   const admin = await Admin.findOne({ where: { email } });
   if (!admin) {
-    return next("no user");
+    req.flash("error", "No user found with this email");
   }
   //create hashed token
   const resetToken = admin.createPasswordResetToken();
