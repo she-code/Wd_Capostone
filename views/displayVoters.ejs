@@ -72,13 +72,22 @@
                   <form method="post" action="/elections/<%=election.id%>/voters">
                     <input type="hidden" name="_csrf" value="<%=csrfToken%>" />
 
-                    <div>
+                    <div class="flex items-center relative">
                       <input type="text" name="voter_Id" class="border border-gray-300 text-gray-900 rounded p-2 "
                         placeholder="Voter Id" />
-                      <input type="password" name="password" class="border border-gray-300 text-gray-900 rounded p-2 "
-                        minlength="8" placeholder="password" />
+                        <div>
+                          <input type="password" name="password" class="border border-gray-300 text-gray-900 rounded p-2 " id="password"
+                          minlength="8" placeholder="password" />
+                          <button type="button" class="absolute ml-2  " onclick="viewPassword()" style="right: 80px; top: 10px;">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 stroke-green-400	">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                          </svg>
+                          </button>
+                        </div>
+                    
                       <button type="submit"
-                        class="text-white bg-green-600 hover:bg-green-800 font-medium rounded px-5 py-2 mt-5">ADD</button>
+                        class="text-white bg-green-600 hover:bg-green-800 font-medium rounded px-5 py-2 ">ADD</button>
 
                     </div>
 
@@ -143,6 +152,18 @@
               </div>
         </div>
       </div>
+      <script>
+         const password = document.getElementById('password')
+       function viewPassword(){
+        console.log('clicked')
+        if(password.type=="text"){
+            password.type="password"
+
+        }else{
+            password.type='text'
+        }
+       }
+      </script>
 </body>
 
 </html>

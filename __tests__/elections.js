@@ -43,6 +43,9 @@ const createElection = async (agent, title, url) => {
   });
   // console.log(response)
 };
+const SECONDS = 1000;
+jest.setTimeout(70 * SECONDS);
+
 describe("Online Voting Platform", function () {
   beforeAll(async () => {
     await db.sequelize.sync({ force: true });
@@ -74,17 +77,30 @@ describe("Online Voting Platform", function () {
 
   test("Create elections", async () => {
     //create new agent
-    const agent = request.agent(server);
-    await login(agent, "test@gmail.com", "12345678");
-    const res = await agent.get("/elections/createElections/new");
-    const csrfToken = extractCsrfToken(res);
-    console.log(res.text);
-    const response = await agent.post("/elections/createElection").send({
-      title: "Class rep",
-      url: "class202",
+    // const agent = request.agent(server);
+    // await login(agent, "test@gmail.com", "12345678");
+    let res = await agent.get("/signup");
+    let csrfToken = extractCsrfToken(res);
+    res = await agent.post("/admins/register").type("form").send({
+      email: "test@gmail.com",
+      password: "password",
+      firstName: "Test",
+      lastName: "Haile",
       _csrf: csrfToken,
     });
-    console.log({ response });
+    res = await agent.get("/elections/createElections/new");
+    csrfToken = extractCsrfToken(res);
+    console.log(res.text);
+    const response = await agent
+      .post("/elections/createElection")
+      .type("form")
+      .send({
+        title: "Class rep",
+        url: "class202",
+        adminId: 1,
+        _csrf: csrfToken,
+      });
+    console.log({ text: res.text });
     expect(response.statusCode).toBe(302);
   });
 
