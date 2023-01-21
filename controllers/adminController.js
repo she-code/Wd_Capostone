@@ -1,93 +1,49 @@
-const { Admin } = require("../models");
 const bcrypt = require("bcrypt");
 const crypto = require("crypto");
 const { Op } = require("sequelize");
+
+const { Admin } = require("../models");
 const Email = require("./../utils/email");
 
 const { generateJwtToken, generateHashedPassword } = require("../utils/index");
-//register admin
-exports.signup = async (req, res) => {
-  try {
-    const { firstName, lastName, email, password } = req.body;
-    const salt = await bcrypt.genSalt(process.env.HASH_NUMBER);
-    const hashedPassword = await bcrypt.hash(password, salt);
-    //check empty inputs
-    if (
-      firstName == null ||
-      lastName == null ||
-      email == null ||
-      password == null
-    ) {
-      return res
-        .status()
-        .json({ status: 401, message: "Cant have empty fields" });
-    }
 
-    //search if email exists
-    const emailExists = await Admin.findOne({ where: { email } });
-    if (emailExists) {
-      return res
-        .status()
-        .json({ status: 409, message: "Email already exist ! LOGIN instead" });
-    }
-    //create admin
-    const admin = Admin.create({
-      firstName: firstName,
-      lastName: lastName,
-      email: email,
-      password: hashedPassword,
-    });
+//creates token and saves it in cookies
+const createSendToken = (admin, req, res) => {
+  //generate jwt token
+  const token = generateJwtToken(admin.id, "admin");
 
-    if (!admin) {
-      return res
-        .status()
-        .json({ status: 501, message: "Unable to create account. Try later" });
-    }
+  const cookieOPtions = {
+    expiresIn: "60d",
+    httpOnly: true,
+  };
+  if (process.env.NODE_ENV == "production") cookieOPtions.secure = true;
 
-    //jwt,cookie will be added todo
-  } catch (error) {
-    return res.status().json({ status: 501, message: error.message });
-  }
+  res.cookie("jwt", token, cookieOPtions);
+
+  //redirect to elections page
+  res.redirect("/elections");
 };
 
 //register admin
-exports.register = async (request, response) => {
-  const { firstName, lastName, email, password } = request.body;
+exports.register = async (req, res) => {
+  const { firstName, lastName, email, password } = req.body;
+  //encrypt password
   const hashedPwd = await generateHashedPassword(password);
+
   //create user
   try {
     const admin = await Admin.create({
       firstName: firstName,
-
       lastName: lastName,
       email: email,
       password: hashedPwd,
     });
-    // const token = generateJwtToken(user.id, "admin");
-    const token = generateJwtToken(admin.id, "admin");
-    //  const JWT_COOKIE_EXPIRES_IN = 90d;
-    const cookieOPtions = {
-      expiresIn: "60d",
-      httpOnly: true,
-    };
-    if (process.env.NODE_ENV == "production") cookieOPtions.secure = true;
-
-    response.cookie("jwt", token, cookieOPtions);
-    const url = `${request.protocol}://${request.get("host")}/me`;
-    // console.log(url);
-    // await new Email(admin, url).sendWelcome();
-
-    request.logIn(admin, (err) => {
-      if (err) {
-        console.log("from", err);
-      }
-      response.redirect("/elections");
-    });
+    createSendToken(admin, req, res);
   } catch (error) {
     console.log(error.message);
     if (error.name === "SequelizeUniqueConstraintError") {
-      request.flash("error", "Email already exists");
-      response.redirect("/signup");
+      req.flash("error", "Email already exists");
+      res.redirect("/signup");
     }
     if (error.name === "SequelizeValidationError") {
       for (var key in error.errors) {
@@ -95,77 +51,58 @@ exports.register = async (request, response) => {
         if (
           error.errors[key].message === "Validation len on firstName failed"
         ) {
-          request.flash(
-            "error",
-            "First name must have minimum of 2 characters"
-          );
+          req.flash("error", "First name must have minimum of 2 characters");
         }
         if (error.errors[key].message === "Validation len on lastName failed") {
-          request.flash("error", "Last name must have minimum of 2 characters");
+          req.flash("error", "Last name must have minimum of 2 characters");
         }
         if (
           error.errors[key].message === "Validation isEmail on email failed"
         ) {
-          request.flash("error", "Invalid Email");
+          req.flash("error", "Invalid Email");
         }
         if (error.errors[key].message === "Email address already in use!") {
-          request.flash("error", "Email address already in use!");
+          req.flash("error", "Email address already in use!");
         }
       }
-      //   response.redirect("/todos");
-      response.redirect("/signup");
+      //   res.redirect("/todos");
+      res.redirect("/signup");
     }
   }
 };
 
 // login
-exports.login = async (request, response) => {
-  const { email, password } = request.body;
+exports.login = async (req, res) => {
+  const { email, password } = req.body;
   try {
+    //search admin using email
     const admin = await Admin.findOne({ where: { email } });
     if (!admin) {
-      request.flash("error", "No user found");
-      response.redirect("/login");
+      req.flash("error", "No user found");
+      res.redirect("/login");
     }
+    //compare password
     const passWordCorrect = await bcrypt.compare(password, admin.password);
     if (!passWordCorrect) {
-      request.flash("error", "Incorrect password");
+      req.flash("error", "Invalid username or password");
+      res.redirect("/login");
     }
     if (passWordCorrect) {
-      const token = generateJwtToken(admin.id, "voter");
-
-      const cookieOPtions = {
-        expiresIn: "60d",
-
-        httpOnly: true,
-      };
-      if (process.env.NODE_ENV == "production") cookieOPtions.secure = true;
-
-      response.cookie("jwt", token, cookieOPtions);
-      request.logIn(admin, (err) => {
-        if (err) {
-          console.log("from", err);
-        }
-        response.redirect("/elections");
-      });
+      createSendToken(admin, req, res);
     }
   } catch (error) {
     console.log(error.message);
   }
 };
 
-exports.logout = (req, res, next) => {
+//logout user
+exports.logout = (req, res) => {
   res.cookie("jwt", "loggedout", {
     expires: new Date(Date.now() + 10 * 1000),
     httpOnly: true,
   });
-  // res.status(200).json({ status: "success" });
-  req.logOut((err) => {
-    if (err) {
-      return next(err);
-    }
-    res.redirect("/");
-  });
+
+  res.redirect("/");
 };
 
 // get admin details
@@ -194,12 +131,14 @@ exports.getAllAdmins = async (req, res) => {
 };
 
 //forgot password
-exports.forgotPassword = async (req, res, next) => {
+exports.forgotPassword = async (req, res) => {
   const { email } = req.body;
   //get the user by email
   const admin = await Admin.findOne({ where: { email } });
   if (!admin) {
     req.flash("error", "No user found with this email");
+    res.redirect("back");
+    return;
   }
   //create hashed token
   const resetToken = admin.createPasswordResetToken();
@@ -210,9 +149,6 @@ exports.forgotPassword = async (req, res, next) => {
     "host"
   )}/admins/resetPassword/${resetToken}`;
   await new Email(admin, resetUrl).sendPasswordReset();
-  if (!admin) {
-    req.flash("error", "No user found with this email");
-  }
 
   req.flash(
     "success",
@@ -221,7 +157,8 @@ exports.forgotPassword = async (req, res, next) => {
   res.redirect("back");
 };
 
-exports.resetPassword = async (req, res, next) => {
+//reset password
+exports.resetPassword = async (req, res) => {
   //get user based on token
   const hashedToken = crypto
     .createHash("sha256")
@@ -238,7 +175,9 @@ exports.resetPassword = async (req, res, next) => {
     },
   });
   if (!admin) {
-    return next("no user found");
+    req.flash("error", "Invalid token");
+    res.redirect("back");
+    return;
   }
   //update user
   const hashedPassword = await generateHashedPassword(req.body.password);
@@ -254,18 +193,9 @@ exports.resetPassword = async (req, res, next) => {
   };
   if (process.env.NODE_ENV == "production") cookieOPtions.secure = true;
 
+  //save cookies
   res.cookie("jwt", token, cookieOPtions);
-  // const url = `${req.protocol}://${req.get("host")}/me`;
-  // // console.log(url);
-  // await new Email(admin, url).sendWelcome();
-  req.logIn(admin, (err) => {
-    if (err) {
-      console.log("from", err);
-    }
-    res.redirect("/elections");
-  });
-  //res.send(admin);
-  //check if token has expired
-  //update chagedPasswordAt
-  //log the user,send jwt
+
+  //redirect to elections page
+  res.redirect("/elections");
 };

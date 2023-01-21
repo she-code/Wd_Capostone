@@ -917,3 +917,165 @@ exports.previewResults = async (req, res) => {
                     </div>
                   </div>
                   <%}%>
+
+
+                  <!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="csrf-token" content="<%= csrfToken %>" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+
+  <title>
+    <%=title%>
+  </title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.anychart.com/releases/8.0.1/js/anychart-core.min.js"></script>
+  <script src="https://cdn.anychart.com/releases/8.0.1/js/anychart-pie.min.js"></script>
+  <script>
+    $(document).ready(function () {
+
+      const element = document.getElementById("select1")
+      const ck = element.options[element.selectedIndex].value
+      var x = 0;
+
+    })
+
+    function myFunction() {
+      x = document.getElementById("select1").value;
+      // var data = 
+      // var filtered=parR.filter(function (el)
+      //         {
+      //           return el.Question.id == 29
+      //         })
+      console.log(x)
+    }
+    var token = document.querySelector('meta[name="csrf-token"]').getAttribute("content")
+
+
+  </script>
+  <style>
+    tr:nth-child(even) {
+      background: rgb(204 204 204 / 20%);
+    }
+
+    body {
+      font-family: 'Jost', sans-serif;
+
+    }
+
+    tr:hover {
+      background: #c2c2c278;
+    }
+  </style>
+
+</head>
+
+<body>
+  <main class=" h-screen pb-5" style="background-color: #6c6c7f24; ">
+    <%-include('header.ejs',{admin:null})%>
+      <div class="  sm:container mx-auto p-10 bg-white shadow-lg rounded-md "
+        style=" margin: 30px auto; height: 75%; width: 75%;">
+        <div class="mx-auto">
+          <% var data=[ {label:"Home",url:"/elections",current:false},
+          {label:`${election.title}`,url:`/elections/${election.id}`,current:false},
+          {label:`Preview Results`,url:`/elections/${election.id}/preview`,current:true} ] %>
+            <%- include('navigation.ejs',{data:data})%>
+              <div class="flex justify-between">
+                <p class="py-2 text-2xl font-bold text-gray-600">
+                  <%=election.title%>
+                </p>
+                  <select id="select1" name="selectedQuestion" >
+                    <%for(var i=0;i< questions.length;i++){%>
+                      <a href="">
+                        <option value="<%=questions[i].id%>">Question <%=i+1%>
+                        </option>
+                      </a>
+                      <%}%>
+                  </select>
+              </div>
+              <div class="shadow-lg rounded-lg overflow-hidden " style="    height: 35%;
+                width: 40%;">
+                
+              <%var arr=[]; var ele={x:'',value:0}; var filtered=parR.filter(function (el)
+              {
+                return el.Question.id == 29
+              })
+                %>
+                <% parR.forEach((element)=> {
+
+                  arr.push({x:element.Answer.content,value:element.votes})
+                  %>
+                 
+                  <%}) %>
+                 
+               <!-- Required chart.js -->
+               
+
+
+        </div>
+        <div id="container" style="height: 400px;"></div>
+      </div>
+  </main>
+
+      <script>
+         var a = document.getElementById('select1');
+         var selectedQuestion=0 ;
+         var parsedData = <%-JSON.stringify(parR)%>
+          var newData =[]
+        var filtered=[]
+        
+        const df =[]
+        df = a.addEventListener('change', function () {
+          //location.reload()
+          newData =[]
+          //check if it exists remove it 
+          const element = document.getElementById("container");
+        
+          selectedQuestion=this.value
+           filtered=parsedData.filter(function (el)
+              {
+                return el.Question.id == selectedQuestion
+              })
+             
+              console.log(filtered)
+              filtered.forEach((element)=> {
+
+                newData.push({x:element.Answer.content,value:element.votes})
+
+                })
+              return newData
+                
+        }, true);
+       console.log(df)
+
+        anychart.onDocumentReady(function() {
+                
+                // create the chart
+                var chart = anychart.pie();
+                var chartData=<%-JSON.stringify(arr)%>
+
+                // set the chart title
+                chart.title("<%=election.title%>");
+                //console.log(chartData)
+                // add the data
+                chart.data(chartData);
+
+                // display the chart in the container
+                chart.container('container');
+                chart.draw();
+
+              });
+               
+         // alert(selectedQuestion)   
+        
+                //newData=[]
+      
+              </script>
+
+</body>
+
+</html>

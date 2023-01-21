@@ -1,6 +1,6 @@
 const { Answer, Admin, Election, Question } = require("../models");
 const AppError = require("../utils/AppError");
-//create elections
+//create answer
 exports.createAnswer = async (req, res) => {
   //get adminId from req.user
   //get electionId from req.body
@@ -88,21 +88,41 @@ exports.deleteAnswer = async (req, res) => {
     res.redirect("back");
   }
 };
+//edit question
+exports.updateAnswer = async (req, res, next) => {
+  const { content } = req.body;
+  const id = req.params.id;
+  console.log(req.body);
+  try {
+    const answer = await Answer.findByPk(id);
+    if (!answer) {
+      return next(new AppError("No answer found with that id", 404));
+    }
+    const updatedAnswer = await answer.update({
+      content,
+    });
+    // const updatedanswer = await answer.updateanswer({title:title,url:customString});
+    console.log(updatedAnswer);
 
+    // res.json(updatedanswer);
+    res.json(updatedAnswer);
+    // res.redirect(`/elections`);
+  } catch (error) {
+    console.log(error.message);
+    res.json(error.message);
+  }
+};
 //edit answer page
 exports.renderUpdateAnsPage = async (request, response, next) => {
   const id = request.params.id;
   const loggedInUser = request.user;
   console.log(request.user);
   const admin = await Admin.getAdminDetails(loggedInUser);
-  const answer = await Answer.getAnswer(loggedInUser, id);
+  const answer = await Answer.findByPk(id);
   if (!answer) {
     return next(new AppError("No answer found with that id", 404));
   }
-  const question = await Question.getQuestionDetails(
-    loggedInUser,
-    answer.questionId
-  );
+  const question = await Question.getQuestion(loggedInUser, answer.questionId);
 
   console.log({ answer });
 
@@ -112,5 +132,8 @@ exports.renderUpdateAnsPage = async (request, response, next) => {
     admin,
     question,
     csrfToken: request.csrfToken(),
+  });
+  response.render("result", {
+    title: "Update answer",
   });
 };

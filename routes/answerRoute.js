@@ -6,8 +6,8 @@ router.use(authenticateJWT);
 
 router.post("/createAnswers", answerControler.createAnswer);
 router.get("/", answerControler.renderAnswersPage);
-router.get("/:id/edit", answerControler.renderUpdateAnsPage);
+router.get("/:id", answerControler.renderUpdateAnsPage);
 
 router.delete("/:id", answerControler.deleteAnswer);
-
+router.put("/:id", answerControler.updateAnswer);
 module.exports = router;

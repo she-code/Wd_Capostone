@@ -10,6 +10,8 @@
     <%=title%>
   </title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.anychart.com/releases/8.0.1/js/anychart-core.min.js"></script>
+  <script src="https://cdn.anychart.com/releases/8.0.1/js/anychart-pie.min.js"></script>
   <script>
     var token = document.querySelector('meta[name="csrf-token"]').getAttribute("content")
     function updateElection(id) {
@@ -45,7 +47,21 @@
          
           <%if(election.status=="ended" ){%>
             <p>The election has ended</p>
-          <%}%>
+            <div class="flex justify-between">
+                
+              <p class="text-gray-600 font-light">Select the dropdown to view the voting result for each question</p>
+                <select id="select1" name="selectedQuestion" onchange="displayChart()">
+                  <option value="" disabled selected>Select</option>
+                  <%for(var i=0;i< questions.length;i++){%>
+                    <a href="">
+                      <option value="<%=questions[i].id%>">Question <%=i+1%>
+                      </option>
+                    </a>
+                    <%}%>
+                </select>
+            </div>
+            <div id="container" style="height: 400px;"></div>
+          </div>          <%}%>
           <%if(election.status=="launched" ){%>
             <%if(currentVoter != null){%>
             <%if(currentVoter.voterStatus == "voted"){%>
@@ -86,7 +102,56 @@
       </div>
       </div>
   </main>
+  <script>
+    //declare variables
+     let selectedQuestion=0 ;
+     let parsedData = <%-JSON.stringify(parsedResult)%>
+     let newData =[]
+     let filtered=[]
+    var queTitle ;
+    function displayChart(){
+      newData=[]
+      //if the chart container has child remove all
+          const container = document.getElementById("container");
+          if (container.childNodes.length > 0) { 
+            while (container.firstChild) {
+                container.removeChild(container.firstChild);
+                    }
+                }
+                //filter the data
+          selectedQuestion = document.getElementById("select1").value;
+          filtered=parsedData.filter(function (el)
+              {
+                return el.Question.id == selectedQuestion
+              })
+         //create chart data
+          filtered.forEach((element)=> {
+            queTitle = element.Question.title
+            newData.push({x:element.Answer.content,value:element.votes})
+            })
 
+            //generate the chart
+            anychart.onDocumentReady(function() {
+
+            // create the chart
+            var chart = anychart.pie();
+
+            // set the chart title
+            chart.title(queTitle);
+            //console.log(chartData)
+            // add the data
+            chart.data(newData);
+
+            // display the chart in the container
+            chart.container('container');
+            chart.draw();
+
+            });
+          // newData
+    }
+   
+  
+          </script>
 </body>
 
 </html>

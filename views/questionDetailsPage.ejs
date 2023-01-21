@@ -27,6 +27,7 @@
         }
       }).catch((err) => console.log(err))
     }
+
     function deleteAnswer(id) {
       var result = confirm("Are you sure?")
       if (result) {
@@ -73,7 +74,9 @@
 
                     </div>
                   </form>
+
                 </div>
+                <%-include("errorMsg.ejs")%>
 
               </div>
               <div>
@@ -87,7 +90,6 @@
                       <%}%>
               </div>
 
-              <%-include("errorMsg.ejs")%>
 
         </div>
         <div>
@@ -105,8 +107,8 @@
               <tbody class="bg-grey-light flex flex-col items-center justify-start overflow-y-auto w-full"
                 style="height: 40vh;">
                 <%for(var i=0;i<answers.length;i++){%>
-
                   <tr class="flex w-full mb-4">
+
                     <td class="p-4 w-1/4 text-lg">
                       <%=i+1%>
                     </td>
@@ -116,7 +118,7 @@
                     </td>
                     <td class="p-4 w-1/4">
                       <div class="flex justify-between">
-                        <a href="/a/<%=answers[i].id%>/edit">
+                        <a href="/questions/editAnswer/<%=answers[i].id%>">
                           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
                             stroke="currentColor" class="w-5 h-6 stroke-green-600">
                             <path stroke-linecap="round" stroke-linejoin="round"

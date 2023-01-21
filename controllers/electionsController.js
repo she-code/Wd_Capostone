@@ -7,7 +7,7 @@ const {
   Result,
 } = require("../models");
 const { fn, col } = require("sequelize");
-const { encode } = require("../utils");
+const { encode, votingResult } = require("../utils");
 const AppError = require("../utils/AppError");
 
 //get elections
@@ -369,6 +369,7 @@ exports.renderVotingPage = async (req, res) => {
     }
     return accumulate;
   }, []);
+  const parsedResult = await votingResult(election.id);
 
   // //return the result
   if (req.accepts("html")) {
@@ -377,7 +378,9 @@ exports.renderVotingPage = async (req, res) => {
       csrfToken: req.csrfToken(),
       election,
       currentVoter,
+      parsedResult,
       groupedByQuestion,
+      questions,
     });
   } else {
     res.json({
@@ -389,47 +392,9 @@ exports.renderVotingPage = async (req, res) => {
 //render result page
 exports.previewResults = async (req, res) => {
   const electionId = req.params.id;
-  const result = await Result.findAll({
-    // where: { [Op.and]: [{ electionId }, { questionId }] },
-    where: { electionId },
-    include: [
-      {
-        model: Answer,
-        required: true,
-        attributes: ["content", "id"],
-      },
-      {
-        model: Question,
-        required: true,
-        attributes: ["title", "description", "id", "electionId"],
-      },
-    ],
-    attributes: [
-      "answerId",
-      "Result.questionId",
-      "Result.electionId",
-      "Answer.id",
-      "Question.id",
-      [fn("COUNT", col("voter_Id")), "votes"],
-    ],
-    group: [
-      "answerId",
-      "Result.questionId",
-      "Result.electionId",
-      "Question.id",
-      "Answer.id",
-    ],
-  });
-  const labels = [];
-  const votes = [];
 
-  const strR = JSON.stringify(result);
-  const parR = JSON.parse(strR);
-  parR.forEach((element) => {
-    labels.push(element.Answer.content);
-    votes.push(element.votes);
-  });
-
+  //get the vote result
+  const parsedResult = await votingResult(electionId);
   //get election
   const admin = req.user;
   const election = await Election.getElectionDetails(admin, electionId);
@@ -439,7 +404,7 @@ exports.previewResults = async (req, res) => {
     res.render("previewResult", {
       election,
       questions,
-      parR,
+      parsedResult,
       title: "Online Voting Platform",
       csrfToken: req.csrfToken(),
     });

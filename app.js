@@ -8,14 +8,12 @@ const cookieParser = require("cookie-parser");
 const dotenv = require("dotenv");
 const morgan = require("morgan");
 const passport = require("passport");
-const bcrypt = require("bcrypt");
 const csurf = require("tiny-csrf");
-// const connectEnsureLogin = require("connect-ensure-login");
 const session = require("express-session");
 dotenv.config({ path: "./config.env" });
 
 //import files
-const { Admin, Voter, Election, Question } = require("./models");
+const { Voter, Election, Question } = require("./models");
 const initiatePassport = require("./auth/passport/index");
 const authenticateJwt = require("./middelwares/authenticateJWT");
 const globalErrorHandler = require("./controllers/errorController");
@@ -58,24 +56,24 @@ app.use(function (request, response, next) {
   next();
 });
 
-//intialize passport
-app.use(passport.initialize());
-app.use(passport.session());
+// //intialize passport
+// app.use(passport.initialize());
+// app.use(passport.session());
 
-initiatePassport(passport);
+// initiatePassport(passport);
 
-passport.serializeUser((voter, done) => {
-  console.log("Seralizing voter in session", voter.id);
-  done(null, voter.id);
-});
+// passport.serializeUser((voter, done) => {
+//   console.log("Seralizing voter in session", voter.id);
+//   done(null, voter.id);
+// });
 
-passport.deserializeUser((id, done) => {
-  Voter.findByPk(id)
-    .then((user) => {
-      done(null, user);
-    })
-    .catch((error) => done(error, null));
-});
+// passport.deserializeUser((id, done) => {
+//   Voter.findByPk(id)
+//     .then((user) => {
+//       done(null, user);
+//     })
+//     .catch((error) => done(error, null));
+// });
 
 //set default view engine
 app.set("views", path.join(__dirname, "views"));
@@ -85,6 +83,12 @@ app.set("view engine", "ejs");
 
 app.get("/", async (req, res) => {
   res.render("index", {
+    title: "Online Voting Platform",
+    csrfToken: req.csrfToken(),
+  });
+});
+app.get("/lol", async (req, res) => {
+  res.render("result", {
     title: "Online Voting Platform",
     csrfToken: req.csrfToken(),
   });
@@ -127,8 +131,6 @@ app.get("/resetPassword", async (req, res) => {
   });
 });
 app.get("/vote", async (req, res) => {
-  console.log("uff", req.user.id);
-
   const currentVoter = req.user.id;
   const adminId = req.user.adminId;
   const electionId = req.user.electionId;
@@ -144,73 +146,21 @@ app.get("/vote", async (req, res) => {
     // questions,
   });
 });
-//register user
-app.post("/admins", async (request, response) => {
-  const { firstName, lastName, email, password } = request.body;
-  const hashedPwd = await bcrypt.hash(password, 10);
-  //create user
-  try {
-    const user = await Admin.create({
-      firstName: firstName,
-      lastName: lastName,
-      email: email,
-      password: hashedPwd,
-    });
-    request.logIn(user, (err) => {
-      if (err) {
-        console.log("from", err);
-      }
-      response.redirect("/elections");
-    });
-  } catch (error) {
-    console.log(error.message);
-    if (error.name === "SequelizeUniqueConstraintError") {
-      request.flash("error", "Email already exists");
-      response.redirect("/signup");
-    }
-    if (error.name === "SequelizeValidationError") {
-      for (var key in error.errors) {
-        console.log(error.errors[key].message);
-        if (
-          error.errors[key].message === "Validation len on firstName failed"
-        ) {
-          request.flash(
-            "error",
-            "First name must have minimum of 2 characters"
-          );
-        }
-        if (error.errors[key].message === "Validation len on lastName failed") {
-          request.flash("error", "Last name must have minimum of 2 characters");
-        }
-        if (
-          error.errors[key].message === "Validation isEmail on email failed"
-        ) {
-          request.flash("error", "Invalid Email");
-        }
-        if (error.errors[key].message === "Email address already in use!") {
-          request.flash("error", "Email address already in use!");
-        }
-      }
-      //   response.redirect("/todos");
-      response.redirect("/signup");
-    }
-  }
-});
 
-//login user
-app.post(
-  "/session",
-  passport.authenticate("local", {
-    failureRedirect: "/voterLogin",
-    failureFlash: true,
-  }),
-  async (request, response) => {
-    //const { email, password } = request.body;
-    //console.log(request.user.id);
+//login voter
+// app.post(
+//   "/session",
+//   passport.authenticate("local", {
+//     failureRedirect: "/voterLogin",
+//     failureFlash: true,
+//   }),
+//   async (request, response) => {
+//     //const { email, password } = request.body;
+//     //console.log(request.user.id);
 
-    response.redirect(`/elections/e/${global.elecIdUrl}/vote`);
-  }
-);
+//     response.redirect(`/elections/e/${global.elecIdUrl}/vote`);
+//   }
+// );
 //sign out user
 app.get("/signout", (request, response, next) => {
   response.cookie("jwt", "loggedout", {
@@ -218,21 +168,21 @@ app.get("/signout", (request, response, next) => {
     httpOnly: true,
   });
   // res.status(200).json({ status: "success" });
-  request.logOut((err) => {
-    if (err) {
-      return next(err);
-    }
-    response.redirect("/");
-  });
+  // request.logOut((err) => {
+  //   if (err) {
+  //     return next(err);
+  //   }
+  response.redirect("/");
+  // });
 });
 
 //routes
 app.use("/admins", adminRoute);
-app.use("/elections", electionRoute);
 app.use("/questions", authenticateJwt, questionsRoute);
-app.use("/answers", authenticateJwt, answersRoute);
+app.use("/answers", answersRoute);
 app.use("/voters", votersRoute);
 app.use("/results", resultsRoute);
+app.use("/elections", electionRoute);
 
 //handles non existing paths
 // app.all("*", (req, res, next) => {

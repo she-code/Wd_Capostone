@@ -70,6 +70,8 @@
                 
                 <p class="text-gray-600 font-light">Select the dropdown to view the voting result for each question</p>
                   <select id="select1" name="selectedQuestion" onchange="displayChart()">
+                    <option value="" disabled selected>Select</option>
+
                     <%for(var i=0;i< questions.length;i++){%>
                       <a href="">
                         <option value="<%=questions[i].id%>">Question <%=i+1%>
@@ -86,7 +88,7 @@
       <script>
         //declare variables
          let selectedQuestion=0 ;
-         let parsedData = <%-JSON.stringify(parR)%>
+         let parsedData = <%-JSON.stringify(parsedResult)%>
          let newData =[]
          let filtered=[]
         var queTitle ;
