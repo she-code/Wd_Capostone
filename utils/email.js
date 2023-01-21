@@ -22,7 +22,7 @@ module.exports = class Email {
         service: "gmail",
         auth: {
           user: "fresam123ab@gmail.com",
-          pass: "frehiwot234SAM@",
+          pass: "xyulwmthittawwbo",
         },
         port: 465,
         host: "smtp.gmail.com",
