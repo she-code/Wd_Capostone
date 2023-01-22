@@ -22,3 +22,5 @@
                   </div>
                 </form>
                 <%-include("errorMsg.ejs")%> -->
+
+                window.alert("Unable to delete\nA question must have atleast one question")

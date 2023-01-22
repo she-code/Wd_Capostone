@@ -84,7 +84,12 @@ exports.deleteQuestion = async (req, res, next) => {
 
     //todo add message
     if (Questions.length <= 1) {
-      return next(new AppError("You cant delete", 403));
+      return next(
+        new AppError(
+          "An election must atleast have one question in the ballot",
+          403
+        )
+      );
     }
     await Question.deleteQuestion(questionId, adminId);
     return res.json(true);

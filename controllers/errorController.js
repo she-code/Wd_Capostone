@@ -6,6 +6,8 @@ const handleJWTExpiredError = () =>
   new AppError("Your token has expired! Please log in again.", 401);
 const handleLauncElectionError = () =>
   new AppError("An election must have atleast 1 question to be launched", 403);
+const handleDeleteQuestionError = () =>
+  new AppError("An election must atleast have one question in the ballot", 403);
 const handleInvalidId = (err) => {
   const message = `Invalid ${err.path}: ${err.value}`;
   return new AppError(message, 400);
@@ -89,6 +91,11 @@ module.exports = (err, req, res, next) => {
       "Every question in an election must have atleast two answers"
     )
       err = handleLauncElectionError();
+    if (
+      err.message === "An election must atleast have one question in the ballot"
+    )
+      err = handleDeleteQuestionError();
+
     sendErrorProd(error, req, res);
   }
 };
