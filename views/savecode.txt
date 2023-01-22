@@ -1,0 +1,24 @@
+ <!-- <% var data=[ {label:"Home",url:"/elections",current:false}, {label:"Create new
+            election",url:"/elections/createElections/new",current:true} ] %>
+            <%- include('navigation.ejs',{data:data})%>
+              <div class="p-8 mx-auto flex flex-col align-center justify-center" style="width: 500px;">
+                <h1 class="text-gray-600 text-2xl font-semibold text-center">Create new election</h1>
+                <form method="post" action="/elections/createElection">
+                  <input type="hidden" name="_csrf" value="<%=csrfToken%>" />
+                  <div class="p-3">
+                    <label for="title" class="text-gray-900 text-lg py-2">What's your election's name?</label>
+                    <input type="text" name="title"
+                      class="border border-gray-300 text-gray-900 rounded p-2 w-full mt-2" />
+                  </div>
+                  <div class="p-3">
+                    <label for="customString" class="text-gray-900 text-lg py-2">What's the custom string for the
+                      election?</label>
+                    <input type="text" name="customString"
+                      class="border border-gray-300 text-gray-900 rounded p-2 w-full mt-2" />
+                  </div>
+                  <div class="p-3">
+                    <button type="submit"
+                      class="text-white bg-green-600 hover:bg-green-800 font-medium rounded px-5 py-2 w-full">SUBMIT</button>
+                  </div>
+                </form>
+                <%-include("errorMsg.ejs")%> -->
