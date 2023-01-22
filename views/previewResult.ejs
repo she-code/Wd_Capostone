@@ -68,7 +68,7 @@
             </p>
               <div class="flex justify-between">
                 
-                <p class="text-gray-600 font-light">Select the dropdown to view the voting result for each question</p>
+                <p class="text-gray-400 font-light">Select the dropdown to view the voting result for each question</p>
                   <select id="select1" name="selectedQuestion" onchange="displayChart()">
                     <option value="" disabled selected>Select</option>
 
@@ -80,7 +80,9 @@
                       <%}%>
                   </select>
               </div>
-              
+              <div>
+                <p class="text-gray-500 text-xl"><span class="text-gray-600 font-semibold"><%=voterCount%></span> voters have voted so far</p>
+              </div>
         <div id="container" style="height: 400px;"></div>
       </div>
   </main>

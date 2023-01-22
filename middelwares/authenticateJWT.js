@@ -2,6 +2,7 @@
  * or cookies */
 
 const jwt = require("jsonwebtoken");
+const AppError = require("../utils/AppError");
 
 const authenticateJwt = (req, res, next) => {
   let token;
@@ -14,18 +15,31 @@ const authenticateJwt = (req, res, next) => {
     token = req.cookies.jwt;
   }
   if (!token) {
-    return res.redirect("/");
+    if (req.originalUrl == "/") {
+      next();
+    }
+    return next(new AppError("Invalid token. Please log in again!", 401));
   }
   jwt.verify(token, process.env.JWT_SECRET, (err, verifiedJwt) => {
     if (err) {
-      console.log(err);
-      res.redirect("/");
+      // console.log(err);
+      // //check this logic
+      // res.redirect("/");
+      if (req.originalUrl == "/") {
+        next();
+      }
+      new AppError("Your token has expired! Please log in again.", 401);
     } else {
       req.user = verifiedJwt.id;
       req.userType = verifiedJwt.userType;
       console.log(token);
       console.log("user", req.user, "userType", req.userType);
       // res.status(200).json({"token":verifiedJwt} )
+
+      //check this logic
+      // if(req.orginalUrl == '/'){
+      //   res.redirect('/elections')
+      // }
       next();
     }
   });

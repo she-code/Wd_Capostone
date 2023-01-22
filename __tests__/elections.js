@@ -4,13 +4,26 @@ const request = require("supertest");
 const db = require("../models/index");
 const app = require("../app");
 const cheerio = require("cheerio");
-const authenticateJWT = require("../middelwares/authenticateJWT");
+const jwt = require("jsonwebtoken");
+const authenticateJwt = require("../middelwares/authenticateJWT");
+
+/* Mocking the authenticateJwt middleware. */
+// jest.mock(
+//   authenticateJwt,
+//   () => (req: Request, res: Response, next: NextFunction) => {
+//     req.user = {};
+//     return next();
+//   }
+// );
 
 let server, agent;
 function extractCsrfToken(res) {
   var $ = cheerio.load(res.text);
   return $("[name=_csrf]").val();
 }
+// function extractUserId(res){
+//   var $ = cheerio.load(res.)
+// }
 const login = async (agent, username, password) => {
   let res = await agent.get("/login");
   let csrfToken = extractCsrfToken(res);
@@ -20,6 +33,19 @@ const login = async (agent, username, password) => {
     _csrf: csrfToken,
   });
   console.log(res.text);
+};
+
+const signup = async (agent, email, password, firstName, lastName) => {
+  let res = await agent.get("/signup");
+  let csrfToken = extractCsrfToken(res);
+  res = await agent.post("/admins/register").type("form").send({
+    email: email,
+    password: password,
+    firstName: firstName,
+    lastName: lastName,
+    _csrf: csrfToken,
+  });
+  return res;
 };
 // eslint-disable-next-line no-unused-vars
 const user = async (agent, username, password) => {
@@ -32,25 +58,51 @@ const user = async (agent, username, password) => {
   });
   return response;
 };
-const createElection = async (agent, title, url) => {
-  const res = await agent.get("/elections/createElections/new");
-  const csrfToken = extractCsrfToken(res);
-  // eslint-disable-next-line no-unused-vars
-  const response = await agent.post("/elections/createElection").send({
-    title: title,
-    url: url,
-    _csrf: csrfToken,
-  });
-  // console.log(response)
+const createElection = async (agent, title, url, adminId) => {
+  let res = await agent.get("/elections/createElections/new");
+  let csrfToken = extractCsrfToken(res);
+
+  const response = await agent
+    .post("/elections/createElection")
+    .set("Authorization", "Bearer " + token)
+    .type("form")
+    .send({
+      title: title,
+      url: url,
+      adminId: adminId,
+      _csrf: csrfToken,
+    });
 };
 const SECONDS = 1000;
 jest.setTimeout(70 * SECONDS);
+let token = null;
+let userId = null;
+let cookie;
 
 describe("Online Voting Platform", function () {
   beforeAll(async () => {
     await db.sequelize.sync({ force: true });
     server = app.listen(4000, () => {});
     agent = request.agent(server);
+    let res = await agent.get("/signup");
+    let csrfToken = extractCsrfToken(res);
+    await agent
+      .post("/admins/register")
+      .type("form")
+      .send({
+        email: "test3@gmail.com",
+        password: "password",
+        firstName: "Test",
+        lastName: "Haile",
+        _csrf: csrfToken,
+      })
+      .then((res) => {
+        const cookies = res.headers["set-cookie"][1]
+          .split(",")
+          .map((item) => item.split(";")[0]);
+        cookie = cookies.join(";");
+        console.log({ admin: cookie });
+      });
   });
   afterAll(async () => {
     try {
@@ -60,51 +112,91 @@ describe("Online Voting Platform", function () {
       console.log(error);
     }
   });
-
-  // test("test for Sign up", async () => {
-  //   let res = await agent.get("/signup");
-  //   let csrfToken = extractCsrfToken(res);
-
-  //   res = await agent.post("/admins/register").send({
-  //     firstName: "Test",
-  //     lastName: "User",
-  //     email: "test@gmail.com",
-  //     password: "12345678",
-  //     _csrf: csrfToken,
-  //   });
-  //   expect(res.statusCode).toBe(302);
-  // });
-
-  test("Create elections", async () => {
-    //create new agent
-    // const agent = request.agent(server);
-    // await login(agent, "test@gmail.com", "12345678");
+  test("test for Sign up", async () => {
     let res = await agent.get("/signup");
     let csrfToken = extractCsrfToken(res);
-    res = await agent.post("/admins/register").type("form").send({
-      email: "test@gmail.com",
-      password: "password",
+
+    res = await agent.post("/admins/register").send({
       firstName: "Test",
-      lastName: "Haile",
+      lastName: "User",
+      email: "testl@gmail.com",
+      password: "12345678",
       _csrf: csrfToken,
     });
-    res = await agent.get("/elections/createElections/new");
-    csrfToken = extractCsrfToken(res);
-    console.log(res.text);
+
+    expect(res.statusCode).toBe(302);
+  });
+
+  test("Create elections", async () => {
+    let res = await agent.get("/elections/createElections/new");
+    let csrfToken = extractCsrfToken(res);
+
     const response = await agent
       .post("/elections/createElection")
+      .set("Cookie", cookie)
       .type("form")
       .send({
         title: "Class rep",
         url: "class202",
-        adminId: 1,
+        adminId: userId,
         _csrf: csrfToken,
       });
-    console.log({ text: res.text });
+    console.log({ body: response });
     expect(response.statusCode).toBe(302);
   });
 
+  // test("Update election with given ID", async () => {
+  //   let res = await agent.get("/elections/createElections/new");
+  //   let csrfToken = extractCsrfToken(res);
+
+  //   const response = await agent
+  //     .post("/elections/createElection")
+  //     .set("Authorization", "Bearer " + token)
+  //     .type("form")
+  //     .send({
+  //       title: "Class 4ep",
+  //       url: "class402",
+  //       adminId: userId,
+  //       _csrf: csrfToken,
+  //     });
+  //   console.log(token);
+  //   const groupedElectionsResponse = await agent
+  //     .get("/elections")
+  //     .set("Accept", "application/json");
+  //   const parsedGroupedResponse = JSON.parse(groupedElectionsResponse.text);
+  //   console.log(parsedGroupedResponse);
+  //   expect(true).toBe(true);
+  // });
+  //   //create election
+  //   const agent = request.agent(server);
+  //   await createElection(agent, "Class 303", "303", 3);
+  //   //get all elections
+  //   const groupedElectionsResponse = await agent
+  //     .get("/elections")
+  //     .set("Accept", "application/json");
+  //   const parsedGroupedResponse = JSON.parse(groupedElectionsResponse.text);
+  //   // const electionsCount = parsedGroupedResponse.length;
+  //   // const latestElection =
+  //   //   parsedGroupedResponse.dueTodayLists[electionsCount - 1];
+  //   console.log(parsedGroupedResponse);
+  //   expect(true).toBe(true);
+  //   //get single election
+  //   //edit it
+  // });
   // test("Create questions", async () => {
+  //   const agent = request.agent(server);
+
+  //   await signup(agent, "test2@gmail.com", "12345678", "haile", "Come");
+  //   await createElection(agent, "Class 303", "303");
+
+  //   let res = await agent.get("/elections/createElections/new");
+  //   let csrfToken = extractCsrfToken(res);
+  //   await agent.post("/elections/createElection").form.send({
+  //     title: "Class rep",
+  //     url: "class22",
+  //     _csrf: csrfToken,
+  //   });
+  // });
   //   //create new agent
   //   const agent = request.agent(server);
   //   await login(agent, "test@gmail.com", "12345678");

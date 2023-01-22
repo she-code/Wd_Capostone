@@ -28,7 +28,7 @@
                             <div class="p-8 mx-auto flex flex-col align-center justify-center" style="width: 500px;">
 
                                 <h1 class="text-gray-600 text-2xl font-semibold text-center">Edit Question</h1>
-                                <form id="update_user" class="form">
+                                <form id="update_user" class="form" onsubmit="submit_btn.disabled = true; return true;">
                                     <input type="hidden" name="_csrf" value="<%=csrfToken%>" id="_csrf" />
                                     <input type="hidden" name="questionId" value="<%=question.id%>" id="questionId" />
                                     <input type="hidden" name="electionId" value="<%=election.id%>" id="electionId" />
@@ -46,7 +46,7 @@
                                             value="<%=question.description%>" />
                                     </div>
                                     <div class="p-3">
-                                        <button type="submit" id="submitBtn"
+                                        <button type="submit" id="submitBtn" name="submit_btn"
                                             class="text-white bg-green-600 hover:bg-green-800 font-medium rounded px-5 py-2 w-full">SUBMIT</button>
                                     </div>
                                 </form>

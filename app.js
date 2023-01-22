@@ -63,11 +63,17 @@ app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "ejs");
 
 //render views
-app.get("/", async (req, res) => {
-  res.render("index", {
-    title: "Online Voting Platform",
-    csrfToken: req.csrfToken(),
-  });
+app.get("/", authenticateJwt, async (req, res) => {
+  //check this logic
+  // console.log(req.user);
+  if (req.user != null) {
+    res.redirect("/elections");
+  } else {
+    res.render("index", {
+      title: "Online Voting Platform",
+      csrfToken: req.csrfToken(),
+    });
+  }
 });
 
 app.get("/signup", (request, response) => {
@@ -122,6 +128,7 @@ app.use("/voters", votersRoute);
 app.use("/results", resultsRoute);
 app.use("/elections", electionRoute);
 
+// after adding this if u click back csrf error
 //handles non existing paths
 // app.all("*", (req, res, next) => {
 //   // console.log(req.originalUrl);

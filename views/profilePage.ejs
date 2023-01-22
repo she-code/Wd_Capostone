@@ -38,7 +38,9 @@
             <div class="  sm:container mx-auto p-10 bg-white shadow-lg rounded-md "
                 style=" margin: 30px auto; height: 80%; width: 75%;">
                 <div class="mx-auto">
-
+                    <% var data=[ {label:"Home",url:"/elections",current:false},
+                    {label:`Profile`,url:`/admins/myProfile`,current:true} ] %>
+                      <%- include('navigation.ejs',{data:data})%>
                     <p class="text-gray-400 text-2xl fone-semibold mt-10 pl-5">Welcome, <%=admin.firstName%> You have created</p>
                     <div class="grid grid-rows-4 grid-flow-row gap-4 pl-3">
                     

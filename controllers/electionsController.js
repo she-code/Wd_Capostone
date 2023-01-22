@@ -1,3 +1,4 @@
+const { where } = require("sequelize");
 const {
   Election,
   Admin,
@@ -205,6 +206,8 @@ exports.renderElectionsPage = async (request, response) => {
   } else {
     response.json({
       elections,
+      admin,
+      loggedInUser,
     });
   }
 };
@@ -263,7 +266,12 @@ exports.renderElectionDetailsPage = async (request, response, next) => {
     });
   } else {
     response.json({
+      admin,
       election,
+      questions,
+      voters,
+      urlId,
+      answersWithQuestion,
     });
   }
 };
@@ -279,13 +287,22 @@ exports.renderManageQuesPage = async (request, response, next) => {
   }
   const admin = await Admin.getAdminDetails(loggedInUser);
   const questions = await Question.getQuestions(loggedInUser, id);
-  response.render("manageQuestions", {
-    title: "Online Voting Platform",
-    admin,
-    election,
-    questions,
-    csrfToken: request.csrfToken(),
-  });
+
+  if (request.accepts("html")) {
+    response.render("manageQuestions", {
+      title: "Online Voting Platform",
+      admin,
+      election,
+      questions,
+      csrfToken: request.csrfToken(),
+    });
+  } else {
+    response.json({
+      questions,
+      election,
+      admin,
+    });
+  }
 };
 
 //create questions page
@@ -311,12 +328,19 @@ exports.renderUpdateElecPage = async (request, response, next) => {
     return next(new AppError("No election found with that id", 404));
   }
 
-  response.render("editElectionPage", {
-    title: "Update Election",
-    election,
-    admin,
-    csrfToken: request.csrfToken(),
-  });
+  if (request.accepts("html")) {
+    response.render("editElectionPage", {
+      title: "Update Election",
+      election,
+      admin,
+      csrfToken: request.csrfToken(),
+    });
+  } else {
+    response.json({
+      election,
+      admin,
+    });
+  }
 };
 
 //render vote page
@@ -372,7 +396,16 @@ exports.renderVotingPage = async (req, res) => {
     return accumulate;
   }, []);
   const parsedResult = await votingResult(election.id);
-
+  const voterCount = await Result.count({
+    where: { electionId: election.id },
+    distinct: true,
+    col: Result.voter_Id,
+  });
+  const result = await Result.findAll({
+    where: { electionId: election.id },
+    raw: true,
+  });
+  console.log(result, { voterCount });
   // //return the result
   if (req.accepts("html")) {
     res.render("vote", {
@@ -380,14 +413,19 @@ exports.renderVotingPage = async (req, res) => {
       csrfToken: req.csrfToken(),
       election,
       currentVoter,
+      voterCount,
       parsedResult,
       groupedByQuestion,
       questions,
     });
   } else {
     res.json({
-      // election,
-      l: "ji",
+      election,
+      currentVoter,
+      voterCount,
+      parsedResult,
+      groupedByQuestion,
+      questions,
     });
   }
 };
@@ -404,13 +442,18 @@ exports.previewResults = async (req, res, next) => {
     return next(new AppError("No election found with the given id", 404));
   }
   const questions = await Question.getQuestions(admin, electionId);
-
+  const voterCount = await Voter.count({
+    where: { electionId: election.id, voterStatus: "voted" },
+    distinct: true,
+  });
+  console.log({ voterCount });
   if (req.accepts("html")) {
     res.render("previewResult", {
       election,
       questions,
       parsedResult,
       admin,
+      voterCount,
       title: "Online Voting Platform",
       csrfToken: req.csrfToken(),
     });
