@@ -13,28 +13,34 @@
   <script>
     var token = document.querySelector('meta[name="csrf-token"]').getAttribute("content")
     var currentId;
+    var questions = <%-JSON.stringify(questions) %>
 
-    function deleteQuestion(id, electionId) {
-      var result = confirm("Are you sure?")
-      if (result) {
-        fetch(`/questions/${id}`, {
-          method: 'delete',
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            electionId: electionId,
-            _csrf: token,
-
-          })
-        }).then((res) => {
-          if (res.ok) {
-            window.location.reload();
-          }
-        }).catch((err) => {
+      function deleteQuestion(id, electionId) {
+        if (questions.length <= 1) {
           window.alert("Unable to delete\nAn election must have atleast one question")
-          console.log(err.message)
-        })
+
+        } else {
+          var result = confirm("Are you sure?")
+          if (result) {
+            fetch(`/questions/${id}`, {
+              method: 'delete',
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                electionId: electionId,
+                _csrf: token,
+
+              })
+            }).then((res) => {
+              if (res.ok) {
+                window.location.reload();
+              }
+            }).catch((err) => {
+              window.alert("Unable to delete\nAn election must have atleast one question")
+              console.log(err.message)
+            })
+          }
+        }
       }
-    }
   </script>
 </head>
 
