@@ -84,6 +84,11 @@ module.exports = (err, req, res, next) => {
         error === handleInvalidId(error);
       }
     }
+    if (
+      err.message ===
+      "Every question in an election must have atleast two answers"
+    )
+      err = handleLauncElectionError();
     sendErrorProd(error, req, res);
   }
 };
