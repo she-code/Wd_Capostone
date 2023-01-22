@@ -225,14 +225,30 @@ exports.renderElectionDetailsPage = async (request, response, next) => {
   const loggedInUser = request.user;
   const id = request.params.id;
   const admin = await Admin.getAdminDetails(loggedInUser);
-  const questions = await Question.getQuestions(loggedInUser, id);
   const election = await Election.getElectionDetails(loggedInUser, id);
   if (!election) {
     return next(new AppError("No election found with that id", 404));
   }
+  const questions = await Question.getQuestions(loggedInUser, id);
   const electionId = election.id;
   const urlId = encode(electionId);
   const voters = await Voter.getVoters(electionId);
+
+  let answersWithQuestion = [];
+  for (var i in questions) {
+    answersWithQuestion.push(
+      await Answer.findAll({
+        where: { questionId: questions[i].id },
+        include: [
+          {
+            model: Question,
+            required: true,
+          },
+        ],
+      })
+    );
+  }
+  console.log("hi", { hi: answersWithQuestion });
   request.voterUrl = electionId;
   if (request.accepts("html")) {
     response.render("electionDetailsPage", {
@@ -242,6 +258,7 @@ exports.renderElectionDetailsPage = async (request, response, next) => {
       questions,
       voters,
       urlId,
+      answersWithQuestion,
       csrfToken: request.csrfToken(),
     });
   } else {
@@ -252,13 +269,16 @@ exports.renderElectionDetailsPage = async (request, response, next) => {
 };
 
 // manage questions page
-exports.renderManageQuesPage = async (request, response) => {
+exports.renderManageQuesPage = async (request, response, next) => {
   const loggedInUser = request.user;
   const id = request.params.id;
+
+  const election = await Election.getElectionDetails(loggedInUser, id);
+  if (!election) {
+    return next(new AppError("No election found with the given id", 404));
+  }
   const admin = await Admin.getAdminDetails(loggedInUser);
   const questions = await Question.getQuestions(loggedInUser, id);
-  const election = await Election.getElectionDetails(loggedInUser, id);
-
   response.render("manageQuestions", {
     title: "Online Voting Platform",
     admin,
@@ -372,7 +392,7 @@ exports.renderVotingPage = async (req, res) => {
   }
 };
 //render result page
-exports.previewResults = async (req, res) => {
+exports.previewResults = async (req, res, next) => {
   const electionId = req.params.id;
 
   //get the vote result
@@ -380,6 +400,9 @@ exports.previewResults = async (req, res) => {
   //get election
   const admin = req.user;
   const election = await Election.getElectionDetails(admin, electionId);
+  if (!election) {
+    return next(new AppError("No election found with the given id", 404));
+  }
   const questions = await Question.getQuestions(admin, electionId);
 
   if (req.accepts("html")) {
@@ -387,6 +410,7 @@ exports.previewResults = async (req, res) => {
       election,
       questions,
       parsedResult,
+      admin,
       title: "Online Voting Platform",
       csrfToken: req.csrfToken(),
     });

@@ -4,7 +4,6 @@ const passport = require("passport");
 
 const electionController = require("../controllers/electionsController");
 const voterController = require("../controllers/voterController");
-const resultController = require("../controllers/resultController");
 
 const authenticateJWT = require("../middelwares/authenticateJWT");
 const passIdToUrl = require("../middelwares/passUrl");

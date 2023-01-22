@@ -13,9 +13,19 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     var token = document.querySelector('meta[name="csrf-token"]').getAttribute("content")
+    var questions = <%-JSON.stringify(questions)%>
+    var launchError = false;
+
+   
     function launchElection(id) {
       // let compelete = false
       //check how many questions r there
+      if(questions.length < 1){
+        window.alert("An election must have atleast one answer")
+      }else if(launchError){
+        window.alert("less answer")
+      }
+      else{
       //check how many answers each question has
       fetch(`/elections/${id}/launch`, {
         method: 'put',
@@ -31,7 +41,7 @@
         window.alert("You can't update an election which has no questions / has a question with only one answer")
         console.log({ err })
       })
-    }
+    }}
     function endElection(id) {
       // let compelete = false
       fetch(`/elections/${id}/end`, {
