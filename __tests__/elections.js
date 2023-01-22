@@ -15,7 +15,24 @@ const authenticateJwt = require("../middelwares/authenticateJWT");
 //     return next();
 //   }
 // );
+const createElection = async (agent, title, url) => {
+  let res = await agent
+    .get("/elections/createElections/new")
+    .set("Cookie", cookie)
+    .set("Accept", "application/json");
 
+  let adminId = res.body.admin.id;
+  const response = await agent
+    .post("/elections/createElection")
+    .set("Cookie", cookie)
+    .send({
+      title: title,
+      url: url,
+      status: "created",
+      adminId: adminId,
+      _csrf: res.body.csrfToken,
+    });
+};
 let server, agent;
 function extractCsrfToken(res) {
   var $ = cheerio.load(res.text);
@@ -24,58 +41,9 @@ function extractCsrfToken(res) {
 // function extractUserId(res){
 //   var $ = cheerio.load(res.)
 // }
-const login = async (agent, username, password) => {
-  let res = await agent.get("/login");
-  let csrfToken = extractCsrfToken(res);
-  res = await agent.post("/admins/login").send({
-    email: username,
-    password: password,
-    _csrf: csrfToken,
-  });
-  console.log(res.text);
-};
 
-const signup = async (agent, email, password, firstName, lastName) => {
-  let res = await agent.get("/signup");
-  let csrfToken = extractCsrfToken(res);
-  res = await agent.post("/admins/register").type("form").send({
-    email: email,
-    password: password,
-    firstName: firstName,
-    lastName: lastName,
-    _csrf: csrfToken,
-  });
-  return res;
-};
-// eslint-disable-next-line no-unused-vars
-const user = async (agent, username, password) => {
-  let res = await agent.get("/login");
-  let csrfToken = extractCsrfToken(res);
-  const response = await agent.post("/admins/login").send({
-    email: username,
-    password: password,
-    _csrf: csrfToken,
-  });
-  return response;
-};
-const createElection = async (agent, title, url, adminId) => {
-  let res = await agent.get("/elections/createElections/new");
-  let csrfToken = extractCsrfToken(res);
-
-  const response = await agent
-    .post("/elections/createElection")
-    .set("Authorization", "Bearer " + token)
-    .type("form")
-    .send({
-      title: title,
-      url: url,
-      adminId: adminId,
-      _csrf: csrfToken,
-    });
-};
 const SECONDS = 1000;
 jest.setTimeout(70 * SECONDS);
-let token = null;
 let userId = null;
 let cookie;
 
@@ -103,6 +71,15 @@ describe("Online Voting Platform", function () {
         cookie = cookies.join(";");
         console.log({ admin: cookie });
       });
+    // jwt.verify(cookie, process.env.JWT_SECRET, (err, verifiedJwt) => {
+    //   if (err) {
+    //     console.log(err);
+    //   } else {
+    //     userId = verifiedJwt.id;
+    //     console.log({ userId });
+    //     // req.us
+    //   }
+    // });
   });
   afterAll(async () => {
     try {
@@ -112,6 +89,23 @@ describe("Online Voting Platform", function () {
       console.log(error);
     }
   });
+  // beforeEach(async () => {
+  //   //login
+  //   let res = await agent.get("/login");
+  //   let csrfToken = extractCsrfToken(res);
+  //   await agent.post("/admins/login").send({
+  //     email: "test3@gmail.com",
+  //     password: "password",
+  //     _csrf: csrfToken,
+  //   }).then((res) => {
+  //     const cookies = res.headers["set-cookie"][1]
+  //       .split(",")
+  //       .map((item) => item.split(";")[0]);
+  //     cookie = cookies.join(";");
+  //     console.log({ admin: cookie });
+  //   });
+  // });
+
   test("test for Sign up", async () => {
     let res = await agent.get("/signup");
     let csrfToken = extractCsrfToken(res);
@@ -126,246 +120,148 @@ describe("Online Voting Platform", function () {
 
     expect(res.statusCode).toBe(302);
   });
-
-  test("Create elections", async () => {
-    let res = await agent.get("/elections/createElections/new");
+  test("test for Sign In", async () => {
+    let res = await agent.get("/login");
     let csrfToken = extractCsrfToken(res);
-
-    const response = await agent
-      .post("/elections/createElection")
-      .set("Cookie", cookie)
-      .type("form")
-      .send({
-        title: "Class rep",
-        url: "class202",
-        adminId: userId,
-        _csrf: csrfToken,
-      });
-    console.log({ body: response });
+    let response = await agent.post("/admins/login").send({
+      email: "test3@gmail.com",
+      password: "password",
+      _csrf: csrfToken,
+    });
+    // console.log(response);
     expect(response.statusCode).toBe(302);
   });
+  test("auth check", async () => {
+    // let csrfToken = extractCsrfToken(res);
+    // Send a request to the app with the token in the cookies
+    const res = await request(app)
+      .get("/elections")
+      .set("Cookie", cookie)
+      .set("Accept", "application/json");
+    // console.log(res.body);
+    // Check if the request was successful
+    expect(res.statusCode).toBe(200);
 
-  // test("Update election with given ID", async () => {
-  //   let res = await agent.get("/elections/createElections/new");
-  //   let csrfToken = extractCsrfToken(res);
+    // Check if the user's ID was returned in the response
+    // expect(res.body.userId).toBe(user.id);
+  });
+  test("Create elections", async () => {
+    let res = await agent
+      .get("/elections/createElections/new")
+      .set("Cookie", cookie)
+      .set("Accept", "application/json");
 
-  //   const response = await agent
-  //     .post("/elections/createElection")
-  //     .set("Authorization", "Bearer " + token)
-  //     .type("form")
-  //     .send({
-  //       title: "Class 4ep",
-  //       url: "class402",
-  //       adminId: userId,
-  //       _csrf: csrfToken,
-  //     });
-  //   console.log(token);
-  //   const groupedElectionsResponse = await agent
-  //     .get("/elections")
-  //     .set("Accept", "application/json");
-  //   const parsedGroupedResponse = JSON.parse(groupedElectionsResponse.text);
-  //   console.log(parsedGroupedResponse);
-  //   expect(true).toBe(true);
-  // });
+    let adminId = res.body.admin.id;
+    let csrfToken = res.body.csrfToken;
+    res = await agent
+      .post("/elections/createElection")
+      .set("Cookie", cookie)
+      .send({
+        title: "Class rep",
+        url: "class67",
+        status: "created",
+        adminId: adminId,
+        _csrf: csrfToken,
+      });
+
+    expect(res.statusCode).toBe(302);
+  });
+
+  test("Edit the title of the election with the given Id", async () => {
+    const agent = request.agent(server);
+    await createElection(agent, "Class 501", "501");
+    //go to elections page
+    const groupedResponse = await agent
+      .get("/elections")
+      .set("Cookie", cookie)
+      .set("Accept", "application/json");
+    const parsedGroupedResponse = JSON.parse(groupedResponse.text);
+    const electionsCount = parsedGroupedResponse.elections.length;
+    const latestElection = parsedGroupedResponse.elections[electionsCount - 1];
+
+    //got to edit page
+    let res = await agent
+      .get(`/elections/${latestElection.id}/edit`)
+      .set("Cookie", cookie);
+    let csrfToken = extractCsrfToken(res);
+
+    const updatedElection = await agent
+      .put(`/elections/${latestElection.id}`)
+      .set("Cookie", cookie)
+      .send({
+        title: "Class 302 updated",
+        _csrf: csrfToken,
+      });
+    console.log(updatedElection.text);
+    expect(updatedElection.statusCode).toBe(200);
+  });
+});
+test("Create Questions", async () => {
   //   //create election
-  //   const agent = request.agent(server);
-  //   await createElection(agent, "Class 303", "303", 3);
-  //   //get all elections
-  //   const groupedElectionsResponse = await agent
-  //     .get("/elections")
-  //     .set("Accept", "application/json");
-  //   const parsedGroupedResponse = JSON.parse(groupedElectionsResponse.text);
-  //   // const electionsCount = parsedGroupedResponse.length;
-  //   // const latestElection =
-  //   //   parsedGroupedResponse.dueTodayLists[electionsCount - 1];
-  //   console.log(parsedGroupedResponse);
-  //   expect(true).toBe(true);
-  //   //get single election
-  //   //edit it
-  // });
-  // test("Create questions", async () => {
-  //   const agent = request.agent(server);
+  const agent = request.agent(server);
+  await createElection(agent, "Class 501", "501");
+  //go to elections page
+  const groupedResponse = await agent
+    .get("/elections")
+    .set("Cookie", cookie)
+    .set("Accept", "application/json");
 
-  //   await signup(agent, "test2@gmail.com", "12345678", "haile", "Come");
-  //   await createElection(agent, "Class 303", "303");
+  //get latest electionId
+  const parsedGroupedResponse = JSON.parse(groupedResponse.text);
+  const electionsCount = parsedGroupedResponse.elections.length;
+  const latestElection = parsedGroupedResponse.elections[electionsCount - 1];
 
-  //   let res = await agent.get("/elections/createElections/new");
-  //   let csrfToken = extractCsrfToken(res);
-  //   await agent.post("/elections/createElection").form.send({
-  //     title: "Class rep",
-  //     url: "class22",
-  //     _csrf: csrfToken,
-  //   });
-  // });
-  //   //create new agent
-  //   const agent = request.agent(server);
-  //   await login(agent, "test@gmail.com", "12345678");
-  //   // await createElection(agent);
-  //   let res = await agent.get("/elections/createElections/new");
-  //   let csrfToken = extractCsrfToken(res);
-  //   await agent.post("/elections/createElection").send({
-  //     title: "Class rep",
-  //     url: "class22",
-  //     _csrf: csrfToken,
-  //   });
-  //   const groupedTodosResponse = await agent
-  //     .get("/elections")
-  //     .set("Accept", "application/json");
-  //   const parsedGroupedResponse = JSON.parse(groupedTodosResponse.text);
-
-  //   const electionsCount = parsedGroupedResponse.elections.length;
-  //   const latestElection = parsedGroupedResponse.elections[electionsCount - 1];
-
-  //   res = await agent.get(`/elections/${latestElection.id}/questions/new`);
-  //   csrfToken = extractCsrfToken(res);
-
-  //   const question = await agent.post("/questions/createQuestion").send({
-  //     title: "Who should we choose?",
-  //     description: "Class representative",
-  //     electionId: latestElection.id,
-  //     _csrf: csrfToken,
-  //   });
-  //   expect(question.statusCode).toBe(302);
-  // });
-
-  // test("create voters", async () => {
-  //   //create new agent
-  //   const agent = request.agent(server);
-  //   await login(agent, "test@gmail.com", "12345678");
-  //   await createElection(agent, "class 301", "301");
-  //   const groupedTodosResponse = await agent
-  //     .get("/elections")
-  //     .set("Accept", "application/json");
-  //   const parsedGroupedResponse = JSON.parse(groupedTodosResponse.text);
-
-  //   const electionsCount = parsedGroupedResponse.elections.length;
-  //   const latestElection = parsedGroupedResponse.elections[electionsCount - 1];
-
-  //   let res = await agent.get(`/elections/${latestElection.id}/voters`);
-  //   let csrfToken = extractCsrfToken(res);
-
-  //   const voter = await agent
-  //     .post(`/elections/${latestElection.id}/voters`)
-  //     .send({
-  //       voter_Id: "LOL",
-  //       password: "12345678",
-  //       electionId: latestElection.id,
-  //       _csrf: csrfToken,
-  //     });
-  //   expect(voter.statusCode).toBe(302);
-  // });
-
-  // test("Create answers", async () => {
-  //   //create new agent
-  //   const agent = request.agent(server);
-  //   await login(agent, "test@gmail.com", "12345678");
-  //   await createElection(agent, "class 303", "303");
-  //   const groupedTodosResponse = await agent
-  //     .get("/elections")
-  //     .set("Accept", "application/json");
-  //   const parsedGroupedResponse = JSON.parse(groupedTodosResponse.text);
-
-  //   const electionsCount = parsedGroupedResponse.elections.length;
-  //   const latestElection = parsedGroupedResponse.elections[electionsCount - 1];
-
-  //   let res = await agent.get(`/elections/${latestElection.id}/questions/new`);
-  //   let csrfToken = extractCsrfToken(res);
-
-  //   const question = await agent.post("/questions/createQuestion").send({
-  //     title: "Who should we choose?",
-  //     description: "Class representative",
-  //     electionId: latestElection.id,
-  //     _csrf: csrfToken,
-  //   });
-  //   console.log(question.id);
-  //   expect(question.statusCode).toBe(302);
-  // });
-  // will be updated
-  // test("Test to update election status to launched", async () => {
-  //   const agent = request.agent(server);
-  //   await login(agent, "test@gmail.com", "12345678");
-  //   await createElection(agent);
-  //   const groupedTodosResponse = await agent
-  //     .get("/elections")
-  //     .set("Accept", "application/json");
-  //   const parsedGroupedResponse = JSON.parse(groupedTodosResponse.text);
-
-  //   const electionsCount = parsedGroupedResponse.elections.length;
-  //   const latestElection = parsedGroupedResponse.elections[electionsCount - 1];
-
-  //   let res = await agent.get(`/elections`);
-  //   let csrfToken = extractCsrfToken(res);
-  //   // eslint-disable-next-line no-unused-vars
-  //   const response = await agent
-  //     .put(`/elections/${latestElection.id}/launch`)
-  //     .send({
-  //       status: "launched",
-  //       _csrf: csrfToken,
-  //     });
-  //   expect(response.statusCode).toBe(302);
-  //   // const parsedUpdatedResponse = JSON.parse(response.text);
-  //   // expect(parsedUpdatedResponse.status).toBe("launched");
-  // });
-
-  // todo csruf problem
-  // test("Update an election based on given Id", async () => {
-  //   const agent = request.agent(server);
-  //   await login(agent, "test@gmail.com", "12345678");
-  //   await createElection(agent, "class 304", "304");
-  //   const groupedTodosResponse = await agent
-  //     .get("/elections")
-  //     .set("Accept", "application/json");
-  //   const parsedGroupedResponse = JSON.parse(groupedTodosResponse.text);
-
-  //   const electionsCount = parsedGroupedResponse.elections.length;
-  //   const latestElection = parsedGroupedResponse.elections[electionsCount - 1];
-  //   let res = await agent.get("/elections");
-  //   let csrfToken = extractCsrfToken(res);
-
-  //   const response = await agent
-  //     .put(`/elections/${latestElection.id}`)
-  //     .send({ title: "Updated title", _csrf: csrfToken });
-  //   // console.log(response.text);
-  //   expect(true).toBe(true);
-  // });
-
-  // // todo csruf problem
-  // test("Delete an election of a given Id", async () => {
-  //   const agent = request.agent(server);
-  //   await login(agent, "test@gmail.com", "12345678");
-  //   await createElection(agent, "class 305", "305");
-  //   const groupedTodosResponse = await agent
-  //     .get("/elections")
-  //     .set("Accept", "application/json");
-  //   const parsedGroupedResponse = JSON.parse(groupedTodosResponse.text);
-
-  //   const electionsCount = parsedGroupedResponse.elections.length;
-  //   const latestElection = parsedGroupedResponse.elections[electionsCount - 1];
-
-  //   let res = await agent.get("/elections");
-  //   let csrfToken = extractCsrfToken(res);
-
-  //   // const deletedResponse = await agent
-  //   //   .delete(`/elections/${latestElection.id}`)
-  //   //   .send({ _csrf: csrfToken });
-
-  //   //   const parsedDeletedREsponse = JSON.parse(deletedResponse.text);
-
-  //   expect(true).toBe(true);
-  // });
-  // test("Sign out", async () => {
-  //   let res = await agent.get("/elections");
-  //   expect(res.statusCode).toBe(200);
-  //   res = await agent.get("/signout");
-  //   expect(res.statusCode).toBe(302);
-  //   //the user can't access after signout
-  //   //todo display the error in a wiser way
-  //   res = await agent.get("/elections");
-  //   expect(res.statusCode).toBe(302);
-  // });
+  //gotomanagequestions
+  let res = await agent
+    .get(`elections/${latestElection.id}/questions`)
+    .set("Cookie", cookie)
+    .set("Accept", "application/json");
+  expect(res.statusCode).toBe(200);
 });
 
 //Todo
 
 // test signout
 //
+/*
+Bemhreth, [23-01-2023 00:00]
+const request = require('supertest');
+const jwt = require('jsonwebtoken');
+
+// Import your app
+const app = require('../app');
+
+// Your secret key for signing JWT tokens
+const secretKey = 'secret_key';
+
+describe('Authentication', () => {
+  test('It should authenticate a user with a valid token', async () => {
+    // Create a JWT token for a user
+    const user = { id: 1, name: 'John Doe' };
+    const token = jwt.sign(user, secretKey);
+
+    // Send a request to the app with the token in the cookies
+    const res = await request(app)
+      .get('/protected-route')
+      .set('Cookie', token=${token});
+
+    // Check if the request was successful
+    expect(res.statusCode).toBe(200);
+
+    // Check if the user's ID was returned in the response
+    expect(res.body.userId).toBe(user.id);
+  });
+
+  test('It should not authenticate a user with an invalid token', async () => {
+    // Send a request to the app with an invalid token in the cookies
+    const res = await request(app)
+      .get('/protected-route')
+      .set('Cookie', 'token=invalid_token');
+
+    // Check if the request was denied
+    expect(res.statusCode).toBe(401);
+  });
+});
+
+Bemhreth, [23-01-2023 00:00]
+expect(res.req.user).toBe(user.id);*/

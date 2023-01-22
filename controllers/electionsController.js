@@ -32,11 +32,11 @@ exports.getElections = async (req, res, next) => {
 //creates elections
 exports.createElection = async (req, res, next) => {
   try {
-    const { title, customString } = req.body;
+    const { title, url } = req.body;
     const adminId = req.user;
     const election = await Election.addElection({
       title: title,
-      url: customString,
+      url: url,
       status: "created",
       adminId,
     });
@@ -216,11 +216,15 @@ exports.renderElectionsPage = async (request, response) => {
 exports.renderCreateElecPage = async (request, response) => {
   const loggedInUser = request.user;
   const admin = await Admin.getAdminDetails(loggedInUser);
-  response.render("createElections", {
-    title: "Create Elections",
-    admin,
-    csrfToken: request.csrfToken(),
-  });
+  if (request.accepts("html")) {
+    response.render("createElections", {
+      title: "Create Elections",
+      admin,
+      csrfToken: request.csrfToken(),
+    });
+  } else {
+    response.json({ admin, loggedInUser, csrfToken: request.csrfToken() });
+  }
 };
 
 //election details page
@@ -396,16 +400,12 @@ exports.renderVotingPage = async (req, res) => {
     return accumulate;
   }, []);
   const parsedResult = await votingResult(election.id);
-  const voterCount = await Result.count({
-    where: { electionId: election.id },
+
+  const voterCount = await Voter.count({
+    where: { electionId: election.id, voterStatus: "voted" },
     distinct: true,
-    col: Result.voter_Id,
   });
-  const result = await Result.findAll({
-    where: { electionId: election.id },
-    raw: true,
-  });
-  console.log(result, { voterCount });
+
   // //return the result
   if (req.accepts("html")) {
     res.render("vote", {
