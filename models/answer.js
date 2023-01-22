@@ -34,6 +34,7 @@ module.exports = (sequelize, DataTypes) => {
         where: {
           [Op.and]: [{ questionId }, { adminId }],
         },
+        order: [["createdAt", "DESC"]],
       });
     }
     static getAnsWithQuestion(questionId) {

@@ -408,6 +408,12 @@ exports.saveVotes = async (req, res) => {
   //create results for each submission
   await Promise.all(
     Object.keys(rest).map(async (key) => {
+      if (rest[key] == null) {
+        console.log("empty");
+        req.flash("error", "Select atleast one answer");
+        res.redirect("back");
+        return;
+      }
       await Result.addVotingResult({
         questionId: key,
         answerId: rest[key],

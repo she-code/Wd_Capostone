@@ -29,7 +29,10 @@ module.exports = (sequelize, DataTypes) => {
       });
     }
     static getVoters(electionId) {
-      return this.findAll({ where: { electionId } });
+      return this.findAll({
+        where: { electionId },
+        order: [["createdAt", "DESC"]],
+      });
     }
     updateVoterStatus(status) {
       return this.update({ voterStatus: status });

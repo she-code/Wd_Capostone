@@ -6,6 +6,10 @@ const handleJWTExpiredError = () =>
   new AppError("Your token has expired! Please log in again.", 401);
 const handleLauncElectionError = () =>
   new AppError("An election must have atleast 1 question to be launched", 403);
+const handleInvalidId = (err) => {
+  const message = `Invalid ${err.path}: ${err.value}`;
+  return new AppError(message, 400);
+};
 const sendErrorDev = (err, req, res) => {
   //add api
   // A) API
@@ -75,7 +79,11 @@ module.exports = (err, req, res, next) => {
 
     if (error.name === "JsonWebTokenError") error = handleJWTError();
     if (error.name === "TokenExpiredError") error = handleJWTExpiredError();
-
+    if (error.name === "SequelizeDatabaseError") {
+      if (error.message == "invalid input syntax for type integer") {
+        error === handleInvalidId(error);
+      }
+    }
     sendErrorProd(error, req, res);
   }
 };

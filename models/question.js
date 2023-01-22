@@ -38,6 +38,7 @@ module.exports = (sequelize, DataTypes) => {
         where: {
           [Op.and]: [{ adminId }, { electionId }],
         },
+        order: [["createdAt", "DESC"]],
       });
     }
 
