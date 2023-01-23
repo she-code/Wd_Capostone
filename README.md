@@ -44,5 +44,6 @@ The platform has two personas Administrator and Voters.
 
 If you want to see more functionalities check out [this]() video.
 
+![home](https://user-images.githubusercontent.com/54357776/214051963-1c89b28c-3153-49b5-b4ed-aef8b1359f99.png)
 
 
