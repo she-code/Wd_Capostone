@@ -81,12 +81,15 @@ describe("Online Voting Platform", function () {
 
     expect(res.statusCode).toBe(200);
   });
-  // test("Sign out", async () => {
-  //   let res = await agent.get("/elections");
-  //   expect(res.statusCode).toBe(200);
-  //   res = await agent.get("/signout");
-  //   expect(res.statusCode).toBe(302);
-  //   res = await agent.get("/elections");
-  //   expect(res.statusCode).toBe(302);
-  // });
+  test("Sign out", async () => {
+    let res = await agent.get("/elections");
+    expect(res.statusCode).toBe(200);
+    res = await agent.get("/signout");
+    expect(res.statusCode).toBe(302);
+    //based on the app logic 
+    //if user is redirected to / user it means they are logged out
+    res = await agent.get("/");
+    expect(res.statusCode).toBe(200);
+  });
+});
 });
