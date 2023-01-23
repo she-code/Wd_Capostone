@@ -66,17 +66,22 @@ If you want to see more functionalities check out [this]() video.
 
 ![votersList](https://user-images.githubusercontent.com/54357776/214053697-49c5bfe4-2dd7-456e-b155-dbbf57afb1a5.png)
 
-![endedel](https://user-images.githubusercontent.com/54357776/214053651-70b6749e-5194-48d1-8f3c-9621e5d2b830.png)
-
 ![launched](https://user-images.githubusercontent.com/54357776/214053657-2efc8e33-9080-42b0-8035-3818013bd82f.png)
+
+![endedel](https://user-images.githubusercontent.com/54357776/214053651-70b6749e-5194-48d1-8f3c-9621e5d2b830.png)
 
 ![voterlogin](https://user-images.githubusercontent.com/54357776/214053695-ae742a25-788e-40fa-ab72-96b7f14d657b.png)
 
 ![votingPaQuelist](https://user-images.githubusercontent.com/54357776/214053700-f5a830ef-4515-48ce-b90e-f7d169202cc4.png)
 
+![after v0te](https://user-images.githubusercontent.com/54357776/214053705-6fbc0848-1e77-4620-9e84-dfb5d6311fd5.png)
+
 ![result](https://user-images.githubusercontent.com/54357776/214053679-3ee20d3a-264e-49f6-bd94-8bcec2a664b5.png)
 
 ![myprofile](https://user-images.githubusercontent.com/54357776/214053663-14c9a945-1710-42c1-abe4-7d5217f2d898.png)
+
+![forgot](https://user-images.githubusercontent.com/54357776/214055920-49fd4af0-176c-4dac-a32f-53327f7730df.png)
+
 
 
 
