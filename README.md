@@ -46,7 +46,15 @@ The platform has two personas Administrator and Voters.
 
 [Link](https://online-election.onrender.com) to the deployed website.
 
-If you want to see more functionalities check out [this]() video.
+If you want to see more functionalities check out the videos listed bellow.
+
+-[Part One](https://www.loom.com/share/8cf420705f604749914bb00859fdc75e)
+
+-[Part Two](https://www.loom.com/share/8f132b82efcb44c7933e83887f8a2e39)
+
+-[Part Three](https://www.loom.com/share/48acb3e678a04523b4af68f8163b3119)
+
+**SCRENSHOTS OF FEW OF THE PAGES OF THE WEBSIE**
 
 ![home](https://user-images.githubusercontent.com/54357776/214053655-f7b96ed0-82da-4b7b-863f-e74285c7680e.png)
 
