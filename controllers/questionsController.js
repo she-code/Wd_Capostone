@@ -61,15 +61,24 @@ exports.renderQuesDetailsPAge = async (request, response, next) => {
   const election = await Election.getElectionDetails(adminId, electionId);
   const answers = await Answer.getAnswers({ adminId, questionId });
   const admin = await Admin.findByPk(adminId);
-
-  response.render("questionDetailsPage", {
-    title: "Online Voting Platform",
-    election,
-    question,
-    answers,
-    admin,
-    csrfToken: request.csrfToken(),
-  });
+  if (request.accepts("html")) {
+    response.render("questionDetailsPage", {
+      title: "Online Voting Platform",
+      election,
+      question,
+      answers,
+      admin,
+      csrfToken: request.csrfToken(),
+    });
+  } else {
+    response.json({
+      election,
+      question,
+      answers,
+      admin,
+      csrfToken: request.csrfToken(),
+    });
+  }
 };
 
 //delete question

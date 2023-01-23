@@ -34,14 +34,16 @@ exports.createElection = async (req, res, next) => {
   try {
     const { title, url } = req.body;
     const adminId = req.user;
+    const slicedString = url.split(" ").join("");
+
     const election = await Election.addElection({
       title: title,
-      url: url,
+      url: slicedString,
       status: "created",
       adminId,
     });
     if (!election) {
-      return next(new AppError("Unable to create election", 404));
+      return next(new AppError("Unable to create election", 401));
     }
     return res.redirect(`/elections/${election.id}`);
   } catch (error) {
@@ -76,7 +78,9 @@ exports.launchElection = async (req, res, next) => {
   let error = false;
 
   try {
-    const election = await Election.getElectionDetails(adminId, electionId);
+    const election = await Election.findOne({
+      where: { adminId, id: electionId },
+    });
     if (!election) {
       return next(new AppError("No election found with that id", 404));
     }
@@ -124,6 +128,7 @@ exports.launchElection = async (req, res, next) => {
       );
     }
     const updatedElection = await election.updateElectionStatus("launched");
+
     if (!updatedElection) {
       console.log("error");
       return next(
@@ -145,11 +150,15 @@ exports.endElection = async (req, res, next) => {
   const electionId = req.params.id;
   const adminId = req.user;
   try {
-    const election = await Election.getElectionDetails(adminId, electionId);
+    const election = await Election.findOne({
+      where: { adminId, id: electionId },
+    });
     if (!election) {
       return next(new AppError("No election found with that id", 404));
     }
+    console.log(election);
     const updatedElection = await election.updateElectionStatus("ended");
+    console.log(updatedElection);
 
     return res.json(updatedElection);
   } catch (error) {
@@ -240,7 +249,7 @@ exports.renderElectionDetailsPage = async (request, response, next) => {
   const electionId = election.id;
   const urlId = encode(electionId);
   const voters = await Voter.getVoters(electionId);
-
+  let launchError = false;
   let answersWithQuestion = [];
   for (var i in questions) {
     answersWithQuestion.push(
@@ -255,7 +264,12 @@ exports.renderElectionDetailsPage = async (request, response, next) => {
       })
     );
   }
-  console.log("hi", { hi: answersWithQuestion });
+  //extract the anwsers from the given data it's in [[{}],[{}]] format
+  for (var l = 0; l < answersWithQuestion.length; l++) {
+    if (answersWithQuestion[l].length < 2) {
+      launchError = true;
+    }
+  }
   request.voterUrl = electionId;
   if (request.accepts("html")) {
     response.render("electionDetailsPage", {
@@ -265,7 +279,7 @@ exports.renderElectionDetailsPage = async (request, response, next) => {
       questions,
       voters,
       urlId,
-      answersWithQuestion,
+      launchError,
       csrfToken: request.csrfToken(),
     });
   } else {
@@ -276,6 +290,7 @@ exports.renderElectionDetailsPage = async (request, response, next) => {
       voters,
       urlId,
       answersWithQuestion,
+      csrfToken: request.csrfToken(),
     });
   }
 };
@@ -305,6 +320,7 @@ exports.renderManageQuesPage = async (request, response, next) => {
       questions,
       election,
       admin,
+      csrfToken: request.csrfToken(),
     });
   }
 };

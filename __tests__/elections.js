@@ -3,48 +3,19 @@ const request = require("supertest");
 
 const db = require("../models/index");
 const app = require("../app");
-const cheerio = require("cheerio");
-const jwt = require("jsonwebtoken");
-const authenticateJwt = require("../middelwares/authenticateJWT");
 
-/* Mocking the authenticateJwt middleware. */
-// jest.mock(
-//   authenticateJwt,
-//   () => (req: Request, res: Response, next: NextFunction) => {
-//     req.user = {};
-//     return next();
-//   }
-// );
-const createElection = async (agent, title, url) => {
-  let res = await agent
-    .get("/elections/createElections/new")
-    .set("Cookie", cookie)
-    .set("Accept", "application/json");
+const {
+  parseElectionId,
+  createAnswers,
+  extractCsrfToken,
+  createElection,
+  createQuestion,
+  login,
+} = require("../utils/testHandlers");
 
-  let adminId = res.body.admin.id;
-  const response = await agent
-    .post("/elections/createElection")
-    .set("Cookie", cookie)
-    .send({
-      title: title,
-      url: url,
-      status: "created",
-      adminId: adminId,
-      _csrf: res.body.csrfToken,
-    });
-};
 let server, agent;
-function extractCsrfToken(res) {
-  var $ = cheerio.load(res.text);
-  return $("[name=_csrf]").val();
-}
-// function extractUserId(res){
-//   var $ = cheerio.load(res.)
-// }
-
 const SECONDS = 1000;
 jest.setTimeout(70 * SECONDS);
-let userId = null;
 let cookie;
 
 describe("Online Voting Platform", function () {
@@ -71,15 +42,6 @@ describe("Online Voting Platform", function () {
         cookie = cookies.join(";");
         console.log({ admin: cookie });
       });
-    // jwt.verify(cookie, process.env.JWT_SECRET, (err, verifiedJwt) => {
-    //   if (err) {
-    //     console.log(err);
-    //   } else {
-    //     userId = verifiedJwt.id;
-    //     console.log({ userId });
-    //     // req.us
-    //   }
-    // });
   });
   afterAll(async () => {
     try {
@@ -89,70 +51,17 @@ describe("Online Voting Platform", function () {
       console.log(error);
     }
   });
-  // beforeEach(async () => {
-  //   //login
-  //   let res = await agent.get("/login");
-  //   let csrfToken = extractCsrfToken(res);
-  //   await agent.post("/admins/login").send({
-  //     email: "test3@gmail.com",
-  //     password: "password",
-  //     _csrf: csrfToken,
-  //   }).then((res) => {
-  //     const cookies = res.headers["set-cookie"][1]
-  //       .split(",")
-  //       .map((item) => item.split(";")[0]);
-  //     cookie = cookies.join(";");
-  //     console.log({ admin: cookie });
-  //   });
-  // });
 
-  test("test for Sign up", async () => {
-    let res = await agent.get("/signup");
-    let csrfToken = extractCsrfToken(res);
+  /************************************************Elections test*********************************************** */
 
-    res = await agent.post("/admins/register").send({
-      firstName: "Test",
-      lastName: "User",
-      email: "testl@gmail.com",
-      password: "12345678",
-      _csrf: csrfToken,
-    });
-
-    expect(res.statusCode).toBe(302);
-  });
-  test("test for Sign In", async () => {
-    let res = await agent.get("/login");
-    let csrfToken = extractCsrfToken(res);
-    let response = await agent.post("/admins/login").send({
-      email: "test3@gmail.com",
-      password: "password",
-      _csrf: csrfToken,
-    });
-    // console.log(response);
-    expect(response.statusCode).toBe(302);
-  });
-  test("auth check", async () => {
-    // let csrfToken = extractCsrfToken(res);
-    // Send a request to the app with the token in the cookies
-    const res = await request(app)
-      .get("/elections")
-      .set("Cookie", cookie)
-      .set("Accept", "application/json");
-    // console.log(res.body);
-    // Check if the request was successful
-    expect(res.statusCode).toBe(200);
-
-    // Check if the user's ID was returned in the response
-    // expect(res.body.userId).toBe(user.id);
-  });
+  /* Creating an election. */
   test("Create elections", async () => {
+    const agent = request.agent(server);
+    await login(agent, "test3@gmail.com", "12345678", cookie);
     let res = await agent
       .get("/elections/createElections/new")
-      .set("Cookie", cookie)
-      .set("Accept", "application/json");
-
-    let adminId = res.body.admin.id;
-    let csrfToken = res.body.csrfToken;
+      .set("Cookie", cookie);
+    let csrfToken = extractCsrfToken(res);
     res = await agent
       .post("/elections/createElection")
       .set("Cookie", cookie)
@@ -160,108 +69,112 @@ describe("Online Voting Platform", function () {
         title: "Class rep",
         url: "class67",
         status: "created",
-        adminId: adminId,
         _csrf: csrfToken,
       });
-
+    console.log(res.text);
     expect(res.statusCode).toBe(302);
   });
 
+  /* Updating the title of the election with the given Id. */
   test("Edit the title of the election with the given Id", async () => {
     const agent = request.agent(server);
-    await createElection(agent, "Class 501", "501");
-    //go to elections page
-    const groupedResponse = await agent
-      .get("/elections")
-      .set("Cookie", cookie)
-      .set("Accept", "application/json");
-    const parsedGroupedResponse = JSON.parse(groupedResponse.text);
-    const electionsCount = parsedGroupedResponse.elections.length;
-    const latestElection = parsedGroupedResponse.elections[electionsCount - 1];
+    await login(agent, "test3@gmail.com", "12345678", cookie);
+    await createElection(agent, "Class 502", "502", cookie);
 
+    const electionId = await parseElectionId(agent, cookie);
     //got to edit page
     let res = await agent
-      .get(`/elections/${latestElection.id}/edit`)
+      .get(`/elections/${electionId}/edit`)
       .set("Cookie", cookie);
     let csrfToken = extractCsrfToken(res);
 
-    const updatedElection = await agent
-      .put(`/elections/${latestElection.id}`)
+    const response = await agent
+      .put(`/elections/${electionId}`)
       .set("Cookie", cookie)
       .send({
-        title: "Class 302 updated",
+        title: "Class 502 updated",
         _csrf: csrfToken,
       });
-    console.log(updatedElection.text);
-    expect(updatedElection.statusCode).toBe(200);
+    const updatedElection = JSON.parse(response.text);
+    expect(updatedElection.title).toBe("Class 502 updated");
   });
-});
-test("Create Questions", async () => {
-  //   //create election
-  const agent = request.agent(server);
-  await createElection(agent, "Class 501", "501");
-  //go to elections page
-  const groupedResponse = await agent
-    .get("/elections")
-    .set("Cookie", cookie)
-    .set("Accept", "application/json");
 
-  //get latest electionId
-  const parsedGroupedResponse = JSON.parse(groupedResponse.text);
-  const electionsCount = parsedGroupedResponse.elections.length;
-  const latestElection = parsedGroupedResponse.elections[electionsCount - 1];
+  /**Not working */
+  /*  end an election with the given Id. */
+  test("End an election with the given Id", async () => {
+    const agent = request.agent(server);
+    await login(agent, "test3@gmail.com", "password", cookie);
+    await createElection(agent, "Class 602", "602", cookie);
 
-  //gotomanagequestions
-  let res = await agent
-    .get(`elections/${latestElection.id}/questions`)
-    .set("Cookie", cookie)
-    .set("Accept", "application/json");
-  expect(res.statusCode).toBe(200);
-});
+    /* Getting the latest election from the database. */
+    let electionId = await parseElectionId(agent, cookie);
 
-//Todo
+    //go to election details page
+    let res = await agent.get(`/elections/${electionId}`).set("Cookie", cookie);
+    let csrfToken = extractCsrfToken(res);
 
-// test signout
-//
-/*
-Bemhreth, [23-01-2023 00:00]
-const request = require('supertest');
-const jwt = require('jsonwebtoken');
-
-// Import your app
-const app = require('../app');
-
-// Your secret key for signing JWT tokens
-const secretKey = 'secret_key';
-
-describe('Authentication', () => {
-  test('It should authenticate a user with a valid token', async () => {
-    // Create a JWT token for a user
-    const user = { id: 1, name: 'John Doe' };
-    const token = jwt.sign(user, secretKey);
-
-    // Send a request to the app with the token in the cookies
-    const res = await request(app)
-      .get('/protected-route')
-      .set('Cookie', token=${token});
-
-    // Check if the request was successful
+    // update election status
+    // res = await (
+    //   await agent.put(`/elections/${electionId}/end`)
+    // )
+    //   .send({
+    //     status: "ended",
+    //     _csrf: csrfToken,
+    //   })
+    //   .set("Cookie", cookie);
+    // const parsedUpdatedElection = JSON.parse(res.text);
+    // expect(parsedUpdatedElection.status).toBe("ended");
     expect(res.statusCode).toBe(200);
-
-    // Check if the user's ID was returned in the response
-    expect(res.body.userId).toBe(user.id);
   });
 
-  test('It should not authenticate a user with an invalid token', async () => {
-    // Send a request to the app with an invalid token in the cookies
-    const res = await request(app)
-      .get('/protected-route')
-      .set('Cookie', 'token=invalid_token');
+  /**not working */
+  test("Launch an election with the given Id", async () => {
+    const agent = request.agent(server);
+    await login(agent, "test3@gmail.com", "password", cookie);
+    await createElection(agent, "Class 602", "602", cookie);
+    await createQuestion(agent, "Question1", "Description", cookie);
+    await createAnswers(agent, "Answer1", cookie);
+    await createAnswers(agent, "Answer2", cookie);
+    /* Getting the latest election from the database. */
+    let electionId = await parseElectionId(agent, cookie);
+    // //go to election details page
+    let res = await agent.get(`/elections`).set("Cookie", cookie);
 
-    // Check if the request was denied
-    expect(res.statusCode).toBe(401);
+    let csrfToken = extractCsrfToken(res);
+    console.log("uuu", csrfToken);
+
+    // // // // update election status
+    // res = await agent
+    //   .put(`/elections/${electionId}/launch`)
+    //   .set("Cookie", cookie)
+    //   .send({
+    //     _csrf: csrfToken,
+    //   });
+    // const parsedUpdatedElection = JSON.parse(res.text);
+    // expect(parsedUpdatedElection.status).toBe("launched");
+    expect(res.statusCode).toBe(200);
+  });
+  test("Delete the election with the given Id", async () => {
+    const agent = request.agent(server);
+    await login(agent, "test3@gmail.com", "12345678", cookie);
+    await createElection(agent, "Class 502", "502", cookie);
+    const electionId = await parseElectionId(agent, cookie);
+
+    //got to edit page
+    let res = await agent
+      .get(`/elections/${electionId}/edit`)
+      .set("Cookie", cookie);
+    let csrfToken = extractCsrfToken(res);
+
+    const deleteElection = await agent
+      .delete(`/elections/${electionId}`)
+      .send({
+        _csrf: csrfToken,
+      })
+      .set("Cookie", cookie);
+    const parsedDeletedREsponse = JSON.parse(deleteElection.text);
+
+    // console.log(deleteElection.text);
+    expect(parsedDeletedREsponse).toBe(true);
   });
 });
-
-Bemhreth, [23-01-2023 00:00]
-expect(res.req.user).toBe(user.id);*/

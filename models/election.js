@@ -55,7 +55,7 @@ module.exports = (sequelize, DataTypes) => {
       });
     }
     updateElectionStatus(status) {
-      return this.update({ status });
+      return this.update({ status: status });
     }
     static async deleteElection(id, adminId) {
       return this.destroy({

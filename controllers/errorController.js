@@ -1,6 +1,6 @@
 const AppError = require("../utils/AppError");
 const handleJWTError = () =>
-  new AppError("Invalid token. Please log in again!", 401);
+  new AppError("Invalid credential. Please log in again!", 401);
 
 const handleJWTExpiredError = () =>
   new AppError("Your token has expired! Please log in again.", 401);
@@ -46,7 +46,7 @@ const sendErrorProd = (err, req, res) => {
     // 2) Send generic message
     return res.status(500).json({
       status: "error",
-      message: "Something went very wrong!",
+      message: "Something went  wrong!",
     });
   }
 

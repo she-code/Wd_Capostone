@@ -14,9 +14,10 @@
   <script>
     var token = document.querySelector('meta[name="csrf-token"]').getAttribute("content")
     var questions = <%-JSON.stringify(questions)%>
-    var launchError = false;
-
-   
+    var launchError  = <%-JSON.stringify(launchError)%>
+    
+    
+    console.log(launchError)
     function launchElection(id) {
       // let compelete = false
       //check how many questions r there
@@ -114,6 +115,7 @@
                         <p class="text-xl text-gray-500 ">Your election has <span class="text-gray-900 font-semibold">
                             <%=voters.length%>
                           </span> registered voters</p>
+                          
                         <%}%>
                           <%if(election.status=="launched" || election.status=="created" ){%>
 
