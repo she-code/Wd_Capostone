@@ -86,8 +86,7 @@
                         <% if(election.status=="ended" ){%>
                           <p class="text-xl text-gray-500 ">This election has ended</p>
                           <a href="/elections/e/<%=election.url%>/vote"
-                            class="text-blue-600 underline text-lg">https://online-election.onrender.com/elections/e/
-                            <%=election.url%>/vote</a>
+                            class="text-blue-600 underline text-lg">https://online-election.onrender.com/elections/e/<%=election.url%>/vote</a>
                           <%}%>
                   </div>
                   <% if(questions.length==0){%>
