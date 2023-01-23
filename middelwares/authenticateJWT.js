@@ -18,7 +18,7 @@ const authenticateJwt = (req, res, next) => {
     if (req.originalUrl == "/") {
       next();
     }
-    return next(new AppError("Invalid token. Please log in again!", 401));
+    return next(new AppError("Invalid credential. Please log in again!", 401));
   }
   jwt.verify(token, process.env.JWT_SECRET, (err, verifiedJwt) => {
     if (err) {
