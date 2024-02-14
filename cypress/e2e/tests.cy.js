@@ -21,9 +21,9 @@ const setSignupFieldValuesWithOutFname = (cy) => {
   cy.get('input[name="password"]').type("12345678");
 };
 const setSignupFieldValues = (cy) => {
-  cy.get('input[name="firstName"]').type("Haile");
+  cy.get('input[name="firstName"]').type("Fre");
   cy.get('input[name="lastName"]').type("Haile");
-  cy.get('input[name="email"]').type("inteTest@gmail.com");
+  cy.get('input[name="email"]').type("integrete@gmail.com");
   cy.get('input[name="password"]').type("12345678");
 };
 const setSignupFieldValuesInvalidEmail = (cy) => {
@@ -87,7 +87,6 @@ describe("Wd capstone integration test, Sign up page test", () => {
     clearSignUpFields(cy);
     setSignupFieldValues(cy);
     cy.get('button[type="submit"]').click();
-    cy.get('input[name="email"]:invalid').should("exist");
     cy.wait(500);
     cy.location().should((loc) => {
       expect(loc.pathname).to.eq("/elections");
@@ -176,21 +175,21 @@ describe("Wd capstone integration test, Create Election Page test", () => {
   });
   it("Should Create Election and redirect to election details page", () => {
     clearCreateElectionFields(cy);
-    cy.get('input[name="title"]').type("Integration-1");
-    cy.get('input[name="url"]').type("integration-1");
+    cy.get('input[name="title"]').type("Integration-2");
+    cy.get('input[name="url"]').type("integration-2");
     cy.get('button[type="submit"]').click();
     cy.wait(500);
     cy.url().should("match", /\/elections\/\d+/); // Matches /todo/ followed by one or more digits
 
     cy.url().then((url) => {
       const dynamicId = url.match(/\/elections\/(\d+)/)[1];
-      cy.get(`.election-title`).should("contain.text", "Integration-1");
+      cy.get(`.election-title`).should("contain.text", "Integration-2");
     });
   });
   it("Should Create an Election with unique custom string | url", () => {
     clearCreateElectionFields(cy);
-    cy.get('input[name="title"]').type("Integration-1");
-    cy.get('input[name="url"]').type(`${"integration-1"}`);
+    cy.get('input[name="title"]').type("Integration-2");
+    cy.get('input[name="url"]').type(`${"integration-2"}`);
     cy.get('button[type="submit"]').click();
     cy.wait(500);
 
