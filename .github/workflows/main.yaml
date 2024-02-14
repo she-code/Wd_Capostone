@@ -21,7 +21,7 @@ jobs:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: 12345678
           POSTGRES_DB: wd-election-test
-          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
         # Set health checks to wait until postgres has started
         options: >-
           --health-cmd pg_isready
@@ -58,10 +58,10 @@ jobs:
           npm install cypress cypress-json-results
           npx cypress run
 
-     - name: Notify Slack
-        if: ${{ always() }}
+      - name: Slack Notification
         uses: rtCamp/action-slack-notify@v2
         with:
           status: ${{ job.status }}
-          text: 'GitHub Actions build finished!'
-      
+          channel: "#developing"
+          message: Deployed {{ env.GITHUB_REF_NAME }} branch Successfully
+        if: always()
