@@ -33,7 +33,7 @@ describe("Online Voting Platform", function () {
           .split(",")
           .map((item) => item.split(";")[0]);
         cookie = cookies.join(";");
-        console.log({ admin: cookie });
+        // console.log({ admin: cookie });
       });
   });
   afterAll(async () => {
@@ -87,7 +87,7 @@ describe("Online Voting Platform", function () {
     res = await agent.get("/signout");
     expect(res.statusCode).toBe(302);
     //based on the app logic
-    //if u r redirected to / user is logged out
+    //if user is redirected to / user it means they are logged out
     res = await agent.get("/");
     expect(res.statusCode).toBe(200);
   });
