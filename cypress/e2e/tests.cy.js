@@ -20,6 +20,12 @@ const setSignupFieldValuesWithOutFname = (cy) => {
   cy.get('input[name="email"]').type("fre@gmail.com");
   cy.get('input[name="password"]').type("12345678");
 };
+const setSignupFieldValues = (cy) => {
+  cy.get('input[name="firstName"]').type("Haile");
+  cy.get('input[name="lastName"]').type("Haile");
+  cy.get('input[name="email"]').type("inteTest@gmail.com");
+  cy.get('input[name="password"]').type("12345678");
+};
 const setSignupFieldValuesInvalidEmail = (cy) => {
   cy.get('input[name="firstName"]').type("Haile");
   cy.get('input[name="lastName"]').type("Haile");
@@ -41,7 +47,7 @@ const setSignInFieldsInvalidCredentials = (cy) => {
   cy.get('input[name="password"]').type("12345678");
 };
 const setSignInFields = (cy) => {
-  cy.get('input[name="email"]').type("frecode123@gmail.com");
+  cy.get('input[name="email"]').type("inteTest@gmail.com");
   cy.get('input[name="password"]').type("12345678");
 };
 const clearCreateElectionFields = (cy) => {
@@ -75,6 +81,16 @@ describe("Wd capstone integration test, Sign up page test", () => {
     cy.wait(500);
     cy.location().should((loc) => {
       expect(loc.pathname).to.eq("/signup");
+    });
+  });
+  it("Should register with valid credentials", () => {
+    clearSignUpFields(cy);
+    setSignupFieldValues(cy);
+    cy.get('button[type="submit"]').click();
+    cy.get('input[name="email"]:invalid').should("exist");
+    cy.wait(500);
+    cy.location().should((loc) => {
+      expect(loc.pathname).to.eq("/elections");
     });
   });
 });
