@@ -40,7 +40,7 @@ describe("Online Voting Platform", function () {
           .split(",")
           .map((item) => item.split(";")[0]);
         cookie = cookies.join(";");
-        console.log({ admin: cookie });
+        // console.log({ admin: cookie });
       });
   });
   afterAll(async () => {
@@ -71,7 +71,7 @@ describe("Online Voting Platform", function () {
         status: "created",
         _csrf: csrfToken,
       });
-    console.log(res.text);
+    // console.log(res.text);
     expect(res.statusCode).toBe(302);
   });
 
@@ -141,7 +141,7 @@ describe("Online Voting Platform", function () {
     let res = await agent.get(`/elections`).set("Cookie", cookie);
 
     let csrfToken = extractCsrfToken(res);
-    console.log("uuu", csrfToken);
+    // console.log("uuu", csrfToken);
 
     // // // // update election status
     // res = await agent

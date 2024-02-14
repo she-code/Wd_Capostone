@@ -40,7 +40,7 @@ describe("Online Voting Platform", function () {
           .split(",")
           .map((item) => item.split(";")[0]);
         cookie = cookies.join(";");
-        console.log({ admin: cookie });
+        // console.log({ admin: cookie });
       });
   });
   afterAll(async () => {
@@ -100,7 +100,7 @@ describe("Online Voting Platform", function () {
       .get(`/elections/${electionId}/questions`)
       .set("Cookie", cookie);
     let csrfToken = extractCsrfToken(res);
-    console.log(electionId, csrfToken);
+    // console.log(electionId, csrfToken);
     expect(res.statusCode).toBe(200);
   });
 
