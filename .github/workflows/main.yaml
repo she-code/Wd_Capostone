@@ -21,6 +21,7 @@ jobs:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: 12345678
           POSTGRES_DB: wd-election-test
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
         # Set health checks to wait until postgres has started
         options: >-
           --health-cmd pg_isready
@@ -63,5 +64,4 @@ jobs:
         with:
           status: ${{ job.status }}
           text: 'GitHub Actions build finished!'
-        env:
-          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
+      
