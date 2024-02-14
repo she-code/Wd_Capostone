@@ -160,21 +160,21 @@ describe("Wd capstone integration test, Create Election Page test", () => {
   });
   it("Should Create Election and redirect to election details page", () => {
     clearCreateElectionFields(cy);
-    cy.get('input[name="title"]').type("Integration");
-    cy.get('input[name="url"]').type("integration");
+    cy.get('input[name="title"]').type("Integration-1");
+    cy.get('input[name="url"]').type("integration-1");
     cy.get('button[type="submit"]').click();
     cy.wait(500);
     cy.url().should("match", /\/elections\/\d+/); // Matches /todo/ followed by one or more digits
 
     cy.url().then((url) => {
       const dynamicId = url.match(/\/elections\/(\d+)/)[1];
-      cy.get(`.election-title`).should("contain.text", "Integration");
+      cy.get(`.election-title`).should("contain.text", "Integration-1");
     });
   });
   it("Should Create an Election with unique custom string | url", () => {
     clearCreateElectionFields(cy);
-    cy.get('input[name="title"]').type("Integration");
-    cy.get('input[name="url"]').type(`${"integration"}`);
+    cy.get('input[name="title"]').type("Integration-1");
+    cy.get('input[name="url"]').type(`${"integration-1"}`);
     cy.get('button[type="submit"]').click();
     cy.wait(500);
 
