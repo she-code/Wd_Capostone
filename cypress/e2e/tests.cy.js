@@ -8,7 +8,7 @@ const clearSignUpFields = (cy) => {
 };
 
 const checkSignupFieldsExist = (cy) => {
-  cy.get('input[name="firstName"]').should("exist");
+  cy.get('input[name="Name"]').should("exist");
   cy.get('input[name="lastName"]').should("exist");
   cy.get('input[name="email"]').should("exist");
   cy.get('input[name="password"]').should("exist");
