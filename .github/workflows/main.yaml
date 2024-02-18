@@ -98,7 +98,7 @@ jobs:
 
     runs-on: ubuntu-latest
     steps:
-      - name: Notify on Failure
+      - name: Notify on Slack
         uses: rtCamp/action-slack-notify@v2
         with:
           status: ${{ job.status }}
