@@ -1,9 +1,12 @@
 name: WD Capstone test
-"on": push
+on:
+  push:
+    branches:
+      - main
 env:
-  PG_DATABASE: wd-election-test
-  PG_USER: postgres
-  PG_PASSWORD: 12345678
+  PG_DATABASE: "${{ secrets.POSTGRES_DB }}"
+  PG_USER: "${{ secrets.POSTGRES_USER }}"
+  PG_PASSWORD: "${{ secrets.POSTGRES_PASSWORD }}"
 jobs:
   run-tests:
     runs-on: ubuntu-latest
@@ -11,14 +14,35 @@ jobs:
       postgres:
         image: "postgres:11.7"
         env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: 12345678
-          POSTGRES_DB: wd-election-test
+          POSTGRES_USER: "${{ secrets.POSTGRES_USER }}"
+          POSTGRES_PASSWORD: "${{ secrets.POSTGRES_PASSWORD }}"
+          POSTGRES_DB: "${{ secrets.POSTGRES_DB }}"
         options: >-
           --health-cmd pg_isready --health-interval 10s --health-timeout 5s
           --health-retries 5
         ports:
           - "5432:5432"
+    env:
+      PORT: "${{ secrets.PORT }}"
+      JWT_SECRET: "${{ secrets.JWT_SECRET }}"
+      SESSION_SECRET: "${{ secrets.SESSION_SECRET }}"
+      CSURF_SECRET: "${{ secrets.CSURF_SECRET }}"
+      DATABASE_URL: "${{ secrets.DATABASE_URL }}"
+      EMAIL_HOST: "${{ secrets.EMAIL_HOST }}"
+      EMAIL_PASSWORD: "${{ secrets.EMAIL_PASSWORD }}"
+      EMAIL_PORT: "${{ secrets.EMAIL_PORT }}"
+      EMAIL_USERNAME: "${{ secrets.EMAIL_USERNAME }}"
+      EXP: "${{ secrets.EXP }}"
+      GMAIL_PASSWORD: "${{ secrets.GMAIL_PASSWORD }}"
+      GMAIL_USERNAME: "${{ secrets.GMAIL_USERNAME }}"
+      HASH_NUMBER: "${{ secrets.HASH_NUMBER }}"
+      JWT_COOKIE_EXPIRES_IN: "${{ secrets.JWT_COOKIE_EXPIRES_IN }}"
+      JWT_EXPIRES_IN: "${{ secrets.JWT_EXPIRES_IN }}"
+      NODE_ENV: "${{ secrets.NODE_ENV }}"
+      SENDGRID_HOST: "${{ secrets.SENDGRID_HOST }}"
+      SENDGRID_PASSWORD: "${{ secrets.SENDGRID_PASSWORD }}"
+      SENDGRID_PORT: "${{ secrets.SENDGRID_PORT }}"
+      SENDGRID_USERNAME: "${{ secrets.SENDGRID_USERNAME }}"
     steps:
       - name: Check out repository code
         uses: actions/checkout@v3
@@ -31,7 +55,6 @@ jobs:
       - name: Run the app
         id: run-app
         run: |
-          npm install
           npx sequelize-cli db:drop
           npx sequelize-cli db:create
           npx sequelize-cli db:migrate
@@ -49,5 +72,5 @@ jobs:
       - name: Deploy to production
         uses: johnbeynon/render-deploy-action@v0.0.8
         with:
-          service-id: ${{ secrets.MY_RENDER_SERVICE_ID }}
-          api-key: ${{ secrets.MY_RENDER_API_KEY }}
+          service-id: "${{ secrets.MY_RENDER_SERVICE_ID }}"
+          api-key: "${{ secrets.MY_RENDER_API_KEY }}"
