@@ -59,8 +59,21 @@ jobs:
           npx cypress run
 
       - name: Deploy to production
+        id: deploy
         uses: johnbeynon/render-deploy-action@v0.0.8
         with:
           service-id: ${{ secrets.MY_RENDER_SERVICE_ID }}
           api-key: ${{ secrets.MY_RENDER_API_KEY }}
-          wait-for-success: true
+
+      - name: Check Deployment Status
+        run: |
+          DEPLOYMENT_STATUS=$(curl -s -H "Authorization: Bearer ${{ secrets.MY_RENDER_API_KEY }}" \
+                              https://api.render.com/v1/services/${{ secrets.MY_RENDER_SERVICE_ID }}/deploys/latest | \
+                              jq -r '.status')
+
+          if [ "$DEPLOYMENT_STATUS" = "SUCCEEDED" ]; then
+            echo "Deployment successful!"
+          else
+            echo "Deployment failed or still in progress."
+            exit 1
+          fi
