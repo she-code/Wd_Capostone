@@ -94,7 +94,7 @@ jobs:
           api-key: "${{ secrets.MY_RENDER_API_KEY }}"
 
   successful-deployment:
-    needs: develop
+    needs: deploy
 
     runs-on: ubuntu-latest
     steps:
