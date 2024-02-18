@@ -1,5 +1,7 @@
 # Wd_Capostone
-## Online Voting Platform ##
+
+## Online Voting Platform
+
 This an Online Voting Platform built using Nodejs(API), PostgreSQL(database) and Ejs(Views).
 
 The platform has two personas Administrator and Voters.
@@ -18,11 +20,11 @@ The platform has two personas Administrator and Voters.
 
 - Can create,update and delete questions until one question is left in the ballot
 
-- Can add,update and delete answers 
+- Can add,update and delete answers
 
 - Can add and remove voters for the election
 
-- Can launch election. 
+- Can launch election.
 
 - Election will be avilable through public url authenticated voters can vote when an election is launched.
 
@@ -89,10 +91,3 @@ If you want to see more functionalities check out the videos listed bellow.
 ![myprofile](https://user-images.githubusercontent.com/54357776/214053663-14c9a945-1710-42c1-abe4-7d5217f2d898.png)
 
 ![forgot](https://user-images.githubusercontent.com/54357776/214055920-49fd4af0-176c-4dac-a32f-53327f7730df.png)
-
-
-
-
-
-
-
