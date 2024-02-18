@@ -9,8 +9,8 @@ jobs:
       - name: Slack Notification
         uses: rtCamp/action-slack-notify@v2
         with:
-        status: ${{ job.status }}
-        fields: build_number,commit_sha,repository,workflow,actor,event_name
+          status: ${{ job.status }}
+          fields: build_number,commit_sha,repository,workflow,actor,event_name
         env:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
           SLACK_CHANNEL: developing
