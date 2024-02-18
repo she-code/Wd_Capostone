@@ -67,13 +67,23 @@ jobs:
 
       - name: Check Deployment Status
         run: |
-          DEPLOYMENT_STATUS=$(curl -s -H "Authorization: Bearer ${{ secrets.MY_RENDER_API_KEY }}" \
-                              https://api.render.com/v1/services/${{ secrets.MY_RENDER_SERVICE_ID }}/deploys/latest | \
-                              jq -r '.status')
+          DEPLOYMENT_STATUS=""
+          TIMEOUT=300
+          INTERVAL=10
+          ELAPSED=0
+
+          while [ "$DEPLOYMENT_STATUS" != "SUCCEEDED" ] && [ $ELAPSED -lt $TIMEOUT ]; do
+            sleep $INTERVAL
+            ELAPSED=$((ELAPSED + INTERVAL))
+
+            DEPLOYMENT_STATUS=$(curl -s -H "Authorization: Bearer ${{ secrets.MY_RENDER_API_KEY }}" \
+                                https://api.render.com/v1/services/${{ secrets.MY_RENDER_SERVICE_ID }}/deploys/latest | \
+                                jq -r '.status')
+          done
 
           if [ "$DEPLOYMENT_STATUS" = "SUCCEEDED" ]; then
             echo "Deployment successful!"
           else
-            echo "Deployment failed or still in progress."
+            echo "Deployment failed or still in progress after $TIMEOUT seconds."
             exit 1
           fi
