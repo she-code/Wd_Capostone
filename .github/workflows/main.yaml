@@ -64,6 +64,24 @@ jobs:
         run: |
           npm install cypress cypress-json-results
           npx cypress run
+
+  error-notification:
+    needs: run-tests
+
+    runs-on: ubuntu-latest
+
+    if: failure()
+
+    steps:
+      - name: Notify on Failure
+        uses: rtCamp/action-slack-notify@v2
+        with:
+          status: ${{ job.status }}
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          SLACK_CHANNEL: developing
+          SLACK_MESSAGE: ${{ github.job }} job in worflow ${{ github.workflow }} of ${{ github.repository }} has ${{ job.status }}
+
   deploy:
     needs:
       - run-tests
@@ -74,3 +92,17 @@ jobs:
         with:
           service-id: "${{ secrets.MY_RENDER_SERVICE_ID }}"
           api-key: "${{ secrets.MY_RENDER_API_KEY }}"
+
+  successful-deployment:
+    needs: develop
+
+    runs-on: ubuntu-latest
+    steps:
+      - name: Notify on Failure
+        uses: rtCamp/action-slack-notify@v2
+        with:
+          status: ${{ job.status }}
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          SLACK_CHANNEL: developing
+          SLACK_MESSAGE: Successfully deployed
