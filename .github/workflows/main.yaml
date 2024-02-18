@@ -1,46 +1,31 @@
 name: WD Capstone test
-on: push
+"on": push
 env:
   PG_DATABASE: wd-election-test
   PG_USER: postgres
   PG_PASSWORD: 12345678
 jobs:
-  # Label of the container job
   run-tests:
-    # Containers must run in Linux based operating systems
     runs-on: ubuntu-latest
-
-    # Service containers to run with `container-job`
     services:
-      # Label used to access the service container
       postgres:
-        # Docker Hub image
-        image: postgres:11.7
-        # Provide the password for postgres
+        image: "postgres:11.7"
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: 12345678
           POSTGRES_DB: wd-election-test
-        # Set health checks to wait until postgres has started
         options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
+          --health-cmd pg_isready --health-interval 10s --health-timeout 5s
           --health-retries 5
         ports:
-          - 5432:5432
-
+          - "5432:5432"
     steps:
-      # Downloads a copy of the code in your repository before running CI tests
       - name: Check out repository code
         uses: actions/checkout@v3
-
       - name: Run build
         run: npm run build
-
       - name: Code Validation
         run: npm run lint
-
       - name: Run unit tests
         run: npm test
       - name: Run the app
@@ -52,38 +37,18 @@ jobs:
           npx sequelize-cli db:migrate
           PORT=5001 npm start &
           sleep 5
-
       - name: Run integration tests
         run: |
           npm install cypress cypress-json-results
           npx cypress run
-
-      - name: Deploy to production
-        id: deploy
-        uses: johnbeynon/render-deploy-action@v0.0.8
-        with:
-          service-id: ${{ secrets.MY_RENDER_SERVICE_ID }}
-          api-key: ${{ secrets.MY_RENDER_API_KEY }}
-
-      - name: Check Deployment Status
-        run: |
-          DEPLOYMENT_STATUS=""
-          TIMEOUT=300
-          INTERVAL=10
-          ELAPSED=0
-
-          while [ "$DEPLOYMENT_STATUS" != "SUCCEEDED" ] && [ $ELAPSED -lt $TIMEOUT ]; do
-            sleep $INTERVAL
-            ELAPSED=$((ELAPSED + INTERVAL))
-
-            DEPLOYMENT_STATUS=$(curl -s -H "Authorization: Bearer ${{ secrets.MY_RENDER_API_KEY }}" \
-                                https://api.render.com/v1/services/${{ secrets.MY_RENDER_SERVICE_ID }}/deploys/latest | \
-                                jq -r '.status')
-          done
-
-          if [ "$DEPLOYMENT_STATUS" = "SUCCEEDED" ]; then
-            echo "Deployment successful!"
-          else
-            echo "Deployment failed or still in progress after $TIMEOUT seconds."
-            exit 1
-          fi
+  deploy:
+    - name: Deploy
+      needs:
+        - run-tests
+      runs-on: ubuntu-latest
+      steps:
+        - name: Deploy to production
+          uses: johnbeynon/render-deploy-action@v0.0.8
+          with:
+            service-id: "${{ secrets.MY_RENDER_SERVICE_ID }}"
+            api-key: "${{ secrets.MY_RENDER_API_KEY }}"
