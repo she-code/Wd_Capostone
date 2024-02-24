@@ -62,26 +62,13 @@ jobs:
           PORT=5001 npm start &
           sleep 5
       - name: Run integration tests
+        id: integration
         run: |
           npm install cypress cypress-json-results
           npx cypress run
-
-      - name: Set matrix output for each step
-        run: |
-          for step in checkout build lint test run-app integration; do
-            echo "::set-output name=${step}::${{ job.status }}"
-          done
-
-          # Capture the entire steps context as a JSON string
-          STEPS_CONTEXT=$(echo "${{ toJson(steps) }}" | jq -c .)
-          echo "$STEPS_CONTEXT" > steps-context.json
-
-      - name: Upload artifacts
-        id: artifacts
-        uses: actions/upload-artifact@v2
-        with:
-          name: artifacts
-          path: steps-context.json
+    outputs:
+      output1: ${{steps.integration.test}}
+      output2: ${{steps.integration.name}}
 
   error-notification:
     needs: run-tests
@@ -91,9 +78,6 @@ jobs:
     if: failure()
 
     steps:
-      - name: Debug STEPS_CONTEXT
-        run: |
-          cat steps-context.json
       - name: Notify on Failure
         uses: rtCamp/action-slack-notify@v2
         with:
@@ -101,17 +85,13 @@ jobs:
         env:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
           SLACK_CHANNEL: developing
-          SLACK_MESSAGE: The workflow  ${{ github.workflow }} of ${{ github.repository }} job run-tests ${{ needs.run-tests.result }}. Outcome- ${{ steps.file-content.steps-context.json }}
+          SLACK_MESSAGE: The workflow  ${{ github.workflow }} of ${{ github.repository }} failed ${{ needs.run-tests.result }} steps resutl ${{ needs.run-tests.outputs.output1 }}
 
   deploy:
     needs:
       - run-tests
     runs-on: ubuntu-latest
     steps:
-      - name: Download artifacts
-        uses: actions/download-artifact@v2
-        with:
-          name: artifacts
       - name: Deploy to production
         uses: johnbeynon/render-deploy-action@v0.0.8
         with:
