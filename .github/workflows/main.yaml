@@ -78,6 +78,16 @@ jobs:
     if: failure()
 
     steps:
+      - name: Set output with failed step name
+        id: output
+        if: failure()
+        run: |
+          for step in checkout build lint test run-app integration; do
+            if [ "${{ needs.run-tests.outputs[step] }}" == "failure" ]; then
+              echo "::set-output name=failed_step::$step"
+              break
+            fi
+          done
       - name: Notify on Failure
         uses: rtCamp/action-slack-notify@v2
         with:
@@ -91,11 +101,7 @@ jobs:
             Workflow: ${{ github.workflow }}
             Repository: ${{ github.repository }}
             Commit: ${{ github.sha }}
-
-            The CI/CD pipeline has failed in the run-tests job.
-
-            Outcome 1: ${{ needs.run-tests.outputs.output1 }}
-            Outcome 2: ${{ needs.run-tests.outputs.output2 }}
+            The CI/CD pipeline has failed in the '${{ needs.run-tests.outputs.failed_step }}' step.
 
             [Workflow Logs](${{ github.run_url }}/jobs/${{ github.job }}/log)
 
