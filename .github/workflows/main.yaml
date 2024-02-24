@@ -80,7 +80,7 @@ jobs:
         env:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
           SLACK_CHANNEL: developing
-          SLACK_MESSAGE: The workflow  ${{ github.workflow }} of ${{ github.repository }} failed ${{ needs.run-tests.result }} steps resutl ${{ toJson(steps) }}
+          SLACK_MESSAGE: The workflow  ${{ github.workflow }} of ${{ github.repository }} failed ${{ needs.run-tests.result }} steps resutl ${{ toJson(needs.run-tests.steps) }}
 
   deploy:
     needs:
