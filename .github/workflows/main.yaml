@@ -83,10 +83,10 @@ jobs:
         if: failure()
         run: |
           for step in checkout build lint test run-app integration; do
-            if [ "${{ needs.run-tests.outputs[step] }}" == "failure" ]; then
-              echo "::set-output name=failed_step::$step"
-              break
-            fi
+          if [ "${{ needs.run-tests.outputs[${step}] }}" == "failure" ]; then
+            echo "::set-output name=failed_step::$step"
+            break
+          fi
           done
       - name: Notify on Failure
         uses: rtCamp/action-slack-notify@v2
