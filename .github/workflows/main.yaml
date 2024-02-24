@@ -82,8 +82,6 @@ jobs:
         uses: actions/github-script@v6
         with:
           script: |
-            const github = require('@actions/github');
-
             async function run() {
               const workflowRun = await github.getWorkflowRun({ owner: she-code, repo: Wd_Capostone, run_id: github.context.runId });
               const failedJob = workflowRun.data.jobs.find(job => job.status === 'failure');
