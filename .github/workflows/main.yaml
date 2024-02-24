@@ -78,6 +78,26 @@ jobs:
     if: failure()
 
     steps:
+      - name: Get failed job and state
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const core = require('@actions/core');
+            const github = require('@actions/github');
+
+            async function run() {
+              const workflowRun = await github.getWorkflowRun({ owner: she-code, repo: Wd_Capostone, run_id: github.context.runId });
+              const failedJob = workflowRun.data.jobs.find(job => job.status === 'failure');
+
+              if (failedJob) {
+                core.setOutput('failed_job_name', failedJob.name);
+                core.setOutput('failed_job_state', failedJob.status);
+              } else {
+                core.setFailed('No failed jobs found in this workflow run');
+              }
+            }
+
+            return run();
       - name: Notify on Failure
         uses: rtCamp/action-slack-notify@v2
         with:
@@ -91,8 +111,9 @@ jobs:
             Workflow: ${{ github.workflow }}
             Repository: ${{ github.repository }}
             Commit: ${{ github.sha }}
-            The CI/CD pipeline has failed in the '${{ needs.run-tests.steps.test }}' step.
 
+            **Failed Job:** ${{ steps.get_failed_job_and_state.outputs.failed_job_name }}
+            **Job State:** ${{ steps.get_failed_job_and_state.outputs.failed_job_state }}
             [Workflow Logs](${{ github.run_url }}/jobs/${{ github.job }}/log)
 
   deploy:
