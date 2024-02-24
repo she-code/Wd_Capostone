@@ -83,8 +83,13 @@ jobs:
         with:
           script: |
             async function run() {
-            const workflowRun = await github.getWorkflowRun({ owner: 'she-code', repo: 'Wd_Capostone', run_id: github.runId });
-            const failedJob = workflowRun.data.jobs.find(job => job.status === 'failure');
+            const { data: workflowRun } = await octokit.rest.actions.getWorkflowRun({
+              owner: 'she-code',
+              repo: 'Wd_Capostone',
+              run_id: github.runId
+            });
+
+            const failedJob = workflowRun.jobs.find(job => job.status === 'failure');
 
             if (failedJob) {
               core.setOutput('failed_job_name', failedJob.name);
