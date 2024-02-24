@@ -64,13 +64,22 @@ jobs:
         run: |
           npm install cypress cypress-json-results
           npx cypress run
-
+      - name: Set output with failed step name
+        id: output
+        if: failure()
+        run: |
+          for step in checkout build lint test run-app integration; do
+            if [ "${{ steps.$step.outcome }}" == "failure" ]; then
+              echo "::set-output name=failed_step::$step"
+              break
+            fi
+          done
   error-notification:
     needs: run-tests
 
     runs-on: ubuntu-latest
 
-    if: failure()
+    if: needs.run-tests.result == 'failure'
 
     steps:
       - name: Notify on Failure
@@ -80,7 +89,7 @@ jobs:
         env:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
           SLACK_CHANNEL: developing
-          SLACK_MESSAGE: The workflow  ${{ github.workflow }} of ${{ github.repository }} failed ${{ needs.run-tests.result }} steps resutl ${{ toJson(needs.run-tests.steps) }}
+          SLACK_MESSAGE: The workflow  ${{ github.workflow }} of ${{ github.repository }} failed due to ${{ needs.run-tests.outputs.failed_step }}
 
   deploy:
     needs:
