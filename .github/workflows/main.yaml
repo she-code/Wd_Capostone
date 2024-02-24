@@ -83,15 +83,15 @@ jobs:
         with:
           script: |
             async function run() {
-              const workflowRun = await github.getWorkflowRun({ owner: 'she-code', repo: 'Wd_Capostone', run_id: github.context.runId });
-              const failedJob = workflowRun.data.jobs.find(job => job.status === 'failure');
+            const workflowRun = await github.getWorkflowRun({ owner: 'she-code', repo: 'Wd_Capostone', run_id: github.runId });
+            const failedJob = workflowRun.data.jobs.find(job => job.status === 'failure');
 
-              if (failedJob) {
-                core.setOutput('failed_job_name', failedJob.name);
-                core.setOutput('failed_job_state', failedJob.status);
-              } else {
-                core.setFailed('No failed jobs found in this workflow run');
-              }
+            if (failedJob) {
+              core.setOutput('failed_job_name', failedJob.name);
+              core.setOutput('failed_job_state', failedJob.status);
+            } else {
+              core.setFailed('No failed jobs found in this workflow run');
+            }
             }
 
             return run();
