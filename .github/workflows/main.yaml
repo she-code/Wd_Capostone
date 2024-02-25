@@ -104,17 +104,9 @@ jobs:
               * Repository: ${{ github.repository }}
               * Workflow: ${{ github.workflow }}
 
-              {% if needs.run-tests.result == 'failure' %}
-              * Failed Job: Run Tests
-              * Error Logs: [Click here](https://github.com/{{ github.repository }}/actions/runs/${{ github.run_id }}/logs?name=error-notification)
-              * Tests Status: Tests failed ${{needs.run-tests}}
-              {% endif %}
+              ${{ if needs.run-tests.result == 'failure' }}* Failed Job: Run Tests\n* Error Logs: [Click here](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/logs?name=error-notification)\n* Tests Status: Tests failed\n\n${{ endif }}
 
-              {% if needs.deploy.result == 'failure' %}
-              * Failed Job: Deploy
-              * Error Logs: [Click here](https://github.com/{{ github.repository }}/actions/runs/${{ github.run_id }}/logs?name=error-notification)
-              * Deploy Status: Deploy unsuccessful ${{needs.run-tests}}
-              {% endif %}
+               ${{ if needs.deploy.result == 'failure' }}* Failed Job: Deploy\n* Error Logs: [Click here](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}/logs?name=error-notification)\n* Deploy Status: Deploy unsuccessful\n\n${{ endif }}
   successful-deployment:
     needs: deploy
 
