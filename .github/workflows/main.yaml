@@ -89,7 +89,7 @@ jobs:
             Repository: ${{ github.repository }}
             Commit: ${{ github.sha }}
 
-            The CI/CD pipeline has failed. Please check the workflow logs for details. ${{needs.run-tests.steps}}
+            The CI/CD pipeline has failed. Please check the workflow logs for details.
 
   deploy:
     needs:
