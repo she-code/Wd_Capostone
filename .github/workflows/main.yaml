@@ -69,20 +69,15 @@ jobs:
     outputs:
       output1: ${{steps.integration.test}}
       output2: ${{steps.integration.name}}
-
   error-notification:
     needs: run-tests
-
     runs-on: ubuntu-latest
-
     if: failure()
-
     steps:
       - name: Notify on Failure
         uses: rtCamp/action-slack-notify@v2
         with:
           status: ${{ needs.run-tests.result }}
-
           env:
             SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
             SLACK_CHANNEL: developing
@@ -93,7 +88,7 @@ jobs:
               Repository: ${{ github.repository }}
               Commit: ${{ github.sha }}
 
-              The CI/CD pipeline has failed. Please check the workflow logs for details. 
+              The CI/CD pipeline has failed. Please check the workflow logs for details. ${{needs.run-tests}}
 
               [Workflow Logs](${{ github.run_url }}/jobs/${{ github.job }})
 
