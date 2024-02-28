@@ -17,16 +17,17 @@ module.exports = {
   ],
   deploy: {
     production: {
-      key: "C:\\Users\\fre\\sshKey.ssh",
+      // key: "D:/wd/Wd_Capostone/gitKey.pub",
+      key: "C:/Users/fre/.ssh/id_rsa.pub",
       user: "fre",
       host: ["192.168.21.1"],
       ssh_options: "StrictHostKeyChecking=no",
       ref: "origin/main",
       repo: "git@github.com:she-code/Wd_Capostone.git",
-      path: "C:\\Users\\fre\\deployed",
-      "pre-setup":
-        "powershell -Command \"& {Start-Process msiexec -ArgumentList '/i https://github.com/git-for-windows/git/releases/download/v2.35.1.windows.1/Git-2.35.1-64-bit.exe /quiet /norestart' -Wait}\" ; dir",
-      "post-setup": "dir",
+      path: "C:/Users/fre/deployed",
+
+      "pre-setup": "echo Git is already installed",
+      "post-setup": "echo post command",
       "pre-deploy-local": "echo 'This is a local executed command'",
       "post-deploy": "npm install",
     },
