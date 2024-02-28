@@ -5,19 +5,19 @@ module.exports = class Email {
     this.to = user.email;
     this.firstName = user.firstName;
     this.url = url;
-    this.from = `fresam123ab@gmail.com`;
+    this.from = process.env.GMAIL_USERNAME;
   }
 
   newTransport() {
     if (process.env.NODE_ENV === "production") {
       return nodemailer.createTransport({
-        service: "gmail",
+        service: process.env.EMAIL_SERVICE,
         auth: {
-          user: "fresam123ab@gmail.com",
-          pass: "xyulwmthittawwbo",
+          user: process.env.GMAIL_USERNAME,
+          pass: process.env.GMAIL_PASSWORD,
         },
-        port: 465,
-        host: "smtp.gmail.com",
+        port: process.env.SMTP_PORT,
+        host: process.env.SMTP_HOST,
       });
     }
 

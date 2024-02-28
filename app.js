@@ -2,13 +2,14 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const flash = require("connect-flash");
-
+const helmet = require("helmet");
 const path = require("path");
 const cookieParser = require("cookie-parser");
 const dotenv = require("dotenv");
 const morgan = require("morgan");
 const csurf = require("tiny-csrf");
 const session = require("express-session");
+const { rateLimit } = require("express-rate-limit");
 dotenv.config({ path: "./config.env" });
 
 //import files
@@ -26,8 +27,18 @@ const resultsRoute = require("./routes/resultsRoute");
 // create express application
 const app = express();
 
-//parse jsom
-app.use(bodyParser.json());
+//security checkups
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // Limit each IP to 100 requests per `window` (here, per 15 minutes)
+  standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+  legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+});
+app.use(helmet({ contentSecurityPolicy: false }));
+app.use(limiter);
+
+//parse json
+app.use(bodyParser.json({ limit: "1mb" }));
 app.use(express.json());
 app.use(morgan("dev"));
 app.use(express.urlencoded({ extended: false }));
@@ -44,7 +55,10 @@ app.use(csurf(process.env.CSURF_SECRET, ["POST", "PUT", "DELETE"]));
 //initialize session
 app.use(
   session({
+    name: process.env.COOKIE_NAME,
     secret: process.env.SESSION_SECRET,
+    resave: true,
+    saveUninitialized: true,
     cookie: {
       maxAge: 24 * 60 * 60 * 1000,
       secure: false,
