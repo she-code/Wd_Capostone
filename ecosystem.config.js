@@ -15,21 +15,21 @@ module.exports = {
       out_file: "D:\\wd\\Wd_Capostone\\logs\\out.log",
     },
   ],
-  // deploy: {
-  //   production: {
-  //     // key: "D:/wd/Wd_Capostone/gitKey.pub",
-  //     key: "C:/Users/fre/.ssh/id_rsa.pub",
-  //     user: "fre",
-  //     host: ["192.168.21.1"],
-  //     ssh_options: "StrictHostKeyChecking=no",
-  //     ref: "origin/main",
-  //     repo: "https://github.com/she-code/Wd_Capostone.git",
-  //     path: "D:/wd/Wd_Capostone",
+  deploy: {
+    production: {
+      // key: "D:/wd/Wd_Capostone/gitKey.pub",
+      key: "C:/Users/fre/.ssh/id_rsa.pub",
+      user: "fre",
+      host: ["192.168.21.1"],
+      ssh_options: "StrictHostKeyChecking=no",
+      ref: "origin/main",
+      repo: "https://github.com/she-code/Wd_Capostone.git",
+      path: "D:/wd/Wd_Capostone",
 
-  //     "pre-setup": "git --version",
-  //     "post-setup": "echo post command",
-  //     "pre-deploy-local": "echo 'This is a local executed command'",
-  //     "post-deploy": "npm install",
-  //   },
-  // },
+      "pre-setup": "git --version",
+      "post-setup": "echo post command",
+      "pre-deploy-local": "echo 'This is a local executed command'",
+      "post-deploy": "npm install",
+    },
+  },
 };
