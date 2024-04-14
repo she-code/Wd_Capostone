@@ -10,7 +10,7 @@ const morgan = require("morgan");
 const csurf = require("tiny-csrf");
 const session = require("express-session");
 const { rateLimit } = require("express-rate-limit");
-dotenv.config({ path: "./config.env" });
+dotenv.config({ path: "./.env" });
 
 //import files
 const authenticateJwt = require("./middelwares/authenticateJWT");

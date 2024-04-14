@@ -8,7 +8,7 @@ const {
 } = require("../models");
 const { encode, votingResult } = require("../utils");
 const AppError = require("../utils/AppError");
-
+const OpenAI = require("openai");
 //get elections
 exports.getElections = async (req, res, next) => {
   const loggedInUser = req.user;
@@ -28,6 +28,103 @@ exports.getElections = async (req, res, next) => {
   }
 };
 
+const openai = new OpenAI({
+  apiKey: process.env.CHAT_GPT_ENDPOINT,
+});
+
+async function askChatGpt(electionTitle) {
+  try {
+    const systemPrompt =
+      "You are an assistant helping a user create voting system." +
+      "Given a message, you should understand the election title provided and suggest the user related questions with answers that help in the voting.";
+    const completion = await openai.chat.completions.create({
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: electionTitle },
+      ],
+      model: "gpt-3.5-turbo",
+    });
+    // console.log(completion.choices[0].message.tool_calls[0].function);
+    const questions = [];
+    const answers = [];
+    const content = completion.choices[0].message.content;
+    const lines = content.split("\n").filter((line) => line.trim() !== "");
+
+    for (let i = 0; i < lines.length; i++) {
+      if (lines[i].match(/^\d+\./)) {
+        const question = lines[i].split("?")[0].trim();
+        questions.push(question);
+
+        let answerLine = null;
+        for (let j = i + 1; j < lines.length; j++) {
+          if (lines[j].trim().startsWith("- ")) {
+            answerLine = lines[j].split(":")[1]?.trim();
+            break;
+          }
+        }
+
+        if (answerLine) {
+          const answerOptions = answerLine
+            .split(",")
+            .map((option) => option.trim().replace(/\[|\]/g, ""));
+          answers.push(answerOptions);
+        }
+      }
+    }
+    console.log({ content, questions, answers, lines });
+    return completion.choices[0].message;
+  } catch (error) {
+    console.log("Error connecting to gpt", error);
+  }
+}
+// async function askChatGpt(electionTitle) {
+//   try {
+//     const systemPrompt = `
+//       You are an assistant helping a user create a voting system.
+//       Given an election title, you should suggest relevant questions to ask voters.
+//     `;
+
+//     const completion = await openai.chat.completions.create({
+//       messages: [
+//         { role: "system", content: systemPrompt },
+//         { role: "user", content: electionTitle },
+//       ],
+//       tools: [
+//         {
+//           type: "function",
+//           function: {
+//             name: "suggestElectionQuestions",
+//             description: "Suggest relevant questions for an election",
+//             parameters: {
+//               type: "object",
+//               properties: {
+//                 title: {
+//                   type: "string",
+//                   description: "The title of the election",
+//                 },
+//                 output: {
+//                   type: "string",
+//                   description: "Suggested questions for the election",
+//                 },
+//               },
+//             },
+//           },
+//         },
+//       ],
+//       tool_choice: {
+//         type: "function",
+//         function: { name: "suggestElectionQuestions" },
+//       },
+//       model: "gpt-3.5-turbo",
+//     });
+
+//     // const suggestedQuestions = completion.choices[0].message[0].function.output;
+//     // console.log(suggestedQuestions);
+//     return completion.choices[0].message.tool_calls[0].function;
+//   } catch (error) {
+//     console.error("Error connecting to OpenAI", error);
+//   }
+// }
 //creates elections
 exports.createElection = async (req, res, next) => {
   try {
@@ -43,6 +140,10 @@ exports.createElection = async (req, res, next) => {
     });
     if (!election) {
       return next(new AppError("Unable to create election", 401));
+    }
+    const sugesstion = await askChatGpt(title);
+    if (sugesstion) {
+      console.log({ sugesstion });
     }
     return res.redirect(`/elections/${election.id}`);
   } catch (error) {

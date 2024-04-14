@@ -1,5 +1,7 @@
 node_modules
 
-config.env
+.env
 
 logs
+pm2Key.pub
+gitKey.pub

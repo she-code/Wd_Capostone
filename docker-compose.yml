@@ -1,0 +1,32 @@
+version: "3.8"
+services:
+  app:
+    build:
+      context: .
+      target: dev
+    image: wd-election-app:development
+    volumes:
+      - .:/app
+    ports:
+      - 5001:5001
+    env_file:
+      - .env
+    depends_on:
+      - db
+    environment:
+      - DB_HOST=host.docker.internal
+
+  db:
+    image: postgres:15
+    volumes:
+      - pg-dev-data:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
+    env_file:
+      - .env
+    environment:
+      - POSTGRES_USER=$DB_USERNAME
+      - POSTGRES_DB =$DEVELOPMENT_DB
+      - POSTGRES_PASSWORD=$DB_PASSWORD
+volumes:
+  pg-dev-data:
