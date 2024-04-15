@@ -43,6 +43,7 @@ jobs:
       SENDGRID_PASSWORD: "${{ secrets.SENDGRID_PASSWORD }}"
       SENDGRID_PORT: "${{ secrets.SENDGRID_PORT }}"
       SENDGRID_USERNAME: "${{ secrets.SENDGRID_USERNAME }}"
+      CHAT_GPT_ENDPOINT: "{{secrets.CHAT_GPT_ENDPOINT}}"
       STEPS_CONTEXT: ""
     steps:
       - name: Check out repository code
