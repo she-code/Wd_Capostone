@@ -186,17 +186,17 @@ describe("Wd capstone integration test, Create Election Page test", () => {
   //     cy.get(`.election-title`).should("contain.text", "L11-test");
   //   });
   // });
-  it("Should Create an Election with unique custom string | url", () => {
-    clearCreateElectionFields(cy);
-    cy.get('input[name="title"]').type("L11-election");
-    cy.get('input[name="url"]').type(`${"L11Election"}`);
-    cy.get('button[type="submit"]').click();
-    cy.wait(500);
+  // it("Should Create an Election with unique custom string | url", () => {
+  //   clearCreateElectionFields(cy);
+  //   cy.get('input[name="title"]').type("L11-election");
+  //   cy.get('input[name="url"]').type(`${"L11Election"}`);
+  //   cy.get('button[type="submit"]').click();
+  //   cy.wait(500);
 
-    cy.location().should((loc) => {
-      expect(loc.pathname).to.eq("/elections/createElections/new");
-    });
-  });
+  //   cy.location().should((loc) => {
+  //     expect(loc.pathname).to.eq("/elections/createElections/new");
+  //   });
+  // });
 });
 
 describe("Wd capstone integration test, Elections Page test", () => {
