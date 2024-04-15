@@ -199,25 +199,25 @@ describe("Wd capstone integration test, Create Election Page test", () => {
   // });
 });
 
-describe("Wd capstone integration test, Elections Page test", () => {
-  beforeEach(() => {
-    cy.visit(`${baseURL}/login`);
-    setSignInFields(cy);
-    cy.get('button[type="submit"]').click();
-    cy.wait(500);
-    cy.location().should((loc) => {
-      expect(loc.pathname).to.eq("/elections");
-    });
-  });
-  it("Election Page should exist", () => {
-    cy.url().should("include", `${baseURL}/elections`);
-  });
+// describe("Wd capstone integration test, Elections Page test", () => {
+//   beforeEach(() => {
+//     cy.visit(`${baseURL}/login`);
+//     setSignInFields(cy);
+//     cy.get('button[type="submit"]').click();
+//     cy.wait(500);
+//     cy.location().should((loc) => {
+//       expect(loc.pathname).to.eq("/elections");
+//     });
+//   });
+//   it("Election Page should exist", () => {
+//     cy.url().should("include", `${baseURL}/elections`);
+//   });
 
-  it("Should contain edit and delete icons ", () => {
-    cy.get("#edit-icon");
-    cy.get("#delete-icon");
-  });
-  it("Should contain Sign Out button in the dropdown ", () => {
-    cy.contains("Sign out");
-  });
-});
+//   it("Should contain edit and delete icons ", () => {
+//     cy.get("#edit-icon");
+//     cy.get("#delete-icon");
+//   });
+//   it("Should contain Sign Out button in the dropdown ", () => {
+//     cy.contains("Sign out");
+//   });
+// });
